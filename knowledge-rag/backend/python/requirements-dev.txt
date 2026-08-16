@@ -1,0 +1,4 @@
+# Dev/test-only dependencies for the QA suite (tests/test_qa.py)
+-r requirements.txt
+pytest>=8.0
+httpx>=0.27

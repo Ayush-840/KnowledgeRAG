@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Runtime artifacts
+chroma_data/
+logs/
+
+# Env files (use .env.example as the template)
+.env

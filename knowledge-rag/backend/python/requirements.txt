@@ -1,0 +1,12 @@
+# Knowledge RAG backend — FastAPI retrieval service
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.29
+pydantic>=2.6
+python-multipart>=0.0.9
+python-dotenv>=1.0
+chromadb>=0.4.24
+sentence-transformers>=2.6
+rank-bm25>=0.2.2
+pypdf>=4.0
+pdfplumber>=0.10
+python-docx>=1.1

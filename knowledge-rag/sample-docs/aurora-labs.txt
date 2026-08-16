@@ -1,0 +1,151 @@
+Aurora Labs — Product Overview
+===============================
+
+About Aurora Labs
+-----------------
+
+Aurora Labs is a software company founded in 2019 and headquartered in
+Portland, Oregon. The company employs 400 people and serves customers in 40
+countries. Its mission is to make real-time data analytics accessible to
+teams of every size, from two-person startups to global enterprises with
+thousands of seats.
+
+The company is bootstrapped and profitable, with annual recurring revenue
+growing more than 60 percent year over year. Aurora Labs raised a Series A
+in 2021 led by Northgate Partners and a Series B in 2023 led by Meridian
+Capital, but the founding team retains majority control and makes product
+decisions with a long-term horizon. The company operates fully remote with
+engineering hubs in Portland, Lisbon, and Bangalore.
+
+Products
+--------
+
+Atlas is the company's flagship analytics platform. Atlas costs $49 per user
+per month and includes real-time dashboards, custom reporting, and a 14-day
+free trial. It is designed for product and marketing teams that need to turn
+raw event data into decisions without writing SQL. Atlas connects to web
+analytics, product analytics, and advertising platforms out of the box, and
+its drag-and-drop report builder ships with more than 40 chart types.
+
+Atlas Pro is the mid-tier plan. Atlas Pro costs $99 per user per month and
+adds single sign-on, audit logs, and priority support. It is intended for
+growth-stage companies that need compliance-ready access controls and
+permission groups. Atlas Pro also unlocks versioned dashboards, scheduled
+email exports, and a 90-day data retention window on the standard plan.
+
+Atlas Enterprise is the top tier. It uses custom pricing based on the number
+of seats and includes a dedicated support engineer, custom data retention
+contracts, and deployment in the customer's own cloud account. Enterprise
+accounts can negotiate annual contracts with volume discounts and receive a
+99.95 percent uptime service-level agreement backed by service credits.
+
+Beacon is a lightweight alerting service. Beacon costs $19 per user per month
+and integrates directly with Slack and Microsoft Teams. Alerts can be routed
+by severity, owner, and schedule, and the alert deduplication engine collapses
+related incidents into a single thread. Beacon supports email, webhook, and
+SMS delivery channels and can page on-call engineers through PagerDuty.
+
+Beacon Plus is the advanced alerting plan. Beacon Plus costs $39 per user per
+month and adds on-call scheduling, escalation policies, and a public status
+page. It is aimed at SRE and DevOps teams that run production systems around
+the clock. Beacon Plus includes a 30-day alert history and unlimited
+integrations.
+
+Nimbus is the company's managed data pipeline product. Nimbus uses custom
+pricing based on data volume and offers a 99.9% uptime service-level
+agreement. It connects to over 60 data sources out of the box, including
+databases, data warehouses, and third-party SaaS APIs, and can stream
+millions of events per minute into a customer's analytics store.
+
+Nimbus Lite is the entry-level pipeline plan. Nimbus Lite costs $29 per month
+for up to 100,000 events per month and includes five data sources and a
+14-day data retention window. It is designed for developers who want to try
+streaming pipelines without a sales conversation.
+
+Nimbus Enterprise adds private networking, field-level data masking, and a
+99.99 percent uptime commitment. It targets regulated industries such as
+financial services and healthcare that need guaranteed delivery and
+compliance controls. Nimbus Enterprise includes a named solutions architect
+and a 24-hour support SLA.
+
+Pricing and Plans
+-----------------
+
+All Aurora Labs products are billed monthly and can be cancelled at any time.
+Annual billing is available at a 20 percent discount, and all paid plans
+include unlimited dashboards, unlimited API calls on the standard tier, and
+email support. Trials do not require a credit card, and trial accounts can
+convert to paid plans with a single click at the end of the 14-day period.
+
+Volume pricing starts at 50 seats, and enterprise contracts are quoted on an
+annual basis. Aurora Labs offers non-profit and education discounts of 30
+percent, and startup credits of up to $1,000 for companies that have raised
+less than $5 million. All prices are listed in US dollars; international
+customers are billed in their local currency where supported.
+
+Security and Compliance
+-----------------------
+
+Aurora Labs holds a SOC 2 Type II certification and encrypts all customer
+data at rest with AES-256. The platform is fully GDPR compliant and supports
+single sign-on through SAML and OAuth. Data in transit is protected with TLS
+1.3, and every request is authenticated with short-lived tokens. The
+security team runs quarterly penetration tests and maintains a public
+security.txt endpoint and a responsible disclosure program with a 90-day
+timeline for patching reported vulnerabilities.
+
+Aurora Labs maintains a formal incident response plan and notifies affected
+customers within 24 hours of a confirmed security incident. Backups are
+encrypted and stored in a separate region, with a recovery point objective of
+15 minutes and a recovery time objective of 4 hours. The company's data
+processing addendum is available on request, and subprocessors are listed in
+the privacy policy.
+
+Support
+-------
+
+All customers receive 24/7 support with a one-hour response time on the
+enterprise plan. A community forum and public documentation are available
+free of charge. Standard plans receive support through a ticketing portal
+with a four-hour response target during business hours, and Beacon Plus and
+Atlas Pro customers get priority queue placement and a two-hour target.
+Enterprise customers are assigned a dedicated support engineer who joins
+their Slack workspace.
+
+Onboarding and Migration
+------------------------
+
+Aurora Labs offers a guided onboarding program for new customers, including a
+free implementation workshop for Atlas Enterprise and Nimbus Enterprise
+accounts. Migration tooling can import dashboards, alerts, and historical
+data from legacy analytics platforms, and the company publishes a detailed
+migration guide covering schema mapping and downtime planning. Most
+customers complete their migration in under two weeks.
+
+Careers
+-------
+
+Aurora Labs is hiring across engineering, product, and go-to-market teams.
+The company publishes a transparent salary band for every role and offers
+four weeks of paid time off, a home office stipend, and a learning budget of
+$2,000 per year. Interview loops include a paid take-home exercise and are
+designed to finish within two weeks of the first conversation.
+
+Roadmap
+-------
+
+The 2026 roadmap includes an AI copilot that answers questions about your
+dashboards in natural language, a mobile app for Beacon alerting, and
+expanded warehouse-native integrations. Aurora Labs also plans to ship
+on-premises editions of Atlas and Nimbus for regulated customers that cannot
+use the public cloud. Feature requests are tracked publicly, and the
+roadmap is updated monthly.
+
+Common Questions
+----------------
+
+Do I need a credit card to try Atlas? No — the 14-day trial requires only a
+work email address. Can I switch plans mid-cycle? Yes, upgrades take effect
+immediately and downgrades take effect at the next billing cycle. Is my data
+portable? Yes, all plans can export raw data and dashboard definitions at
+any time, and the standard API exposes the full data model.

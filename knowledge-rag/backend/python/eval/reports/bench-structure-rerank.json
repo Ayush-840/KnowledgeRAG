@@ -1,0 +1,161 @@
+{
+  "generated_at": "2026-08-16T11:57:54.474935+00:00",
+  "settings": {
+    "chunk_size": 500,
+    "overlap": 100,
+    "strategy": "structure_aware",
+    "retrieve_candidates": 20,
+    "rerank_top_k": 5,
+    "reranker_enabled": true,
+    "judge_model": "openai/gpt-4o",
+    "generation_model": "openai/gpt-4o",
+    "llm_enabled": false
+  },
+  "documents": [
+    "aurora-labs.txt",
+    "faq.md",
+    "products.csv"
+  ],
+  "summary": {
+    "context_precision": 0.1333,
+    "context_recall": 0.5,
+    "recall_at_pool": 0.5,
+    "faithfulness": null,
+    "answer_relevance": null,
+    "mean_total_latency_ms": 12312.8583
+  },
+  "queries": [
+    {
+      "id": "q1",
+      "question": "How much does the Atlas analytics platform cost?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 176.35,
+        "bm25": 0.07,
+        "fusion": 0.28,
+        "rerank": 72474.14,
+        "total": 72650.88
+      }
+    },
+    {
+      "id": "q2",
+      "question": "Which Aurora Labs product integrates with Slack?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 173.04,
+        "bm25": 0.23,
+        "fusion": 0.33,
+        "rerank": 171.52,
+        "total": 345.15
+      }
+    },
+    {
+      "id": "q3",
+      "question": "What uptime SLA does Nimbus offer?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 50.28,
+        "bm25": 0.06,
+        "fusion": 0.27,
+        "rerank": 177.22,
+        "total": 227.86
+      }
+    },
+    {
+      "id": "q4",
+      "question": "Where is Aurora Labs headquartered?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 46.23,
+        "bm25": 0.04,
+        "fusion": 0.32,
+        "rerank": 169.72,
+        "total": 216.33
+      }
+    },
+    {
+      "id": "q5",
+      "question": "What security certifications does Aurora Labs hold?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.28,
+        "bm25": 0.05,
+        "fusion": 0.27,
+        "rerank": 169.06,
+        "total": 214.68
+      }
+    },
+    {
+      "id": "q6",
+      "question": "How many employees work at Aurora Labs?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 44.66,
+        "bm25": 0.05,
+        "fusion": 0.28,
+        "rerank": 177.24,
+        "total": 222.25
+      }
+    }
+  ]
+}

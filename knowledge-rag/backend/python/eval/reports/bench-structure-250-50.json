@@ -1,0 +1,382 @@
+{
+  "generated_at": "2026-08-16T12:12:54.634746+00:00",
+  "settings": {
+    "chunk_size": 250,
+    "overlap": 50,
+    "strategy": "structure_aware",
+    "retrieve_candidates": 20,
+    "rerank_top_k": 5,
+    "reranker_enabled": false,
+    "judge_model": "openai/gpt-4o",
+    "generation_model": "openai/gpt-4o",
+    "llm_enabled": false
+  },
+  "documents": [
+    "aurora-labs.txt",
+    "data-privacy.md",
+    "faq.md",
+    "products.csv"
+  ],
+  "summary": {
+    "context_precision": 0.275,
+    "context_recall": 0.6604,
+    "recall_at_pool": 0.9375,
+    "faithfulness": null,
+    "answer_relevance": null,
+    "mean_total_latency_ms": 51.8813
+  },
+  "queries": [
+    {
+      "id": "q1",
+      "question": "How much does the Atlas analytics platform cost?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 106.06,
+        "bm25": 0.09,
+        "fusion": 0.53,
+        "rerank": 0.01,
+        "total": 106.72
+      }
+    },
+    {
+      "id": "q2",
+      "question": "Which Aurora Labs product integrates with Slack?",
+      "expected_source": "products.csv",
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 5,
+      "context_precision": 0.6,
+      "context_recall": 0.6,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 49.59,
+        "bm25": 0.09,
+        "fusion": 0.56,
+        "rerank": 0.0,
+        "total": 50.27
+      }
+    },
+    {
+      "id": "q3",
+      "question": "What uptime SLA does Nimbus offer?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 46.85,
+        "bm25": 0.07,
+        "fusion": 0.5,
+        "rerank": 0.0,
+        "total": 47.43
+      }
+    },
+    {
+      "id": "q4",
+      "question": "Where is Aurora Labs headquartered?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.64,
+        "bm25": 0.05,
+        "fusion": 0.53,
+        "rerank": 0.0,
+        "total": 46.25
+      }
+    },
+    {
+      "id": "q5",
+      "question": "What security certifications does Aurora Labs hold?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 4,
+      "total_relevant": 5,
+      "context_precision": 0.8,
+      "context_recall": 0.8,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 47.71,
+        "bm25": 0.07,
+        "fusion": 0.48,
+        "rerank": 0.0,
+        "total": 48.28
+      }
+    },
+    {
+      "id": "q6",
+      "question": "How many employees work at Aurora Labs?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 48.05,
+        "bm25": 0.06,
+        "fusion": 0.54,
+        "rerank": 0.0,
+        "total": 48.68
+      }
+    },
+    {
+      "id": "q7",
+      "question": "When was Aurora Labs founded?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 48.63,
+        "bm25": 0.05,
+        "fusion": 0.47,
+        "rerank": 0.0,
+        "total": 49.18
+      }
+    },
+    {
+      "id": "q8",
+      "question": "Which investors led Aurora Labs' funding rounds?",
+      "expected_source": "aurora-labs.txt",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.66,
+        "bm25": 0.07,
+        "fusion": 0.46,
+        "rerank": 0.0,
+        "total": 46.22
+      }
+    },
+    {
+      "id": "q9",
+      "question": "What does the Atlas Pro plan add?",
+      "expected_source": "products.csv",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 1,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.36,
+        "bm25": 0.06,
+        "fusion": 0.57,
+        "rerank": 0.0,
+        "total": 46.01
+      }
+    },
+    {
+      "id": "q10",
+      "question": "How long is workspace content retained after account deletion?",
+      "expected_source": "data-privacy.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.69,
+        "bm25": 0.08,
+        "fusion": 0.55,
+        "rerank": 0.0,
+        "total": 46.34
+      }
+    },
+    {
+      "id": "q11",
+      "question": "How quickly must Aurora Labs notify customers of a data breach?",
+      "expected_source": "data-privacy.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 1,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.43,
+        "bm25": 0.08,
+        "fusion": 0.5,
+        "rerank": 0.0,
+        "total": 46.04
+      }
+    },
+    {
+      "id": "q12",
+      "question": "Which companies are Aurora Labs subprocessors?",
+      "expected_source": "data-privacy.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 1,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 45.83,
+        "bm25": 0.05,
+        "fusion": 0.46,
+        "rerank": 0.0,
+        "total": 46.37
+      }
+    },
+    {
+      "id": "q13",
+      "question": "What is the API rate limit on standard plans?",
+      "expected_source": "faq.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 49.26,
+        "bm25": 0.08,
+        "fusion": 0.6,
+        "rerank": 0.0,
+        "total": 49.96
+      }
+    },
+    {
+      "id": "q14",
+      "question": "What response time do enterprise support customers receive?",
+      "expected_source": "faq.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 3,
+      "context_precision": 0.6,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 50.1,
+        "bm25": 0.07,
+        "fusion": 0.55,
+        "rerank": 0.0,
+        "total": 50.76
+      }
+    },
+    {
+      "id": "q15",
+      "question": "How long does the free trial last?",
+      "expected_source": "faq.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 3,
+      "context_precision": 0.4,
+      "context_recall": 0.6667,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 47.36,
+        "bm25": 0.08,
+        "fusion": 0.64,
+        "rerank": 0.0,
+        "total": 48.11
+      }
+    },
+    {
+      "id": "q16",
+      "question": "Does Aurora Labs encrypt customer data at rest?",
+      "expected_source": "faq.md",
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "llm_error": null,
+      "latency_ms": {
+        "dense": 52.91,
+        "bm25": 0.08,
+        "fusion": 0.46,
+        "rerank": 0.0,
+        "total": 53.48
+      }
+    }
+  ]
+}

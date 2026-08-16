@@ -1,0 +1,61 @@
+Product,Category,Price,Notes
+Atlas,Analytics,49,Real-time dashboards and custom reporting
+Atlas Pro,Analytics,99,Adds SSO and audit logs
+Atlas Enterprise,Analytics,0,Custom pricing and dedicated support engineer
+Beacon,Alerting,19,Integrates with Slack and Microsoft Teams
+Beacon Plus,Alerting,39,Adds on-call scheduling and escalation policies
+Nimbus,Pipeline,0,Custom pricing based on data volume
+Nimbus Lite,Pipeline,29,Up to 100000 events per month
+Nimbus Enterprise,Pipeline,0,Private networking and 99.99 percent uptime
+Atlas Add-on: Scheduled Exports,Analytics,10,Email reports on a daily schedule
+Atlas Add-on: Versioned Dashboards,Analytics,10,Point-in-time snapshot of dashboards
+Beacon Add-on: SMS Delivery,Alerting,5,Alert delivery via text message
+Beacon Add-on: Public Status Page,Alerting,9,Hosted status page for your team
+Atlas Mobile,Analytics,4,On-the-go dashboard viewer
+Beacon Mobile,Alerting,0,Included with all Beacon plans
+Nimbus Streaming Connector,Pipeline,15,Per additional data source
+Nimbus Batch Connector,Pipeline,10,Per additional batch source
+API Access — Standard,Developer,0,100 requests per minute
+API Access — Pro,Developer,19,1000 requests per minute
+API Access — Enterprise,Developer,49,Unlimited requests and dedicated capacity
+Audit Log Retention 90 days,Compliance,20,Extended audit log history
+Audit Log Retention 1 year,Compliance,60,Compliance-ready audit trail
+Data Residency — EU,Compliance,30,Host processing in European Union
+Data Residency — US,Compliance,30,Host processing in United States
+SSO — SAML,Compliance,0,Included with Atlas Pro and Enterprise
+SSO — OAuth,Compliance,0,Included with all paid plans
+SCIM Provisioning,Compliance,5,Automated user lifecycle management
+Onboarding Workshop,Professional Services,500,Two-hour guided setup call
+Migration Service,Professional Services,1500,Full migration from legacy platform
+Solutions Architect,Professional Services,4000,Per month dedicated engineering help
+Custom Dashboard Build,Professional Services,750,Per dashboard built by our team
+Data Warehouse Export,Storage,0,Included with Atlas and Nimbus
+Data Lake Export,Storage,20,Parquet export to S3 or GCS
+Long-term Archive,Storage,15,Per GB per month
+Atlas AI Copilot,Add-on,20,Natural language answers about your data
+Beacon AI Summaries,Add-on,5,AI-generated incident summaries
+Nimbus Data Masking,Add-on,25,Field-level masking for sensitive fields
+Atlas — Free Trial,Analytics,0,14-day trial without a credit card
+Beacon — Free Trial,Alerting,0,14-day trial without a credit card
+Nimbus — Free Trial,Pipeline,0,14-day trial without a credit card
+Atlas — Startup Credits,Analytics,0,Up to 1000 dollars for early startups
+Education Discount,Discount,-30,30 percent off for schools and nonprofits
+Non-profit Discount,Discount,-30,30 percent off for registered non-profits
+Annual Billing Discount,Discount,-20,20 percent off when billed annually
+Volume Tier 50 seats,Discount,-10,10 percent off at 50 seats
+Volume Tier 100 seats,Discount,-15,15 percent off at 100 seats
+Volume Tier 250 seats,Discount,-20,20 percent off at 250 seats
+Volume Tier 500 seats,Discount,-25,25 percent off at 500 seats
+Beacon — PagerDuty Integration,Alerting,0,Pages on-call engineers automatically
+Beacon — Email Delivery,Alerting,0,Included with all Beacon plans
+Beacon — Webhook Delivery,Alerting,0,Included with all Beacon plans
+Atlas — Salesforce Connector,Analytics,0,Included with all Atlas plans
+Atlas — HubSpot Connector,Analytics,0,Included with all Atlas plans
+Atlas — Snowflake Connector,Analytics,0,Included with all Atlas plans
+Nimbus — Segment Source,Pipeline,0,Stream events from Segment
+Nimbus — Kafka Source,Pipeline,0,Stream events from Kafka topics
+Nimbus — Postgres Source,Pipeline,0,Replicate from Postgres
+Nimbus — BigQuery Destination,Pipeline,0,Load into BigQuery
+Nimbus — Snowflake Destination,Pipeline,0,Load into Snowflake
+Priority Support — Pro,Support,0,Two-hour response target
+Priority Support — Enterprise,Support,0,Dedicated engineer in your Slack

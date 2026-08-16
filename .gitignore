@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*$py.class
+
+# Environments & Local Configs
+.venv/
+env/
+venv/
+ENV/
+.env
+.env.local
+.env.*.local
+
+# Database & Observability runtime data
+chroma_data/
+logs/
+*.sqlite3
+*.bin
+bm25.json
+
+# Node dependencies & builds
+node_modules/
+dist/
+build/
+.cache/
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/
