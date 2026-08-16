@@ -4,6 +4,7 @@ from typing import List, Optional
 class IngestResponse(BaseModel):
     session_id: str = Field(..., description="Session identifier")
     filename: str = Field(..., description="Original uploaded filename")
+    title: Optional[str] = Field(None, description="Best-effort document title (PDF /Title, DOCX core props, MD H1, TXT first line) — None when only the filename should be displayed")
     page_count: int = Field(..., description="Number of pages extracted (for CSVs: number of data rows)")
     chunk_count: int = Field(..., description="Number of text chunks created")
     chunk_size: int = Field(..., description="Chunk size used for this upload")
@@ -21,6 +22,7 @@ class SearchResultChunk(BaseModel):
     id: str = Field(..., description="Chunk identifier (stable per chunk, used for citations and logs)")
     text: str = Field(..., description="Chunk text")
     filename: str = Field(..., description="Source document filename")
+    title: Optional[str] = Field(None, description="Best-effort document title, when one exists")
     page_number: int = Field(..., description="Page number of the source document")
     chunk_strategy: str = Field("fixed", description="Chunking strategy that produced this chunk")
     retrieval_scores: RetrievalScores = Field(..., description="Stage-wise retrieval scores (labeled)")
@@ -37,6 +39,7 @@ class Citation(BaseModel):
     marker: int = Field(..., description="Inline citation marker ([n] in the answer)")
     id: str = Field(..., description="Chunk identifier")
     filename: str = Field(..., description="Source document filename")
+    title: Optional[str] = Field(None, description="Best-effort document title, when one exists")
     page_number: int = Field(..., description="Page (or CSV row range start) of the source")
     text: str = Field(..., description="Chunk text quote")
     scores: RetrievalScores = Field(..., description="Stage-wise retrieval scores (labeled)")

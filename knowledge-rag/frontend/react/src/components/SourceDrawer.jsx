@@ -30,7 +30,7 @@ export default function SourceDrawer({ open, onClose, citations, query, focusMar
             >
               <header className="source-card-header">
                 <span className="source-marker">[{c.marker}]</span>
-                <span className="source-filename">{c.filename}</span>
+                <span className="source-filename">{c.title || c.filename}</span>
                 <span className="source-page">page {c.page_number}</span>
                 {c.confidence != null && (
                   <span className="source-confidence">{(c.confidence * 100).toFixed(1)}%</span>

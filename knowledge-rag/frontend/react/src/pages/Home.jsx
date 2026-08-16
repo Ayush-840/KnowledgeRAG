@@ -37,6 +37,9 @@ export default function Home() {
         onNew={newSession}
         onRename={chat.renameSession}
         onDelete={chat.deleteSession}
+        onTogglePin={chat.togglePin}
+        onAddTag={chat.addTag}
+        onRemoveTag={chat.removeTag}
       />
 
       <main className="chat-main">

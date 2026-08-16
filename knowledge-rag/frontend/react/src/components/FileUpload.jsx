@@ -1,10 +1,13 @@
 import { useRef, useState } from 'react'
-import { ingestFile } from '../services/api'
+import { ingestFileStream } from '../services/api'
 
 const ACCEPT = ['.pdf', '.txt', '.docx', '.md', '.csv']
 const MAX_MB = 50
 
-const STAGES = ['Uploading…', 'Parsing…', 'Chunking…', 'Embedding…', 'Indexed']
+// Status index -> human-readable label. 0 is the real network upload; the rest
+// are driven by backend stage events (?stream=1), never by a timed animation.
+const STAGES = ['Uploading…', 'Extracting text…', 'Chunking document…', 'Generating embeddings…', 'Indexing…', 'Ready']
+const STAGE_INDEX = { parsing: 1, chunking: 2, embedding: 3, indexing: 4, done: 5 }
 
 function humanSize(bytes) {
   if (!bytes && bytes !== 0) return ''
@@ -35,21 +38,17 @@ export default function FileUpload({ sessionId, files, onFilesAdded, onFileRemov
     }
     const item = { name: file.name, size: file.size, status: 0 }
     setItems((prev) => [...prev, item])
-    const tick = setInterval(() => {
-      setItems((prev) =>
-        prev.map((it) =>
-          it.name === file.name && it.status >= 0 && it.status < 4 ? { ...it, status: it.status + 1 } : it,
-        ),
-      )
-    }, 350)
+    const setItem = (patch) =>
+      setItems((prev) => prev.map((it) => (it.name === file.name ? { ...it, ...patch } : it)))
     try {
-      const res = await ingestFile(sessionId, file, settings)
-      clearInterval(tick)
-      setItems((prev) => prev.map((it) => (it.name === file.name ? { ...it, status: 4, info: res } : it)))
-      onFilesAdded([{ name: file.name, size: file.size, chunkCount: res.chunk_count }])
+      const res = await ingestFileStream(sessionId, file, settings, (evt) => {
+        if (evt.stage && STAGE_INDEX[evt.stage] != null) setItem({ status: STAGE_INDEX[evt.stage] })
+      })
+      setItem({ status: 5, info: res })
+      const displayName = res.title || file.name
+      onFilesAdded([{ name: file.name, displayName, size: file.size, chunkCount: res.chunk_count }])
     } catch (e) {
-      clearInterval(tick)
-      setItems((prev) => prev.map((it) => (it.name === file.name ? { ...it, status: -1, error: e.message } : it)))
+      setItem({ status: -1, error: e.message })
     }
   }
 
@@ -152,12 +151,12 @@ export default function FileUpload({ sessionId, files, onFilesAdded, onFileRemov
                 ) : (
                   <div className="upload-progress">
                     <div className="stage-track">
-                      <div className="stage-fill" style={{ width: `${(it.status / 4) * 100}%` }} />
+                      <div className="stage-fill" style={{ width: `${(it.status / 5) * 100}%` }} />
                     </div>
                     <span className="upload-stage-label">{STAGES[it.status]}</span>
                   </div>
                 )}
-                {it.status === 4 && it.info && (
+                {it.status === 5 && it.info && (
                   <div className="upload-meta">
                     <span>
                       {it.info.page_count} {isCsv ? 'rows' : 'pages'}
@@ -178,7 +177,7 @@ export default function FileUpload({ sessionId, files, onFilesAdded, onFileRemov
           {files.map((f) => (
             <li key={f.name} className="session-file">
               <span className="file-badge">{f.name.split('.').pop().toUpperCase()}</span>
-              <span className="file-name">{f.name}</span>
+              <span className="file-name">{f.displayName || f.name}</span>
               <button
                 className="file-remove"
                 onClick={() => {

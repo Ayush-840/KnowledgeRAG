@@ -11,9 +11,17 @@ from pathlib import Path
 
 import pytest
 
+from app.dependencies import get_session_vectors
 from app.llm import verify_citations
 from app.retrieval import reciprocal_rank_fusion
-from app.utils import extract_csv_chunks, extract_blocks_from_markdown
+from app.utils import (
+    clean_extracted_pages,
+    clean_page_text,
+    detect_repeated_lines,
+    extract_csv_chunks,
+    extract_blocks_from_markdown,
+    extract_text_from_pdf,
+)
 
 SAMPLE_DIR = Path(__file__).resolve().parents[3] / "sample-docs"
 
@@ -48,6 +56,87 @@ def ready_session(client, session_id):
     r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
     assert r.status_code == 200, r.text
     return session_id
+
+
+# ---------- S0: PDF extraction hygiene (Phase 0.2) ----------
+
+def test_pdf_extraction_strips_page_numbers():
+    text = "Page 3\n\nAurora Labs was founded in 2019.\n\n4\n"
+    assert clean_page_text(text) == "Aurora Labs was founded in 2019."
+
+
+def test_pdf_extraction_splits_glued_numeric_prefix():
+    # The "04Build" artifact: a short numeric page marker glued onto the first
+    # word of the page with no whitespace. Digits dropped, word kept.
+    text = "04Build pipelines in production.\n\nThe Atlas platform costs $49."
+    cleaned = clean_page_text(text)
+    assert cleaned.startswith("Build pipelines in production.")
+    # Legitimate numbers inside body text are untouched
+    assert "$49" in cleaned
+
+
+def test_pdf_extraction_keeps_legitimate_leading_numbers():
+    # A 4-digit year at line start must NOT be treated as a glued page marker
+    text = "2024 revenue grew 40% year over year."
+    assert clean_page_text(text) == "2024 revenue grew 40% year over year."
+
+
+def test_pdf_extraction_glue_strip_survives_header_line():
+    # A running header above the content must not consume the glue-strip:
+    # "04Build" on the first content line is still split, even though the
+    # header line comes first.
+    pages = [
+        (1, "Aurora Labs Confidential\n\nAtlas deployment guide.\n\nPage 1\nAurora Labs Confidential"),
+        (2, "Aurora Labs Confidential\n\n04Build pipelines for prod.\n\nPage 2\nAurora Labs Confidential"),
+        (3, "Aurora Labs Confidential\n\n05Runbook for incidents.\n\nPage 3\nAurora Labs Confidential"),
+        (4, "Aurora Labs Confidential\n\nMore content.\n\nPage 4\nAurora Labs Confidential"),
+    ]
+    cleaned = clean_extracted_pages(pages)
+    assert cleaned[1][1].startswith("Build pipelines for prod.")
+    assert cleaned[2][1].startswith("Runbook for incidents.")
+    assert "Aurora Labs Confidential" not in cleaned[1][1]
+
+
+def test_pdf_extraction_strips_repeated_headers_footers():
+    pages = [
+        (1, "Aurora Labs\n\nIntro page content.\n\nPage 1\nAurora Labs"),
+        (2, "Aurora Labs\n\nMore content here.\n\nPage 2\nAurora Labs"),
+        (3, "Aurora Labs\n\nFinal content.\n\nPage 3\nAurora Labs"),
+        (4, "Aurora Labs\n\nMore content.\n\nPage 4\nAurora Labs"),
+    ]
+    repeated = detect_repeated_lines(pages)
+    assert "Aurora Labs" in repeated  # running header/footer detected
+    cleaned = clean_extracted_pages(pages)
+    # The boilerplate header/footer is gone from every page; body text survives
+    for _, text in cleaned:
+        assert "Aurora Labs\n\n" not in text
+        assert "content" in text
+    assert "Intro page content." in cleaned[0][1]
+
+
+def test_pdf_extraction_baseline(client):
+    """Regression check: re-extract the sample corpus and diff against the stored
+    baseline so a future parser change that reintroduces layout contamination is
+    caught here, not by a user. Regenerate with UPDATE_BASELINES=1."""
+    baseline_path = Path(__file__).parent / "baselines" / "pdf_extraction.json"
+    if not baseline_path.exists():
+        pytest.skip("extraction baseline not present")
+    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    for filename, record in baseline.items():
+        pdf = SAMPLE_DIR / filename
+        if not pdf.exists():
+            continue
+        pages = extract_text_from_pdf(str(pdf))
+        actual = [{"page": p, "text": t} for p, t in pages]
+        if os.getenv("UPDATE_BASELINES") == "1":
+            baseline[filename] = {"pages": actual}
+            continue
+        assert actual == record["pages"], (
+            f"PDF extraction for {filename} changed! If the change is intended, "
+            "regenerate with UPDATE_BASELINES=1."
+        )
+    if os.getenv("UPDATE_BASELINES") == "1":
+        baseline_path.write_text(json.dumps(baseline, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 # ---------- S1: extension whitelist ----------
@@ -323,3 +412,101 @@ def test_s13_search_writes_jsonl(client, ready_session):
     assert {"dense", "bm25", "fusion", "rerank", "total"} <= set(last["latency_ms"].keys())
     assert last["retrieved"]  # fused pool with stage scores
     assert last["final_answer"] is None  # search has no generation stage
+
+
+# ---------- S14: real ingestion stages + document titles + chat titles ----------
+
+def test_s14_ingest_streams_real_stages(client, session_id):
+    """?stream=1 returns SSE events for real pipeline stages (parsing -> chunking
+    -> embedding -> indexing -> done), not a timed animation."""
+    r = _ingest(client, session_id, "stages.md", MD_SAMPLE.encode(), stream=True)
+    assert r.status_code == 200
+    assert r.headers.get("content-type", "").startswith("text/event-stream")
+    events = []
+    for line in r.text.splitlines():
+        if line.startswith("data: "):
+            events.append(json.loads(line[6:]))
+    stages = [e["stage"] for e in events]
+    assert stages == ["parsing", "chunking", "embedding", "indexing", "done"]
+    done = events[-1]
+    assert done["result"]["chunk_count"] >= 1
+    assert done["result"]["title"] == "Aurora Labs FAQ"
+
+
+def test_s14_ingest_stream_reports_errors(client, session_id):
+    """Mid-stream failures surface as an error event, not a broken stream."""
+    # An empty CSV passes validation but fails inside ingest_document
+    r = _ingest(client, session_id, "empty.csv", b"\n", stream=True)
+    assert r.status_code == 200
+    events = [
+        json.loads(line[6:])
+        for line in r.text.splitlines()
+        if line.startswith("data: ")
+    ]
+    assert events[-1]["stage"] == "error"
+    assert "empty" in events[-1]["error"].lower()
+
+
+def test_s14_title_endpoint_heuristic(client):
+    """/title returns a deterministic heuristic title when no LLM key is set."""
+    r = client.post("/title", json={"query": "What are the key findings in the Q3 budget report?"})
+    assert r.status_code == 200
+    title = r.json()["title"]
+    assert title and len(title) <= 48
+    assert title == "What are the key findings in the Q3"
+
+
+def test_s14_title_endpoint_requires_query(client):
+    r = client.post("/title", json={"query": "   "})
+    assert r.status_code == 400
+
+
+def test_s14_document_title_in_metadata(client, session_id):
+    """Ingest prefers a document's own title (MD H1 here) and exposes it in the
+    response, the /documents list, and chunk metadata."""
+    r = _ingest(client, session_id, "faq.md", MD_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+    assert r.json()["title"] == "Aurora Labs FAQ"
+
+    listing = client.get(f"/documents/{session_id}").json()["documents"]
+    assert listing[0]["title"] == "Aurora Labs FAQ"
+
+    # Chunks carry the title so search results/citations can display it
+    doc = client.get(f"/documents/{session_id}/faq.md").json()
+    assert doc["title"] == "Aurora Labs FAQ"
+
+    session = get_session_vectors(session_id)
+    meta = session["collection"].get(include=["metadatas"])["metadatas"][0]
+    assert meta.get("title") == "Aurora Labs FAQ"
+
+
+def test_s14_plain_txt_first_line_title(client, session_id):
+    """A .txt whose first line is short becomes the title."""
+    content = "Onboarding Guide\n\nWeek one: set up your laptop and accounts.\n"
+    r = _ingest(client, session_id, "notes.txt", content.encode())
+    assert r.status_code == 200, r.text
+    assert r.json()["title"] == "Onboarding Guide"
+
+
+def test_s14_csv_has_no_title(client, session_id):
+    """CSVs have no document title — callers fall back to the filename."""
+    r = _ingest(client, session_id, "products.csv", CSV_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+    assert r.json()["title"] is None
+
+
+def test_s14_chroma_cosine_space(client, session_id):
+    """Collections are created with hnsw:space=cosine so the dense_similarity
+    label (1 - distance) is an actual cosine similarity, not L2."""
+    _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    collection = get_session_vectors(session_id)["collection"]
+    assert collection.metadata.get("hnsw:space") == "cosine"
+
+
+def test_s14_search_carries_title(client, session_id):
+    r = _ingest(client, session_id, "faq.md", MD_SAMPLE.encode())
+    assert r.status_code == 200
+    sr = client.post(f"/search/{session_id}", json={"query": "Atlas"})
+    assert sr.status_code == 200
+    for chunk in sr.json()["results"]:
+        assert chunk["title"] == "Aurora Labs FAQ"

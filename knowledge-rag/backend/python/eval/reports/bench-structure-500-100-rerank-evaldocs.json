@@ -1,54 +1,66 @@
 {
-  "generated_at": "2026-08-16T15:01:10.500959+00:00",
+  "generated_at": "2026-08-16T15:02:10.941317+00:00",
   "settings": {
     "chunk_size": 500,
     "overlap": 100,
-    "strategy": "fixed",
+    "strategy": "structure_aware",
     "retrieve_candidates": 20,
     "rerank_top_k": 5,
     "reranker_enabled": true,
     "judge_model": "meta/llama-3.3-70b-instruct",
     "generation_model": "meta/llama-3.3-70b-instruct",
-    "llm_enabled": false
+    "llm_enabled": true
   },
   "documents": [
-    "aurora-labs.pdf",
-    "aurora-labs.txt",
-    "data-privacy.md",
-    "faq.md",
-    "guide.docx",
-    "products.csv"
+    "api-reference.md",
+    "atlas-product-sheet.pdf",
+    "benefits-faq.md",
+    "employee-handbook-v1.md",
+    "employee-handbook-v2.md",
+    "feature-comparison.md",
+    "gdpr-faq.md",
+    "incident-runbook.txt",
+    "oncall-handbook.md",
+    "platform-report-part1.md",
+    "platform-report-part2.md",
+    "privacy-policy-v1.md",
+    "privacy-policy-v2.md",
+    "product-pricing.csv",
+    "security-policy.docx",
+    "sla-agreement.md",
+    "vendor-contract-v2.md",
+    "vendor-contract.md"
   ],
   "summary": {
-    "context_precision": 0.2806,
-    "context_recall": 0.8206,
-    "recall_at_pool": 0.8597,
+    "context_precision": 0.2472,
+    "context_recall": 0.7136,
+    "recall_at_pool": 0.7624,
     "faithfulness": null,
     "answer_relevance": null,
     "mean_generation_ms": null,
-    "mean_total_latency_ms": 984.2447,
+    "mean_total_latency_ms": 834.8172,
     "by_query_type": {
       "ambiguous": {
         "n": 12,
-        "context_precision": 0.2333,
-        "context_recall": 0.9167,
-        "recall_at_pool": 0.9167,
+        "context_precision": 0.1333,
+        "context_recall": 0.6667,
+        "recall_at_pool": 0.7222,
         "faithfulness": null,
         "answer_relevance": null
       },
       "multi_hop": {
         "n": 19,
-        "context_precision": 0.4947,
-        "context_recall": 0.8641,
-        "recall_at_pool": 0.9419,
+        "context_precision": 0.4526,
+        "context_recall": 0.7698,
+        "recall_at_pool": 0.841,
         "faithfulness": null,
         "answer_relevance": null
       },
       "single_hop": {
         "n": 36,
-        "context_precision": 0.2222,
-        "context_recall": 0.8796,
-        "recall_at_pool": 0.9167,
+        "context_precision": 0.2111,
+        "context_recall": 0.7986,
+        "recall_at_pool": 0.8403,
         "faithfulness": null,
         "answer_relevance": null
       },
@@ -80,13 +92,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.08,
-        "bm25": 0.13,
-        "fusion": 0.51,
-        "rerank": 6720.79,
-        "total": 6734.56
+        "dense": 44.26,
+        "bm25": 0.35,
+        "fusion": 0.78,
+        "rerank": 9406.7,
+        "total": 9452.24
       }
     },
     {
@@ -106,13 +118,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.85,
-        "bm25": 0.15,
-        "fusion": 0.74,
-        "rerank": 776.17,
-        "total": 791.95
+        "dense": 81.79,
+        "bm25": 1.24,
+        "fusion": 1.76,
+        "rerank": 705.33,
+        "total": 790.19
       }
     },
     {
@@ -132,13 +144,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.95,
-        "bm25": 0.14,
-        "fusion": 0.6,
-        "rerank": 781.94,
-        "total": 794.69
+        "dense": 58.36,
+        "bm25": 0.35,
+        "fusion": 1.01,
+        "rerank": 1791.69,
+        "total": 1851.5
       }
     },
     {
@@ -158,13 +170,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.84,
-        "bm25": 0.14,
-        "fusion": 0.88,
-        "rerank": 773.47,
-        "total": 791.39
+        "dense": 52.42,
+        "bm25": 0.36,
+        "fusion": 1.05,
+        "rerank": 445.22,
+        "total": 499.13
       }
     },
     {
@@ -185,13 +197,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.13,
-        "bm25": 0.14,
-        "fusion": 0.92,
-        "rerank": 778.88,
-        "total": 795.12
+        "dense": 55.17,
+        "bm25": 0.46,
+        "fusion": 1.17,
+        "rerank": 1756.87,
+        "total": 1813.77
       }
     },
     {
@@ -211,13 +223,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.65,
-        "bm25": 0.11,
-        "fusion": 0.6,
-        "rerank": 798.07,
-        "total": 805.52
+        "dense": 52.72,
+        "bm25": 0.6,
+        "fusion": 1.87,
+        "rerank": 1554.18,
+        "total": 1609.56
       }
     },
     {
@@ -237,13 +249,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.74,
-        "bm25": 0.22,
-        "fusion": 0.57,
-        "rerank": 789.23,
-        "total": 804.79
+        "dense": 15.2,
+        "bm25": 0.42,
+        "fusion": 0.96,
+        "rerank": 406.94,
+        "total": 423.63
       }
     },
     {
@@ -263,13 +275,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.98,
-        "bm25": 0.13,
-        "fusion": 0.7,
-        "rerank": 790.39,
-        "total": 807.24
+        "dense": 14.16,
+        "bm25": 0.49,
+        "fusion": 0.78,
+        "rerank": 947.86,
+        "total": 963.36
       }
     },
     {
@@ -289,13 +301,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.04,
-        "bm25": 0.12,
-        "fusion": 0.58,
-        "rerank": 799.23,
-        "total": 806.02
+        "dense": 14.28,
+        "bm25": 0.52,
+        "fusion": 1.27,
+        "rerank": 704.69,
+        "total": 720.83
       }
     },
     {
@@ -316,13 +328,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 8.67,
-        "bm25": 0.2,
-        "fusion": 0.84,
-        "rerank": 814.1,
-        "total": 823.86
+        "dense": 11.5,
+        "bm25": 0.57,
+        "fusion": 1.72,
+        "rerank": 493.74,
+        "total": 507.58
       }
     },
     {
@@ -342,13 +354,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.15,
-        "bm25": 0.12,
-        "fusion": 0.64,
-        "rerank": 817.87,
-        "total": 824.81
+        "dense": 13.06,
+        "bm25": 0.64,
+        "fusion": 2.02,
+        "rerank": 362.5,
+        "total": 378.3
       }
     },
     {
@@ -359,22 +371,22 @@
         "platform-report-part1.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
-      "total_relevant": 2,
-      "context_precision": 0.2,
-      "context_recall": 0.5,
+      "relevant_retrieved": 3,
+      "total_relevant": 3,
+      "context_precision": 0.6,
+      "context_recall": 1.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.07,
-        "bm25": 0.1,
-        "fusion": 0.63,
-        "rerank": 812.34,
-        "total": 819.18
+        "dense": 12.94,
+        "bm25": 0.59,
+        "fusion": 1.83,
+        "rerank": 884.79,
+        "total": 900.2
       }
     },
     {
@@ -394,13 +406,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.68,
-        "bm25": 0.14,
-        "fusion": 0.66,
-        "rerank": 812.42,
-        "total": 820.97
+        "dense": 7.48,
+        "bm25": 0.32,
+        "fusion": 0.71,
+        "rerank": 534.05,
+        "total": 542.59
       }
     },
     {
@@ -420,13 +432,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.3,
-        "bm25": 0.17,
-        "fusion": 1.08,
-        "rerank": 814.19,
-        "total": 825.83
+        "dense": 13.96,
+        "bm25": 0.47,
+        "fusion": 1.5,
+        "rerank": 925.17,
+        "total": 941.16
       }
     },
     {
@@ -437,22 +449,22 @@
         "api-reference.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
-      "total_relevant": 1,
-      "context_precision": 0.2,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
       "context_recall": 1.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.29,
-        "bm25": 0.19,
-        "fusion": 1.03,
-        "rerank": 816.6,
-        "total": 830.17
+        "dense": 13.84,
+        "bm25": 0.51,
+        "fusion": 1.95,
+        "rerank": 984.25,
+        "total": 1000.62
       }
     },
     {
@@ -472,13 +484,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.09,
-        "bm25": 0.15,
-        "fusion": 0.78,
-        "rerank": 808.17,
-        "total": 816.24
+        "dense": 14.04,
+        "bm25": 0.59,
+        "fusion": 1.66,
+        "rerank": 915.82,
+        "total": 932.18
       }
     },
     {
@@ -498,13 +510,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 9.66,
-        "bm25": 0.15,
-        "fusion": 0.83,
-        "rerank": 810.06,
-        "total": 820.78
+        "dense": 13.04,
+        "bm25": 0.5,
+        "fusion": 1.29,
+        "rerank": 843.26,
+        "total": 858.18
       }
     },
     {
@@ -516,21 +528,21 @@
       ],
       "retrieved_count": 5,
       "relevant_retrieved": 1,
-      "total_relevant": 2,
+      "total_relevant": 4,
       "context_precision": 0.2,
-      "context_recall": 0.5,
-      "recall_at_pool": 1.0,
+      "context_recall": 0.25,
+      "recall_at_pool": 0.75,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 9.1,
-        "bm25": 0.15,
-        "fusion": 0.72,
-        "rerank": 809.04,
-        "total": 819.07
+        "dense": 9.2,
+        "bm25": 0.27,
+        "fusion": 0.71,
+        "rerank": 186.79,
+        "total": 197.03
       }
     },
     {
@@ -550,13 +562,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.39,
-        "bm25": 0.27,
-        "fusion": 1.49,
-        "rerank": 812.93,
-        "total": 828.15
+        "dense": 8.6,
+        "bm25": 0.45,
+        "fusion": 0.93,
+        "rerank": 188.85,
+        "total": 198.86
       }
     },
     {
@@ -576,13 +588,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.94,
-        "bm25": 0.23,
-        "fusion": 1.51,
-        "rerank": 822.95,
-        "total": 836.68
+        "dense": 12.33,
+        "bm25": 0.56,
+        "fusion": 1.53,
+        "rerank": 825.6,
+        "total": 840.1
       }
     },
     {
@@ -602,13 +614,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.12,
-        "bm25": 0.1,
-        "fusion": 0.54,
-        "rerank": 811.56,
-        "total": 825.37
+        "dense": 20.2,
+        "bm25": 0.21,
+        "fusion": 0.58,
+        "rerank": 890.85,
+        "total": 911.89
       }
     },
     {
@@ -628,13 +640,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 8.78,
-        "bm25": 0.14,
-        "fusion": 0.79,
-        "rerank": 805.49,
-        "total": 815.24
+        "dense": 12.16,
+        "bm25": 0.45,
+        "fusion": 1.55,
+        "rerank": 244.26,
+        "total": 258.52
       }
     },
     {
@@ -654,13 +666,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.35,
-        "bm25": 0.11,
-        "fusion": 0.51,
-        "rerank": 799.99,
-        "total": 810.99
+        "dense": 36.56,
+        "bm25": 0.27,
+        "fusion": 4.3,
+        "rerank": 867.92,
+        "total": 909.11
       }
     },
     {
@@ -680,13 +692,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.24,
-        "bm25": 0.14,
-        "fusion": 0.62,
-        "rerank": 806.43,
-        "total": 813.46
+        "dense": 12.15,
+        "bm25": 0.85,
+        "fusion": 2.01,
+        "rerank": 337.78,
+        "total": 352.91
       }
     },
     {
@@ -707,13 +719,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.61,
-        "bm25": 0.15,
-        "fusion": 0.56,
-        "rerank": 804.49,
-        "total": 815.87
+        "dense": 25.85,
+        "bm25": 0.34,
+        "fusion": 0.96,
+        "rerank": 906.05,
+        "total": 933.24
       }
     },
     {
@@ -725,22 +737,22 @@
         "sla-agreement.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 2,
-      "total_relevant": 2,
-      "context_precision": 0.4,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
       "context_recall": 1.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 25.86,
-        "bm25": 0.26,
-        "fusion": 1.01,
-        "rerank": 807.81,
-        "total": 835.01
+        "dense": 16.59,
+        "bm25": 0.37,
+        "fusion": 0.62,
+        "rerank": 891.17,
+        "total": 908.81
       }
     },
     {
@@ -761,13 +773,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.88,
-        "bm25": 0.34,
-        "fusion": 1.81,
-        "rerank": 814.76,
-        "total": 830.89
+        "dense": 12.86,
+        "bm25": 0.94,
+        "fusion": 1.85,
+        "rerank": 566.69,
+        "total": 582.43
       }
     },
     {
@@ -778,22 +790,22 @@
         "privacy-policy-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 2,
-      "total_relevant": 2,
-      "context_precision": 0.4,
+      "relevant_retrieved": 3,
+      "total_relevant": 3,
+      "context_precision": 0.6,
       "context_recall": 1.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 25.82,
-        "bm25": 0.24,
-        "fusion": 0.94,
-        "rerank": 813.56,
-        "total": 840.63
+        "dense": 19.27,
+        "bm25": 0.36,
+        "fusion": 0.69,
+        "rerank": 598.66,
+        "total": 619.03
       }
     },
     {
@@ -805,22 +817,22 @@
         "platform-report-part2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 2,
+      "relevant_retrieved": 1,
       "total_relevant": 2,
-      "context_precision": 0.4,
-      "context_recall": 1.0,
-      "recall_at_pool": 1.0,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 0.5,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 20.36,
-        "bm25": 0.3,
-        "fusion": 0.94,
-        "rerank": 806.59,
-        "total": 828.23
+        "dense": 25.77,
+        "bm25": 0.46,
+        "fusion": 0.86,
+        "rerank": 1047.25,
+        "total": 1074.44
       }
     },
     {
@@ -841,13 +853,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.5,
-        "bm25": 0.19,
-        "fusion": 0.57,
-        "rerank": 808.38,
-        "total": 821.67
+        "dense": 23.5,
+        "bm25": 0.61,
+        "fusion": 0.71,
+        "rerank": 209.47,
+        "total": 234.42
       }
     },
     {
@@ -868,13 +880,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 5.92,
-        "bm25": 0.13,
-        "fusion": 0.51,
-        "rerank": 801.22,
-        "total": 807.82
+        "dense": 13.65,
+        "bm25": 0.87,
+        "fusion": 1.75,
+        "rerank": 955.35,
+        "total": 971.72
       }
     },
     {
@@ -886,22 +898,22 @@
         "sla-agreement.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 3,
+      "relevant_retrieved": 2,
       "total_relevant": 3,
-      "context_precision": 0.6,
-      "context_recall": 1.0,
+      "context_precision": 0.4,
+      "context_recall": 0.6667,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.61,
-        "bm25": 0.15,
-        "fusion": 0.52,
-        "rerank": 805.95,
-        "total": 817.29
+        "dense": 23.39,
+        "bm25": 0.39,
+        "fusion": 0.87,
+        "rerank": 932.88,
+        "total": 957.62
       }
     },
     {
@@ -922,13 +934,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 23.54,
-        "bm25": 0.26,
-        "fusion": 1.18,
-        "rerank": 807.53,
-        "total": 832.57
+        "dense": 21.1,
+        "bm25": 0.41,
+        "fusion": 1.38,
+        "rerank": 887.63,
+        "total": 910.56
       }
     },
     {
@@ -940,22 +952,22 @@
         "platform-report-part1.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 3,
-      "total_relevant": 3,
-      "context_precision": 0.6,
-      "context_recall": 1.0,
+      "relevant_retrieved": 4,
+      "total_relevant": 6,
+      "context_precision": 0.8,
+      "context_recall": 0.6667,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.06,
-        "bm25": 0.17,
-        "fusion": 0.62,
-        "rerank": 808.56,
-        "total": 816.45
+        "dense": 6.97,
+        "bm25": 0.39,
+        "fusion": 0.75,
+        "rerank": 830.12,
+        "total": 838.28
       }
     },
     {
@@ -968,21 +980,21 @@
       ],
       "retrieved_count": 5,
       "relevant_retrieved": 4,
-      "total_relevant": 5,
+      "total_relevant": 6,
       "context_precision": 0.8,
-      "context_recall": 0.8,
-      "recall_at_pool": 0.8,
+      "context_recall": 0.6667,
+      "recall_at_pool": 0.8333,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.3,
-        "bm25": 0.2,
-        "fusion": 0.75,
-        "rerank": 811.72,
-        "total": 820.02
+        "dense": 13.57,
+        "bm25": 0.82,
+        "fusion": 1.45,
+        "rerank": 620.5,
+        "total": 636.41
       }
     },
     {
@@ -995,21 +1007,21 @@
       ],
       "retrieved_count": 5,
       "relevant_retrieved": 5,
-      "total_relevant": 20,
+      "total_relevant": 26,
       "context_precision": 1.0,
-      "context_recall": 0.25,
-      "recall_at_pool": 0.8,
+      "context_recall": 0.1923,
+      "recall_at_pool": 0.3462,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 9.12,
-        "bm25": 0.17,
-        "fusion": 0.76,
-        "rerank": 816.97,
-        "total": 827.07
+        "dense": 12.81,
+        "bm25": 0.44,
+        "fusion": 1.18,
+        "rerank": 883.11,
+        "total": 897.59
       }
     },
     {
@@ -1030,13 +1042,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.52,
-        "bm25": 0.2,
-        "fusion": 0.78,
-        "rerank": 822.38,
-        "total": 840.93
+        "dense": 24.71,
+        "bm25": 0.7,
+        "fusion": 0.9,
+        "rerank": 894.66,
+        "total": 921.07
       }
     },
     {
@@ -1048,22 +1060,22 @@
         "sla-agreement.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 2,
-      "total_relevant": 2,
-      "context_precision": 0.4,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
       "context_recall": 1.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.32,
-        "bm25": 0.27,
-        "fusion": 0.69,
-        "rerank": 813.04,
-        "total": 830.36
+        "dense": 21.6,
+        "bm25": 0.56,
+        "fusion": 0.8,
+        "rerank": 885.78,
+        "total": 908.81
       }
     },
     {
@@ -1075,21 +1087,21 @@
       ],
       "retrieved_count": 5,
       "relevant_retrieved": 3,
-      "total_relevant": 4,
+      "total_relevant": 6,
       "context_precision": 0.6,
-      "context_recall": 0.75,
-      "recall_at_pool": 1.0,
+      "context_recall": 0.5,
+      "recall_at_pool": 0.6667,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.84,
-        "bm25": 0.19,
-        "fusion": 0.65,
-        "rerank": 815.46,
-        "total": 824.19
+        "dense": 10.82,
+        "bm25": 0.53,
+        "fusion": 0.83,
+        "rerank": 855.2,
+        "total": 867.43
       }
     },
     {
@@ -1101,22 +1113,22 @@
         "platform-report-part1.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 5,
-      "total_relevant": 23,
-      "context_precision": 1.0,
-      "context_recall": 0.2174,
-      "recall_at_pool": 0.6957,
+      "relevant_retrieved": 3,
+      "total_relevant": 30,
+      "context_precision": 0.6,
+      "context_recall": 0.1,
+      "recall_at_pool": 0.3,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.96,
-        "bm25": 0.17,
-        "fusion": 0.62,
-        "rerank": 876.12,
-        "total": 883.92
+        "dense": 14.51,
+        "bm25": 0.69,
+        "fusion": 2.07,
+        "rerank": 251.46,
+        "total": 268.8
       }
     },
     {
@@ -1136,13 +1148,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.63,
-        "bm25": 0.28,
-        "fusion": 5.89,
-        "rerank": 816.65,
-        "total": 840.53
+        "dense": 12.03,
+        "bm25": 0.62,
+        "fusion": 1.72,
+        "rerank": 182.94,
+        "total": 197.4
       }
     },
     {
@@ -1162,13 +1174,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.39,
-        "bm25": 0.17,
-        "fusion": 1.13,
-        "rerank": 811.97,
-        "total": 824.7
+        "dense": 15.33,
+        "bm25": 0.43,
+        "fusion": 1.5,
+        "rerank": 390.66,
+        "total": 408.0
       }
     },
     {
@@ -1188,13 +1200,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.36,
-        "bm25": 0.12,
-        "fusion": 0.51,
-        "rerank": 810.56,
-        "total": 817.6
+        "dense": 10.24,
+        "bm25": 0.27,
+        "fusion": 0.77,
+        "rerank": 374.12,
+        "total": 385.48
       }
     },
     {
@@ -1214,13 +1226,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 27.89,
-        "bm25": 0.08,
-        "fusion": 0.67,
-        "rerank": 812.13,
-        "total": 840.81
+        "dense": 54.03,
+        "bm25": 0.14,
+        "fusion": 0.71,
+        "rerank": 612.36,
+        "total": 667.3
       }
     },
     {
@@ -1240,13 +1252,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.97,
-        "bm25": 0.12,
-        "fusion": 0.59,
-        "rerank": 825.04,
-        "total": 832.76
+        "dense": 12.5,
+        "bm25": 0.46,
+        "fusion": 1.46,
+        "rerank": 917.6,
+        "total": 932.08
       }
     },
     {
@@ -1258,22 +1270,22 @@
         "privacy-policy-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 3,
+      "relevant_retrieved": 0,
       "total_relevant": 3,
-      "context_precision": 0.6,
-      "context_recall": 1.0,
-      "recall_at_pool": 1.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.6667,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.65,
-        "bm25": 0.11,
-        "fusion": 0.52,
-        "rerank": 828.06,
-        "total": 836.37
+        "dense": 16.74,
+        "bm25": 0.51,
+        "fusion": 1.52,
+        "rerank": 224.25,
+        "total": 243.1
       }
     },
     {
@@ -1284,22 +1296,22 @@
         "privacy-policy-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 2,
-      "total_relevant": 2,
-      "context_precision": 0.4,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
       "context_recall": 1.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.81,
-        "bm25": 0.13,
-        "fusion": 0.93,
-        "rerank": 831.16,
-        "total": 839.09
+        "dense": 13.04,
+        "bm25": 0.64,
+        "fusion": 1.63,
+        "rerank": 188.21,
+        "total": 203.62
       }
     },
     {
@@ -1319,13 +1331,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.78,
-        "bm25": 0.12,
-        "fusion": 0.47,
-        "rerank": 826.88,
-        "total": 835.32
+        "dense": 13.16,
+        "bm25": 0.63,
+        "fusion": 1.65,
+        "rerank": 869.59,
+        "total": 885.14
       }
     },
     {
@@ -1345,13 +1357,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.57,
-        "bm25": 0.31,
-        "fusion": 1.22,
-        "rerank": 822.4,
-        "total": 837.58
+        "dense": 13.7,
+        "bm25": 0.56,
+        "fusion": 1.86,
+        "rerank": 851.98,
+        "total": 868.2
       }
     },
     {
@@ -1371,13 +1383,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 9.3,
-        "bm25": 0.19,
-        "fusion": 0.88,
-        "rerank": 828.07,
-        "total": 838.49
+        "dense": 14.75,
+        "bm25": 0.39,
+        "fusion": 1.45,
+        "rerank": 822.82,
+        "total": 839.46
       }
     },
     {
@@ -1388,22 +1400,22 @@
         "sla-agreement.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
-      "total_relevant": 1,
-      "context_precision": 0.2,
-      "context_recall": 1.0,
-      "recall_at_pool": 1.0,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 8.94,
-        "bm25": 0.14,
-        "fusion": 0.72,
-        "rerank": 817.02,
-        "total": 826.89
+        "dense": 12.47,
+        "bm25": 0.3,
+        "fusion": 0.94,
+        "rerank": 863.66,
+        "total": 877.42
       }
     },
     {
@@ -1414,22 +1426,22 @@
         "employee-handbook-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
-      "total_relevant": 1,
-      "context_precision": 0.2,
-      "context_recall": 1.0,
-      "recall_at_pool": 1.0,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.12,
-        "bm25": 0.31,
-        "fusion": 1.36,
-        "rerank": 843.68,
-        "total": 856.51
+        "dense": 7.4,
+        "bm25": 0.22,
+        "fusion": 0.61,
+        "rerank": 801.97,
+        "total": 810.24
       }
     },
     {
@@ -1447,13 +1459,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 8.54,
-        "bm25": 0.21,
-        "fusion": 0.47,
-        "rerank": 890.74,
-        "total": 900.0
+        "dense": 12.83,
+        "bm25": 0.49,
+        "fusion": 1.67,
+        "rerank": 817.21,
+        "total": 832.26
       }
     },
     {
@@ -1471,13 +1483,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.04,
-        "bm25": 0.11,
-        "fusion": 0.47,
-        "rerank": 867.36,
-        "total": 875.02
+        "dense": 8.12,
+        "bm25": 0.34,
+        "fusion": 0.85,
+        "rerank": 421.27,
+        "total": 430.63
       }
     },
     {
@@ -1495,13 +1507,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 7.27,
-        "bm25": 0.12,
-        "fusion": 0.5,
-        "rerank": 897.66,
-        "total": 905.62
+        "dense": 12.34,
+        "bm25": 0.62,
+        "fusion": 1.69,
+        "rerank": 891.52,
+        "total": 906.24
       }
     },
     {
@@ -1519,13 +1531,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.82,
-        "bm25": 0.23,
-        "fusion": 0.63,
-        "rerank": 861.44,
-        "total": 875.16
+        "dense": 10.26,
+        "bm25": 0.27,
+        "fusion": 0.94,
+        "rerank": 525.3,
+        "total": 536.82
       }
     },
     {
@@ -1543,13 +1555,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.68,
-        "bm25": 0.14,
-        "fusion": 0.55,
-        "rerank": 871.81,
-        "total": 879.21
+        "dense": 14.96,
+        "bm25": 0.56,
+        "fusion": 2.03,
+        "rerank": 854.07,
+        "total": 871.71
       }
     },
     {
@@ -1569,13 +1581,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.51,
-        "bm25": 0.14,
-        "fusion": 0.67,
-        "rerank": 894.94,
-        "total": 902.29
+        "dense": 15.89,
+        "bm25": 0.58,
+        "fusion": 1.69,
+        "rerank": 825.01,
+        "total": 843.25
       }
     },
     {
@@ -1595,13 +1607,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.24,
-        "bm25": 0.13,
-        "fusion": 0.62,
-        "rerank": 897.26,
-        "total": 904.31
+        "dense": 10.22,
+        "bm25": 0.3,
+        "fusion": 1.12,
+        "rerank": 815.89,
+        "total": 827.58
       }
     },
     {
@@ -1613,22 +1625,22 @@
         "privacy-policy-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 4,
-      "total_relevant": 6,
-      "context_precision": 0.8,
-      "context_recall": 0.6667,
-      "recall_at_pool": 1.0,
+      "relevant_retrieved": 2,
+      "total_relevant": 4,
+      "context_precision": 0.4,
+      "context_recall": 0.5,
+      "recall_at_pool": 0.5,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.18,
-        "bm25": 0.27,
-        "fusion": 1.24,
-        "rerank": 859.96,
-        "total": 877.05
+        "dense": 13.26,
+        "bm25": 0.49,
+        "fusion": 1.27,
+        "rerank": 164.12,
+        "total": 179.22
       }
     },
     {
@@ -1648,13 +1660,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 21.38,
-        "bm25": 0.24,
-        "fusion": 0.99,
-        "rerank": 881.9,
-        "total": 904.54
+        "dense": 13.89,
+        "bm25": 0.98,
+        "fusion": 1.88,
+        "rerank": 827.37,
+        "total": 844.19
       }
     },
     {
@@ -1674,13 +1686,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 6.41,
-        "bm25": 0.12,
-        "fusion": 0.54,
-        "rerank": 865.57,
-        "total": 872.67
+        "dense": 13.87,
+        "bm25": 0.5,
+        "fusion": 1.57,
+        "rerank": 549.05,
+        "total": 565.11
       }
     },
     {
@@ -1691,22 +1703,22 @@
         "privacy-policy-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
-      "total_relevant": 1,
-      "context_precision": 0.2,
-      "context_recall": 1.0,
-      "recall_at_pool": 1.0,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 5.96,
-        "bm25": 0.13,
-        "fusion": 0.45,
-        "rerank": 915.18,
-        "total": 921.76
+        "dense": 13.41,
+        "bm25": 0.5,
+        "fusion": 1.27,
+        "rerank": 177.55,
+        "total": 192.81
       }
     },
     {
@@ -1726,13 +1738,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.55,
-        "bm25": 0.28,
-        "fusion": 1.94,
-        "rerank": 930.44,
-        "total": 944.3
+        "dense": 10.7,
+        "bm25": 0.4,
+        "fusion": 1.22,
+        "rerank": 335.3,
+        "total": 347.67
       }
     },
     {
@@ -1752,13 +1764,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 8.13,
-        "bm25": 0.25,
-        "fusion": 0.51,
-        "rerank": 1010.32,
-        "total": 1019.62
+        "dense": 12.76,
+        "bm25": 0.52,
+        "fusion": 1.88,
+        "rerank": 347.13,
+        "total": 362.36
       }
     },
     {
@@ -1778,13 +1790,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 118.72,
-        "bm25": 0.93,
-        "fusion": 7.6,
-        "rerank": 992.05,
-        "total": 1119.47
+        "dense": 15.61,
+        "bm25": 0.91,
+        "fusion": 1.83,
+        "rerank": 863.23,
+        "total": 881.66
       }
     },
     {
@@ -1805,13 +1817,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 22.34,
-        "bm25": 0.91,
-        "fusion": 2.65,
-        "rerank": 1282.9,
-        "total": 1308.96
+        "dense": 14.54,
+        "bm25": 0.61,
+        "fusion": 1.69,
+        "rerank": 491.74,
+        "total": 508.66
       }
     },
     {
@@ -1822,22 +1834,22 @@
         "vendor-contract-v2.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
-      "total_relevant": 1,
-      "context_precision": 0.2,
-      "context_recall": 1.0,
-      "recall_at_pool": 1.0,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 75.41,
-        "bm25": 3.4,
-        "fusion": 2.28,
-        "rerank": 1492.73,
-        "total": 1573.9
+        "dense": 14.04,
+        "bm25": 0.6,
+        "fusion": 1.65,
+        "rerank": 342.17,
+        "total": 358.55
       }
     },
     {
@@ -1848,22 +1860,22 @@
         "platform-report-part1.md"
       ],
       "retrieved_count": 5,
-      "relevant_retrieved": 1,
+      "relevant_retrieved": 0,
       "total_relevant": 1,
-      "context_precision": 0.2,
-      "context_recall": 1.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
       "recall_at_pool": 1.0,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 40.7,
-        "bm25": 0.43,
-        "fusion": 3.56,
-        "rerank": 1576.97,
-        "total": 1621.77
+        "dense": 14.9,
+        "bm25": 0.67,
+        "fusion": 1.79,
+        "rerank": 559.17,
+        "total": 576.62
       }
     },
     {
@@ -1884,13 +1896,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 47.45,
-        "bm25": 0.34,
-        "fusion": 0.92,
-        "rerank": 1354.49,
-        "total": 1403.29
+        "dense": 15.03,
+        "bm25": 0.84,
+        "fusion": 1.93,
+        "rerank": 823.09,
+        "total": 840.95
       }
     },
     {
@@ -1911,13 +1923,13 @@
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 20.12,
-        "bm25": 0.3,
-        "fusion": 1.35,
-        "rerank": 1580.27,
-        "total": 1602.12
+        "dense": 25.54,
+        "bm25": 0.7,
+        "fusion": 1.08,
+        "rerank": 827.91,
+        "total": 855.29
       }
     },
     {
@@ -1930,21 +1942,21 @@
       ],
       "retrieved_count": 5,
       "relevant_retrieved": 2,
-      "total_relevant": 5,
+      "total_relevant": 6,
       "context_precision": 0.4,
-      "context_recall": 0.4,
-      "recall_at_pool": 0.6,
+      "context_recall": 0.3333,
+      "recall_at_pool": 0.3333,
       "answer": null,
       "faithfulness": null,
       "answer_relevance": null,
       "generation_ms": null,
-      "llm_error": null,
+      "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 76.25,
-        "bm25": 0.45,
-        "fusion": 1.69,
-        "rerank": 1614.41,
-        "total": 1692.91
+        "dense": 30.24,
+        "bm25": 0.86,
+        "fusion": 1.24,
+        "rerank": 611.28,
+        "total": 643.72
       }
     }
   ]

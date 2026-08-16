@@ -1,130 +1,656 @@
 [
   {
-    "id": "q1",
-    "question": "How much does the Atlas analytics platform cost?",
-    "evidence": ["$49 per user"],
-    "expected_answer": "Atlas costs $49 per user per month.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q001",
+    "query_type": "single_hop",
+    "question": "How much does Atlas Standard cost per user per month?",
+    "evidence": ["Atlas,Standard,49"],
+    "expected_answer": "Atlas Standard costs $49 per user per month.",
+    "expected_source": ["product-pricing.csv"],
     "expected_page": 1
   },
   {
-    "id": "q2",
-    "question": "Which Aurora Labs product integrates with Slack?",
-    "evidence": ["Integrates with Slack", "integrates directly with Slack"],
-    "expected_answer": "Beacon integrates with Slack and Microsoft Teams.",
-    "expected_source": "products.csv",
+    "id": "q002",
+    "query_type": "single_hop",
+    "question": "What monthly uptime guarantee does Beacon offer under the SLA?",
+    "evidence": ["99.95%"],
+    "expected_answer": "Beacon alerting offers a 99.95% monthly uptime guarantee.",
+    "expected_source": ["sla-agreement.md"],
     "expected_page": 1
   },
   {
-    "id": "q3",
-    "question": "What uptime SLA does Nimbus offer?",
-    "evidence": ["99.9% uptime"],
-    "expected_answer": "Nimbus offers a 99.9% uptime service-level agreement.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q003",
+    "query_type": "single_hop",
+    "question": "What is the p95 warm query latency of the Calcite query engine?",
+    "evidence": ["1.8 seconds"],
+    "expected_answer": "Calcite warm query p95 latency is 1.8 seconds.",
+    "expected_source": ["platform-report-part2.md"],
     "expected_page": 1
   },
   {
-    "id": "q4",
-    "question": "Where is Aurora Labs headquartered?",
-    "evidence": ["Portland, Oregon"],
-    "expected_answer": "Aurora Labs is headquartered in Portland, Oregon.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q004",
+    "query_type": "single_hop",
+    "question": "What percentage does Aurora Labs match on employee 401(k) contributions?",
+    "evidence": ["4% match"],
+    "expected_answer": "Aurora Labs offers a 4% match on 401(k) contributions.",
+    "expected_source": ["benefits-faq.md"],
     "expected_page": 1
   },
   {
-    "id": "q5",
-    "question": "What security certifications does Aurora Labs hold?",
-    "evidence": ["SOC 2 Type II", "AES-256"],
-    "expected_answer": "Aurora Labs holds a SOC 2 Type II certification and encrypts data at rest with AES-256.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q005",
+    "query_type": "single_hop",
+    "question": "How quickly must an on-call engineer acknowledge a SEV1 page?",
+    "evidence": ["acknowledged within 5 minutes"],
+    "expected_answer": "SEV1 pages must be acknowledged within 5 minutes.",
+    "expected_source": ["oncall-handbook.md", "incident-runbook.txt"],
     "expected_page": 1
   },
   {
-    "id": "q6",
-    "question": "How many employees work at Aurora Labs?",
-    "evidence": ["employs 400 people"],
-    "expected_answer": "Aurora Labs employs 400 people.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q006",
+    "query_type": "single_hop",
+    "question": "What is the SKU of the Atlas analytics platform?",
+    "evidence": ["ATL-100"],
+    "expected_answer": "The Atlas analytics platform has SKU ATL-100.",
+    "expected_source": ["atlas-product-sheet.pdf"],
     "expected_page": 1
   },
   {
-    "id": "q7",
-    "question": "When was Aurora Labs founded?",
-    "evidence": ["founded in 2019"],
-    "expected_answer": "Aurora Labs was founded in 2019.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q007",
+    "query_type": "single_hop",
+    "question": "What is the annual fee Acme Corp pays under the current Master Services Agreement?",
+    "evidence": ["$60,000"],
+    "expected_answer": "The annual fee is $60,000 under the v2 agreement.",
+    "expected_source": ["vendor-contract-v2.md"],
     "expected_page": 1
   },
   {
-    "id": "q8",
-    "question": "Which investors led Aurora Labs' funding rounds?",
-    "evidence": ["Northgate Partners", "Meridian Capital"],
-    "expected_answer": "Northgate Partners led the Series A and Meridian Capital led the Series B.",
-    "expected_source": "aurora-labs.txt",
+    "id": "q008",
+    "query_type": "single_hop",
+    "question": "Which Aurora Labs product is the alerting and monitoring service?",
+    "evidence": ["Beacon is Aurora Labs' alerting service"],
+    "expected_answer": "Beacon is the alerting and monitoring service.",
+    "expected_source": ["feature-comparison.md"],
     "expected_page": 1
   },
   {
-    "id": "q9",
-    "question": "What does the Atlas Pro plan add?",
-    "evidence": ["Adds SSO and audit logs"],
-    "expected_answer": "Atlas Pro adds SSO and audit logs.",
-    "expected_source": "products.csv",
+    "id": "q009",
+    "query_type": "single_hop",
+    "question": "What is the base URL of the Aurora Labs REST API?",
+    "evidence": ["api.auroralabs.example/v1"],
+    "expected_answer": "The base URL is https://api.auroralabs.example/v1.",
+    "expected_source": ["api-reference.md"],
     "expected_page": 1
   },
   {
-    "id": "q10",
-    "question": "How long is workspace content retained after account deletion?",
-    "evidence": ["30 days after account deletion"],
-    "expected_answer": "Workspace content is retained for 30 days after account deletion.",
-    "expected_source": "data-privacy.md",
+    "id": "q010",
+    "query_type": "single_hop",
+    "question": "How long is the probation period for new hires at Aurora Labs?",
+    "evidence": ["90-day probation period"],
+    "expected_answer": "New hires serve a 90-day probation period.",
+    "expected_source": ["employee-handbook-v1.md", "employee-handbook-v2.md"],
     "expected_page": 1
   },
   {
-    "id": "q11",
-    "question": "How quickly must Aurora Labs notify customers of a data breach?",
-    "evidence": ["72 hours"],
-    "expected_answer": "Aurora Labs notifies affected customers within 72 hours of a data breach.",
-    "expected_source": "data-privacy.md",
+    "id": "q011",
+    "query_type": "single_hop",
+    "question": "How many named users does Acme Corp get under the current MSA?",
+    "evidence": ["up to 100 named users"],
+    "expected_answer": "The v2 agreement grants access to up to 100 named users.",
+    "expected_source": ["vendor-contract-v2.md"],
     "expected_page": 1
   },
   {
-    "id": "q12",
-    "question": "Which companies are Aurora Labs subprocessors?",
-    "evidence": ["Amazon Web Services", "Stripe"],
-    "expected_answer": "Subprocessors include Amazon Web Services, Stripe, and Intercom.",
-    "expected_source": "data-privacy.md",
+    "id": "q012",
+    "query_type": "single_hop",
+    "question": "What is the codename of the stream processor behind Nimbus?",
+    "evidence": ["Kestrel"],
+    "expected_answer": "The stream processor behind Nimbus is codenamed Kestrel.",
+    "expected_source": ["platform-report-part1.md"],
     "expected_page": 1
   },
   {
-    "id": "q13",
-    "question": "What is the API rate limit on standard plans?",
+    "id": "q013",
+    "query_type": "single_hop",
+    "question": "How many chart types does the Atlas dashboard builder support?",
+    "evidence": ["40+ chart types"],
+    "expected_answer": "The dashboard builder supports 40+ chart types.",
+    "expected_source": ["feature-comparison.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q014",
+    "query_type": "single_hop",
+    "question": "What is the Nimbus Enterprise monthly uptime guarantee?",
+    "evidence": ["99.99%"],
+    "expected_answer": "Nimbus Enterprise receives an enhanced 99.99% monthly uptime guarantee.",
+    "expected_source": ["sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q015",
+    "query_type": "single_hop",
+    "question": "What is the API rate limit for the free tier?",
     "evidence": ["100 requests per minute"],
-    "expected_answer": "The REST API allows 100 requests per minute on standard plans.",
-    "expected_source": "faq.md",
+    "expected_answer": "The free tier allows 100 requests per minute.",
+    "expected_source": ["api-reference.md"],
     "expected_page": 1
   },
   {
-    "id": "q14",
-    "question": "What response time do enterprise support customers receive?",
-    "evidence": ["one-hour response"],
-    "expected_answer": "Enterprise customers receive 24/7 support with a one-hour response time.",
-    "expected_source": "faq.md",
+    "id": "q016",
+    "query_type": "single_hop",
+    "question": "How long after an incident must the post-incident review be completed?",
+    "evidence": ["Within 5 business days"],
+    "expected_answer": "The post-incident review must be completed within 5 business days.",
+    "expected_source": ["incident-runbook.txt"],
     "expected_page": 1
   },
   {
-    "id": "q15",
-    "question": "How long does the free trial last?",
-    "evidence": ["14-day trial", "14-day free trial"],
-    "expected_answer": "The free trial lasts 14 days.",
-    "expected_source": "faq.md",
+    "id": "q017",
+    "query_type": "single_hop",
+    "question": "What is the wellness stipend amount per month?",
+    "evidence": ["$50 per month wellness stipend"],
+    "expected_answer": "Employees get a $50 per month wellness stipend.",
+    "expected_source": ["benefits-faq.md"],
     "expected_page": 1
   },
   {
-    "id": "q16",
-    "question": "Does Aurora Labs encrypt customer data at rest?",
-    "evidence": ["encrypted at rest with AES-256"],
-    "expected_answer": "Yes — customer data is encrypted at rest with AES-256.",
-    "expected_source": "faq.md",
+    "id": "q018",
+    "query_type": "single_hop",
+    "question": "Which codename is used for the Aurora Labs catalog service?",
+    "evidence": ["Marina"],
+    "expected_answer": "The catalog service is codenamed Marina.",
+    "expected_source": ["platform-report-part1.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q019",
+    "query_type": "single_hop",
+    "question": "How often must API keys be rotated according to the security policy?",
+    "evidence": ["rotated every 180 days"],
+    "expected_answer": "API keys are rotated every 180 days.",
+    "expected_source": ["security-policy.docx"],
+    "expected_page": 1
+  },
+  {
+    "id": "q020",
+    "query_type": "single_hop",
+    "question": "What is the p95 write latency of the Marina catalog service?",
+    "evidence": ["14 milliseconds"],
+    "expected_answer": "Marina write p95 latency is 14 milliseconds.",
+    "expected_source": ["platform-report-part2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q021",
+    "query_type": "single_hop",
+    "question": "What is the learning budget per employee per year?",
+    "evidence": ["learning budget of $1,000"],
+    "expected_answer": "Each employee receives an annual learning budget of $1,000.",
+    "expected_source": ["benefits-faq.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q022",
+    "query_type": "single_hop",
+    "question": "Who is Aurora Labs' EU representative under GDPR?",
+    "evidence": ["Aurora Labs Ireland Ltd"],
+    "expected_answer": "Aurora Labs Ireland Ltd is the EU representative.",
+    "expected_source": ["gdpr-faq.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q023",
+    "query_type": "single_hop",
+    "question": "What is the p95 end-to-end processing latency of Kestrel?",
+    "evidence": ["210 milliseconds"],
+    "expected_answer": "Kestrel end-to-end processing p95 latency is 210 milliseconds.",
+    "expected_source": ["platform-report-part2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q024",
+    "query_type": "single_hop",
+    "question": "What is the initial term of the current Acme Master Services Agreement?",
+    "evidence": ["Initial term: 24 months"],
+    "expected_answer": "The initial term of the v2 agreement is 24 months.",
+    "expected_source": ["vendor-contract-v2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q025",
+    "query_type": "multi_hop",
+    "question": "Which product does the Calcite query engine power, and what is its warm p95 latency?",
+    "evidence": ["Calcite is the SQL engine that powers Atlas", "1.8 seconds"],
+    "expected_answer": "Calcite powers Atlas, with 1.8 second warm p95 latency.",
+    "expected_source": ["platform-report-part1.md", "platform-report-part2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q026",
+    "query_type": "multi_hop",
+    "question": "What happens when Nimbus pipeline lag exceeds 30 minutes, and what does the SLA commit for pipeline lag?",
+    "evidence": ["Nimbus pipeline backpressure", "pipeline lag must remain below 30 minutes"],
+    "expected_answer": "The runbook says to check Kafka consumer group lag and scale workers; the SLA commits lag below 30 minutes.",
+    "expected_source": ["incident-runbook.txt", "sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q027",
+    "query_type": "multi_hop",
+    "question": "What uptime guarantee does the product behind Beacon offer, and what pricing tier is available?",
+    "evidence": ["99.95%", "Beacon,Starter,19"],
+    "expected_answer": "Beacon offers 99.95% uptime; Starter is $19 per user per month.",
+    "expected_source": ["sla-agreement.md", "product-pricing.csv"],
+    "expected_page": 1
+  },
+  {
+    "id": "q028",
+    "query_type": "multi_hop",
+    "question": "What is the retention period in the version of the privacy policy that supersedes Version 1?",
+    "evidence": ["this version supersedes Version 1", "Retention period: 24 months"],
+    "expected_answer": "Version 2 supersedes Version 1 and sets retention at 24 months.",
+    "expected_source": ["privacy-policy-v2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q029",
+    "query_type": "multi_hop",
+    "question": "Which service does the incident runbook say powers the data pipeline, and what is its throughput ceiling per the benchmark report?",
+    "evidence": ["Kestrel is the stream processor behind Nimbus", "250,000 events per second"],
+    "expected_answer": "Nimbus is powered by Kestrel, whose throughput ceiling is 250,000 events per second per cluster.",
+    "expected_source": ["platform-report-part1.md", "platform-report-part2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q030",
+    "query_type": "multi_hop",
+    "question": "What does the current employee handbook say about parental leave, and what additional weeks does the benefits FAQ mention?",
+    "evidence": ["16 weeks of fully paid parental leave", "4 additional weeks"],
+    "expected_answer": "The handbook grants 16 weeks of paid parental leave, plus 4 additional weeks for the birthing parent.",
+    "expected_source": ["employee-handbook-v2.md", "benefits-faq.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q031",
+    "query_type": "multi_hop",
+    "question": "Which data sources can Atlas connect to, and what does the Atlas Enterprise edition cost?",
+    "evidence": ["Snowflake, BigQuery, Postgres, Redshift", "Atlas,Enterprise,99"],
+    "expected_answer": "Atlas connects to Snowflake, BigQuery, Postgres, and Redshift; Enterprise is $99 per user per month.",
+    "expected_source": ["feature-comparison.md", "product-pricing.csv"],
+    "expected_page": 1
+  },
+  {
+    "id": "q032",
+    "query_type": "multi_hop",
+    "question": "What is the SEV2 response time in the runbook, and what is the SLA credit percentage for Beacon?",
+    "evidence": ["SEV2", "10% of monthly fee"],
+    "expected_answer": "SEV2 requires response within 15 minutes; Beacon credits 10% of the monthly fee per 0.05% below the guarantee.",
+    "expected_source": ["incident-runbook.txt", "sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q033",
+    "query_type": "multi_hop",
+    "question": "How much does the Nimbus Enterprise tier cost, and what uptime guarantee does it receive?",
+    "evidence": ["Nimbus,Enterprise,999", "99.99%"],
+    "expected_answer": "Nimbus Enterprise costs $999 per month and receives a 99.99% uptime guarantee.",
+    "expected_source": ["product-pricing.csv", "sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q034",
+    "query_type": "multi_hop",
+    "question": "What is the maximum catalog size tested for Marina, and which codename is the query engine?",
+    "evidence": ["5 million objects", "Calcite"],
+    "expected_answer": "Marina was tested to 5 million objects; the query engine is Calcite.",
+    "expected_source": ["platform-report-part2.md", "platform-report-part1.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q035",
+    "query_type": "multi_hop",
+    "question": "What encryption does the privacy policy promise at rest, and what does the security policy require for restricted data?",
+    "evidence": ["AES-256 encryption at rest", "encrypted at rest with AES-256"],
+    "expected_answer": "Both policies require AES-256 encryption at rest.",
+    "expected_source": ["privacy-policy-v1.md", "security-policy.docx"],
+    "expected_page": 1
+  },
+  {
+    "id": "q036",
+    "query_type": "multi_hop",
+    "question": "Which product integrates with Slack, and how much does its Standard tier cost?",
+    "evidence": ["Beacon", "Beacon,Standard,39"],
+    "expected_answer": "Beacon integrates with Slack; its Standard tier is $39 per user per month.",
+    "expected_source": ["feature-comparison.md", "product-pricing.csv"],
+    "expected_page": 1
+  },
+  {
+    "id": "q037",
+    "query_type": "multi_hop",
+    "question": "What is the equity vesting schedule in the employee handbook, and what is the 401(k) match percentage?",
+    "evidence": ["4-year vesting", "4% match"],
+    "expected_answer": "Options vest over 4 years; the 401(k) match is 4%.",
+    "expected_source": ["employee-handbook-v1.md", "benefits-faq.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q038",
+    "query_type": "multi_hop",
+    "question": "How long does the runbook say an incident can run before escalating to the VP of Engineering, and what is the SLA's Nimbus lag commitment?",
+    "evidence": ["lasts more than 4 hours", "below 30 minutes"],
+    "expected_answer": "Incidents lasting more than 4 hours escalate to the VP of Engineering; Nimbus lag must stay below 30 minutes.",
+    "expected_source": ["incident-runbook.txt", "sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q039",
+    "query_type": "multi_hop",
+    "question": "Which two data sources can Atlas and Nimbus both write to according to the feature comparison?",
+    "evidence": ["Snowflake", "BigQuery"],
+    "expected_answer": "Both connect to Snowflake and BigQuery.",
+    "expected_source": ["feature-comparison.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q040",
+    "query_type": "multi_hop",
+    "question": "What is the backpressure onset lag measured for Kestrel, and which Kafka-based product does it power?",
+    "evidence": ["32 minutes of consumer group lag", "Nimbus"],
+    "expected_answer": "Kestrel backpressure onset is 32 minutes of consumer group lag; it powers Nimbus.",
+    "expected_source": ["platform-report-part2.md", "platform-report-part1.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q041",
+    "query_type": "ambiguous",
+    "question": "What is the current data retention period in the Aurora Labs privacy policy?",
+    "evidence": ["Retention period: 24 months"],
+    "expected_answer": "The current retention period is 24 months (Version 2).",
+    "expected_source": ["privacy-policy-v2.md"],
+    "expected_page": 1,
+    "distractor_chunks": [{"filename": "privacy-policy-v1.md", "content_anchor": "Retention period: 36 months"}]
+  },
+  {
+    "id": "q042",
+    "query_type": "ambiguous",
+    "question": "How many PTO days do employees get per year?",
+    "evidence": ["PTO: 20 days per year (updated 2025-01)"],
+    "expected_answer": "Employees get 20 PTO days per year under the current handbook.",
+    "expected_source": ["employee-handbook-v2.md"],
+    "expected_page": 1,
+    "distractor_chunks": [{"filename": "employee-handbook-v1.md", "content_anchor": "PTO: 15 days per year"}]
+  },
+  {
+    "id": "q043",
+    "query_type": "ambiguous",
+    "question": "What is the renewal term in the Acme Master Services Agreement?",
+    "evidence": ["Initial term: 24 months (amended 2025)"],
+    "expected_answer": "The current agreement renews on successive 24-month terms.",
+    "expected_source": ["vendor-contract-v2.md"],
+    "expected_page": 1,
+    "distractor_chunks": [{"filename": "vendor-contract.md", "content_anchor": "successive 12-month terms"}]
+  },
+  {
+    "id": "q044",
+    "query_type": "ambiguous",
+    "question": "What does Atlas cost?",
+    "evidence": ["Atlas,Enterprise,99"],
+    "expected_answer": "Atlas Enterprise costs $99 per user per month (pricing varies by tier).",
+    "expected_source": ["product-pricing.csv"],
+    "expected_page": 1
+  },
+  {
+    "id": "q045",
+    "query_type": "ambiguous",
+    "question": "What is the uptime guarantee for the Nimbus pipeline?",
+    "evidence": ["Nimbus pipeline | 99.9%"],
+    "expected_answer": "The standard Nimbus pipeline guarantee is 99.9%.",
+    "expected_source": ["sla-agreement.md"],
+    "expected_page": 1,
+    "distractor_chunks": [{"filename": "sla-agreement.md", "content_anchor": "Nimbus Enterprise tier"}]
+  },
+  {
+    "id": "q046",
+    "query_type": "ambiguous",
+    "question": "What encryption does Aurora Labs use for data at rest?",
+    "evidence": ["AES-256 encryption at rest"],
+    "expected_answer": "AES-256 encryption at rest.",
+    "expected_source": ["privacy-policy-v1.md", "privacy-policy-v2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q047",
+    "query_type": "ambiguous",
+    "question": "What happens to customer content after the subscription term ends?",
+    "evidence": ["permanently deleted from our systems"],
+    "expected_answer": "Customer content is permanently deleted after the retention period.",
+    "expected_source": ["privacy-policy-v2.md"],
+    "expected_page": 1,
+    "distractor_chunks": [{"filename": "privacy-policy-v1.md", "content_anchor": "thirty-six months"}]
+  },
+  {
+    "id": "q048",
+    "query_type": "ambiguous",
+    "question": "What is the p95 query latency target for Atlas?",
+    "evidence": ["Atlas p95 query latency must remain below 2 seconds"],
+    "expected_answer": "Atlas p95 query latency must remain below 2 seconds.",
+    "expected_source": ["sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q049",
+    "query_type": "ambiguous",
+    "question": "Which document describes how to respond to a SEV1 incident?",
+    "evidence": ["SEV1: total service outage"],
+    "expected_answer": "The incident runbook defines SEV1 response.",
+    "expected_source": ["incident-runbook.txt"],
+    "expected_page": 1
+  },
+  {
+    "id": "q050",
+    "query_type": "ambiguous",
+    "question": "What happens when an incident lasts more than 4 hours?",
+    "evidence": ["escalate to the VP of Engineering"],
+    "expected_answer": "Escalate to the VP of Engineering and open a customer communication thread.",
+    "expected_source": ["incident-runbook.txt"],
+    "expected_page": 1
+  },
+  {
+    "id": "q051",
+    "query_type": "ambiguous",
+    "question": "What is the Nimbus pipeline lag commitment?",
+    "evidence": ["Nimbus pipeline lag must remain below 30 minutes"],
+    "expected_answer": "Nimbus pipeline lag must remain below 30 minutes.",
+    "expected_source": ["sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q052",
+    "query_type": "ambiguous",
+    "question": "How many PTO days carry over into the next year?",
+    "evidence": ["PTO carries over up to 10 days"],
+    "expected_answer": "Up to 10 days carry over under the current handbook.",
+    "expected_source": ["employee-handbook-v2.md"],
+    "expected_page": 1,
+    "distractor_chunks": [{"filename": "employee-handbook-v1.md", "content_anchor": "carries over up to 5 days"}]
+  },
+  {
+    "id": "q053",
+    "query_type": "unanswerable",
+    "question": "What is Aurora Labs' revenue for fiscal year 2024?",
+    "evidence": [],
+    "expected_answer": "Not in the corpus — the system must decline to answer.",
+    "expected_source": [],
+    "expected_page": 0
+  },
+  {
+    "id": "q054",
+    "query_type": "unanswerable",
+    "question": "What is the email address of Aurora Labs' CEO?",
+    "evidence": [],
+    "expected_answer": "Not in the corpus — the system must decline to answer.",
+    "expected_source": [],
+    "expected_page": 0
+  },
+  {
+    "id": "q055",
+    "query_type": "unanswerable",
+    "question": "What is the interest rate on Aurora Labs' line of credit?",
+    "evidence": [],
+    "expected_answer": "Not in the corpus — the system must decline to answer.",
+    "expected_source": [],
+    "expected_page": 0
+  },
+  {
+    "id": "q056",
+    "query_type": "unanswerable",
+    "question": "How many employees does Aurora Labs have in Tokyo?",
+    "evidence": [],
+    "expected_answer": "Not in the corpus — the system must decline to answer.",
+    "expected_source": [],
+    "expected_page": 0
+  },
+  {
+    "id": "q057",
+    "query_type": "unanswerable",
+    "question": "What is the version number of the Aurora mobile app?",
+    "evidence": [],
+    "expected_answer": "Not in the corpus — the system must decline to answer.",
+    "expected_source": [],
+    "expected_page": 0
+  },
+  {
+    "id": "q058",
+    "query_type": "single_hop",
+    "question": "What is the maximum number of concurrent queries Calcite sustained in the benchmark?",
+    "evidence": ["120 concurrent queries"],
+    "expected_answer": "Calcite sustained 120 concurrent queries.",
+    "expected_source": ["platform-report-part2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q059",
+    "query_type": "single_hop",
+    "question": "What is the Nimbus Free tier price?",
+    "evidence": ["Nimbus,Free,0"],
+    "expected_answer": "Nimbus Free is $0 per pipeline.",
+    "expected_source": ["product-pricing.csv"],
+    "expected_page": 1
+  },
+  {
+    "id": "q060",
+    "query_type": "single_hop",
+    "question": "How long does Aurora Labs respond to a verified data subject access request?",
+    "evidence": ["within 30 days"],
+    "expected_answer": "Aurora Labs responds to verified requests within 30 days.",
+    "expected_source": ["privacy-policy-v1.md", "privacy-policy-v2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q061",
+    "query_type": "single_hop",
+    "question": "What is the p95 write latency of Marina?",
+    "evidence": ["Write p95 latency: 14 milliseconds"],
+    "expected_answer": "Marina write p95 latency is 14 milliseconds.",
+    "expected_source": ["platform-report-part2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q062",
+    "query_type": "single_hop",
+    "question": "What is the monthly uptime guarantee for Atlas analytics?",
+    "evidence": ["Atlas analytics | 99.9%"],
+    "expected_answer": "Atlas analytics has a 99.9% monthly uptime guarantee.",
+    "expected_source": ["sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q063",
+    "query_type": "single_hop",
+    "question": "How long are Aurora Labs usage telemetry records retained under the current policy?",
+    "evidence": ["Usage telemetry is retained for 12 months"],
+    "expected_answer": "Usage telemetry is retained for 12 months under Version 2.",
+    "expected_source": ["privacy-policy-v2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q064",
+    "query_type": "single_hop",
+    "question": "What is the health insurance premium coverage for employee dependents?",
+    "evidence": ["80% of dependent premiums"],
+    "expected_answer": "Aurora Labs pays 80% of dependent premiums.",
+    "expected_source": ["benefits-faq.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q065",
+    "query_type": "single_hop",
+    "question": "Which error code does the API return for rate limit exceeded?",
+    "evidence": ["429"],
+    "expected_answer": "The API returns 429 for rate limit exceeded.",
+    "expected_source": ["api-reference.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q066",
+    "query_type": "single_hop",
+    "question": "What is the standard Nimbus monthly price for the Standard tier?",
+    "evidence": ["Nimbus,Standard,499"],
+    "expected_answer": "Nimbus Standard costs $499 per month.",
+    "expected_source": ["product-pricing.csv"],
+    "expected_page": 1
+  },
+  {
+    "id": "q067",
+    "query_type": "single_hop",
+    "question": "How many weeks of paid parental leave do new parents receive?",
+    "evidence": ["16 weeks of fully paid parental leave"],
+    "expected_answer": "New parents receive 16 weeks of fully paid parental leave.",
+    "expected_source": ["employee-handbook-v2.md", "benefits-faq.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q068",
+    "query_type": "single_hop",
+    "question": "What is the liability cap in the current Acme MSA?",
+    "evidence": ["fees paid during the 24 months preceding the claim"],
+    "expected_answer": "Liability is capped at fees paid during the 24 months preceding the claim.",
+    "expected_source": ["vendor-contract-v2.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q069",
+    "query_type": "single_hop",
+    "question": "How many production regions does the Aurora Labs platform run in?",
+    "evidence": ["three regions"],
+    "expected_answer": "The platform runs in three regions.",
+    "expected_source": ["platform-report-part1.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q070",
+    "query_type": "multi_hop",
+    "question": "What is the Beacon delivery delay limit in the runbook, and what uptime guarantee does Beacon carry in the SLA?",
+    "evidence": ["delayed more than 10 minutes", "99.95%"],
+    "expected_answer": "Beacon delivery delay beyond 10 minutes triggers investigation; Beacon guarantees 99.95% uptime.",
+    "expected_source": ["incident-runbook.txt", "sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q071",
+    "query_type": "multi_hop",
+    "question": "What does the runbook say to check when Atlas query timeouts occur, and what is the SLA latency target for Atlas?",
+    "evidence": ["Atlas query timeouts", "below 2 seconds"],
+    "expected_answer": "Check the Atlas query engine connection pool; the SLA target is p95 below 2 seconds.",
+    "expected_source": ["incident-runbook.txt", "sla-agreement.md"],
+    "expected_page": 1
+  },
+  {
+    "id": "q072",
+    "query_type": "multi_hop",
+    "question": "Which regions host customer data per the GDPR FAQ, and what is the retention period for usage telemetry in the current privacy policy?",
+    "evidence": ["eu-central-1", "12 months"],
+    "expected_answer": "Data is stored in us-east-1, eu-central-1, or ap-southeast-2; telemetry is retained 12 months.",
+    "expected_source": ["gdpr-faq.md", "privacy-policy-v2.md"],
     "expected_page": 1
   }
 ]

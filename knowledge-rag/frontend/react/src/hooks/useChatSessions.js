@@ -1,22 +1,44 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { chatRequest } from '../services/api'
+import { chatRequest, generateTitle } from '../services/api'
 
 const STORAGE_KEY = 'knowledge-rag:sessions'
+const DEFAULT_TITLE = 'New chat'
 const GREETINGS = new Set(['hi', 'hello', 'hey', 'hi there', 'hello there', 'hey there', 'yo', 'sup'])
+
+// A chat that never received a first message or upload is an empty draft and
+// should not occupy a permanent slot in the sidebar history.
+function isDraft(s) {
+  return !s.messages?.length && !s.files?.length && (!s.title || s.title === DEFAULT_TITLE)
+}
+
+function cleanSessions(list) {
+  return list.filter((s) => !isDraft(s))
+}
 
 function loadSessions() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    return cleanSessions(raw ? JSON.parse(raw) : [])
   } catch {
     return []
   }
 }
 
+function titleFromFile(file) {
+  const base = (file.displayName || file.name || '').replace(/\.[^.]+$/, '').trim()
+  return base ? base.slice(0, 48) : DEFAULT_TITLE
+}
+
+function titleFromQuery(query) {
+  const t = query.replace(/\s+/g, ' ').trim().replace(/^[^a-zA-Z0-9]+|[?!.]+$/g, '')
+  const title = t.split(' ').slice(0, 8).join(' ')
+  return (title || 'Untitled chat').slice(0, 48)
+}
+
 function createSession() {
   return {
     id: crypto.randomUUID(),
-    title: 'New chat',
+    title: DEFAULT_TITLE,
     files: [],
     messages: [],
     createdAt: Date.now(),
@@ -28,6 +50,11 @@ export default function useChatSessions() {
   const [sessions, setSessions] = useState(loadSessions)
   const [activeId, setActiveId] = useState(null)
   const abortRef = useRef(null)
+  const sessionsRef = useRef(sessions)
+
+  useEffect(() => {
+    sessionsRef.current = sessions
+  }, [sessions])
 
   useEffect(() => {
     try {
@@ -44,7 +71,8 @@ export default function useChatSessions() {
 
   const newSession = () => {
     const s = createSession()
-    setSessions((prev) => [s, ...prev])
+    // Drop any older empty drafts so they don't pile up in the sidebar
+    setSessions((prev) => [s, ...prev.filter((x) => !isDraft(x))])
     setActiveId(s.id)
     return s.id
   }
@@ -58,7 +86,16 @@ export default function useChatSessions() {
     setActiveId((cur) => (cur === id ? null : cur))
   }
 
-  const addFiles = (id, files) => patch(id, (s) => ({ ...s, files: [...s.files, ...files] }))
+  const addFiles = (id, files) =>
+    patch(id, (s) => {
+      const updated = { ...s, files: [...s.files, ...files] }
+      // Name the chat after the first uploaded document (title or filename)
+      // until the first real exchange generates a proper summary.
+      if ((!s.title || s.title === DEFAULT_TITLE) && !s.messages?.length && files.length) {
+        updated.title = titleFromFile(files[0])
+      }
+      return updated
+    })
 
   const removeFile = (id, name) => patch(id, (s) => ({ ...s, files: s.files.filter((f) => f.name !== name) }))
 
@@ -83,6 +120,8 @@ export default function useChatSessions() {
       if (!activeId) return
       const q = query.trim()
       if (!q) return
+      const current = sessionsRef.current.find((s) => s.id === activeId)
+      const firstExchange = current && !current.messages?.some((m) => m.role === 'user')
       addMessage(activeId, { role: 'user', content: q })
 
       // Client-side intent interceptor: greetings never hit the RAG pipeline
@@ -115,6 +154,27 @@ export default function useChatSessions() {
           },
           loading: false,
         }))
+        // Auto-title after the first real exchange completes (generated once,
+        // replaceable by the user via rename). Greetings skip this.
+        if (firstExchange) {
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === activeId && (!s.title || s.title === DEFAULT_TITLE)
+                ? { ...s, title: titleFromQuery(q) }
+                : s,
+            ),
+          )
+          generateTitle(q)
+            .then((title) => {
+              if (!title) return
+              setSessions((prev) =>
+                prev.map((s) => (s.id === activeId ? { ...s, title } : s)),
+              )
+            })
+            .catch(() => {
+              /* keep the local heuristic title */
+            })
+        }
       } catch (err) {
         if (err.name === 'AbortError') return // superseded by a newer ask
         updateLastMessage(activeId, (m) => ({

@@ -4,8 +4,11 @@ This document defines the requirements for the evaluation corpus (`eval-docs/`)
 and golden query set (`backend/python/eval/golden_set.json`) used by the eval
 harness (`python -m eval.run_eval`).
 
-> **Status:** spec complete — corpus and queries pending authoring. Numbers in
-> the README Benchmarks table will be populated once both are committed.
+> **Status:** complete. The `eval-docs/` corpus (18 documents, 6 topical
+> clusters, 3 near-duplicate pairs, all 5 formats) and the 72-query golden set
+> (`eval/golden_set.json`, tagged `single_hop` / `multi_hop` / `ambiguous` /
+> `unanswerable`) are committed, and the README Benchmarks table contains
+> measured numbers from real runs.
 
 ---
 
@@ -212,13 +215,19 @@ python -m eval.run_eval --docs ../../eval-docs --query-type multi_hop
 RERANKER_ENABLED=false python -m eval.run_eval --docs ../../eval-docs
 
 # With LLM judge (faithfulness + answer relevance; needed for unanswerable)
-export OPENROUTER_API_KEY=sk-...
+export NVIDIA_API_KEY=nvapi-...   # or OPENROUTER_API_KEY=sk-...
 python -m eval.run_eval --docs ../../eval-docs --chunk-size 500 --overlap 100 --strategy structure_aware
+
+# Named benchmark report (writes bench-<tag>.json/.md)
+python -m eval.run_eval --docs ../../eval-docs --tag fixed-500-100-rerank
 ```
 
-Reports land in `eval/reports/eval_report.json` and `eval/reports/eval_report.md`,
-broken out globally and per `query_type`. The per-config ablation reports land in
-`eval/reports/bench-*.json` and are aggregated in `eval/reports/benchmarks.json`.
+Reports land in `eval/reports/eval_report.json` and `eval/reports/eval_report.md`
+(or `bench-<tag>.json/.md` with `--tag`), broken out globally and per
+`query_type` in the `by_query_type` summary. The committed benchmark runs live
+in `eval/reports/bench-*-evaldocs.*`. The old sample-docs golden set (16
+untagged queries) is preserved at `eval/golden_set_sample.json` for
+reproducing the README's earlier baseline.
 
 ---
 

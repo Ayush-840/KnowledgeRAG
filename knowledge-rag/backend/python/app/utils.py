@@ -1,7 +1,8 @@
 import csv
 import os
 import re
-from typing import List, Optional, Tuple
+from collections import Counter
+from typing import Callable, List, Optional, Tuple
 
 from pypdf import PdfReader
 import pdfplumber
@@ -16,8 +17,110 @@ MAX_CSV_ROWS = int(os.getenv("MAX_CSV_ROWS", "50000"))
 
 # ----- Text extraction -----
 
+# A line that is just a page number ("3", "Page 4", "— 7 —", "· 3 ·", with
+# optional surrounding ornaments/spacing).
+_PAGE_NUMBER_LINE = re.compile(r"^\s*(?:page\s+)?[.·—–-]*\s*\d{1,4}\s*[.·—–-]*\s*$", re.IGNORECASE)
+# Glue pattern: a short numeric prefix fused directly onto the next word with no
+# whitespace at the very start of a page (the "04Build" artifact). Conservative:
+# only 1-3 digits followed by a capital letter — plain numbers in body sentences
+# ("40GB", "2024 revenue") are mid-line or lowercase and are left untouched.
+_GLUE_PREFIX = re.compile(r"^(\d{1,3})(?=[A-Z][a-z])")
+
+
+def _normalize_repeat_key(line: str) -> str:
+    """Collapse a line to a stable key ignoring digits/punctuation, so running
+    footers like 'Aurora Labs — 4' and 'Aurora Labs — 5' count as the same line."""
+    return re.sub(r"[\d\W_]+\s*", " ", line).strip().lower()
+
+
+def detect_repeated_lines(pages: List[Tuple[int, str]]) -> set:
+    """Return raw lines that recur near-identically in the top/bottom of >50% of
+    pages — almost certainly running headers/footers (boilerplate), not content.
+    Comparison uses a digit/punctuation-stripped key so footers containing page
+    numbers still match across pages.
+    """
+    n = len(pages)
+    if n < 3:
+        return set()
+    threshold = max(2, int(n * 0.5))
+    top_keys, bottom_keys = Counter(), Counter()
+    top_examples, bottom_examples = {}, {}
+    for _, text in pages:
+        lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+        if not lines:
+            continue
+        for ln in lines[:2]:
+            key = _normalize_repeat_key(ln)
+            if key:
+                top_keys[key] += 1
+                top_examples.setdefault(key, ln)
+        for ln in lines[-2:]:
+            key = _normalize_repeat_key(ln)
+            if key:
+                bottom_keys[key] += 1
+                bottom_examples.setdefault(key, ln)
+    repeated = set()
+    for counter, examples in ((top_keys, top_examples), (bottom_keys, bottom_examples)):
+        for key, count in counter.items():
+            if count >= threshold and len(key) > 3:
+                repeated.add(examples[key])
+    return repeated
+
+
+def clean_page_text(page_text: str, repeated_lines: set = None) -> str:
+    """Strip PDF layout artifacts from one page of extracted text:
+
+    - standalone page-number lines ("3", "Page 4")
+    - running headers/footers that recur across pages (matched by normalized key
+      so footers with varying page numbers are still caught)
+    - the glue pattern: a short numeric prefix fused onto the first word of the
+      page ("04Build") — the digits are dropped, the word is kept.
+
+    Only the top/bottom lines of the page are eligible for header/footer removal,
+    and glue-stripping is limited to the very first content line, so real numbers
+    inside body text are never touched.
+    """
+    repeated_lines = repeated_lines or set()
+    repeated_keys = {_normalize_repeat_key(ln) for ln in repeated_lines}
+    lines = page_text.split("\n")
+    cleaned = []
+    glue_checked = False  # apply the glue-strip to the first surviving content line
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            cleaned.append(line)
+            continue
+        # Standalone page-number line, anywhere on the page
+        if _PAGE_NUMBER_LINE.match(stripped):
+            continue
+        # Running header/footer: only the top 2 / bottom 2 lines of the page
+        is_edge = i <= 1 or i >= len(lines) - 2
+        if is_edge and _normalize_repeat_key(stripped) in repeated_keys:
+            continue
+        # Glue pattern: strip a short numeric prefix fused onto the first
+        # surviving content line ("04Build" -> "Build"). The header/footer and
+        # page-number checks above run first, so a header line that precedes the
+        # content doesn't consume the glue-strip.
+        if not glue_checked:
+            glue_checked = True
+            m = _GLUE_PREFIX.match(line)
+            if m:
+                line = line[m.end():]
+                stripped = line.strip()
+        cleaned.append(line)
+    return "\n".join(cleaned).strip()
+
+
+def clean_extracted_pages(pages: List[Tuple[int, str]]) -> List[Tuple[int, str]]:
+    """Post-process every page of an extracted PDF: detect repeated
+    headers/footers across pages first, then clean each page."""
+    repeated = detect_repeated_lines(pages)
+    return [(pno, clean_page_text(text, repeated)) for pno, text in pages]
+
+
 def extract_text_from_pdf(file_path: str) -> List[Tuple[int, str]]:
-    """Extract text from each page of a PDF.
+    """Extract text from each page of a PDF, then strip layout artifacts
+    (page numbers, running headers/footers, glued numeric prefixes).
     Returns a list of (page_number, page_text).
     """
     pages = []
@@ -27,14 +130,13 @@ def extract_text_from_pdf(file_path: str) -> List[Tuple[int, str]]:
         for i, page in enumerate(reader.pages):
             text = page.extract_text() or ""
             pages.append((i + 1, text))
-        return pages
     except Exception:
         # Fallback to pdfplumber
         with pdfplumber.open(file_path) as pdf:
             for i, page in enumerate(pdf.pages):
                 text = page.extract_text() or ""
                 pages.append((i + 1, text))
-        return pages
+    return clean_extracted_pages(pages)
 
 
 def extract_text_from_txt(file_path: str) -> List[Tuple[int, str]]:
@@ -132,10 +234,11 @@ def chunk_text(page_text: str, max_words: int = 500, overlap: int = 100) -> List
     words = page_text.split()
     chunks = []
     i = 0
+    step = max(max_words - overlap, 1)  # never let overlap >= max_words stall the loop
     while i < len(words):
         chunk = words[i : i + max_words]
         chunks.append(" ".join(chunk))
-        i += max_words - overlap
+        i += step
     return chunks
 
 
@@ -217,6 +320,59 @@ CHUNKERS = {
     "structure_aware": chunk_text_structure_aware,
 }
 
+# ----- Document titles -----
+
+# Titles that are "empty/generic" and shouldn't be shown instead of a filename.
+_GENERIC_TITLES = {"", "untitled", "untitled document", "document", "pdf", "microsoft word", "microsoft word document", "new document"}
+
+
+def extract_document_title(filename: str, file_path: str, pages: Optional[List[Tuple[int, str]]] = None, blocks: Optional[List[dict]] = None) -> Optional[str]:
+    """Best-effort document title for display purposes:
+
+    - .pdf  — PDF /Title metadata
+    - .docx — core-properties title
+    - .md   — first H1 heading
+    - .txt  — first line, when it's short enough to plausibly be a title
+    - .csv  — none (chunks stay tabular)
+
+    Returns None when no non-generic title exists, so callers fall back to the
+    user's original upload filename.
+    """
+    ext = os.path.splitext(filename)[1].lower()
+    title = None
+    if ext == ".pdf":
+        try:
+            meta = PdfReader(file_path).metadata or {}
+            title = meta.get("/Title")
+        except Exception:  # noqa: BLE001 - title is best-effort
+            title = None
+    elif ext == ".docx":
+        try:
+            from docx import Document
+            title = Document(file_path).core_properties.title
+        except Exception:  # noqa: BLE001
+            title = None
+    elif ext == ".md" and blocks:
+        for b in blocks:
+            heading = (b.get("heading") or "").strip()
+            if heading:
+                title = heading
+                break
+    elif ext == ".txt" and pages:
+        first = (pages[0][1] or "").strip().splitlines()
+        if first:
+            candidate = re.sub(r"^\s*#+\s*", "", first[0]).strip()
+            if 0 < len(candidate) <= 80 and not _PAGE_NUMBER_LINE.match(candidate):
+                title = candidate
+
+    if not title:
+        return None
+    title = title.strip()
+    if title.lower() in _GENERIC_TITLES or len(title) > 120:
+        return None
+    return title
+
+
 # ----- Embedding -----
 
 def embed_chunks(chunks: List[str]):
@@ -242,13 +398,18 @@ def ingest_document(
     chunk_size: int = 500,
     overlap: int = 100,
     strategy: str = "fixed",
-) -> Tuple[int, int]:
+    progress_cb: Optional[Callable[[str], None]] = None,
+) -> Tuple[int, int, Optional[str]]:
     """Process an uploaded document and store its vectors and BM25 index.
-    Returns (page_count, chunk_count).
+    Returns (page_count, chunk_count, title) where title is a best-effort
+    document title (PDF /Title, DOCX core props, MD H1, TXT first line) or
+    None when only the filename should be used for display.
 
     chunk_size/overlap/strategy are per-upload settings; the strategy that
     produced the index is recorded in each chunk's metadata so retrieval
-    results stay explainable.
+    results stay explainable. progress_cb(stage) is called with real pipeline
+    stages ("parsing", "chunking", "embedding", "indexing") so UIs can show
+    honest progress instead of a timed animation.
     """
     if strategy not in CHUNKERS:
         raise ValueError(f"Unknown chunking strategy: {strategy}")
@@ -256,6 +417,10 @@ def ingest_document(
     ext = os.path.splitext(filename)[1].lower()
     if ext not in SUPPORTED_EXTENSIONS:
         raise ValueError(f"Unsupported file type '{ext}'. Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}")
+
+    def report(stage: str):
+        if progress_cb:
+            progress_cb(stage)
 
     embedder_name = get_embedder().name
     all_chunks = []
@@ -276,36 +441,53 @@ def ingest_document(
                 meta.update(extra)
             metadata.append(meta)
 
+    title = None
     page_count = 1
     if ext == ".pdf":
+        report("parsing")
         pages = extract_text_from_pdf(file_path)
+        title = extract_document_title(filename, file_path, pages=pages)
         chunker = CHUNKERS[strategy]
         for page_num, page_text in pages:
             add_chunks(chunker(page_text, chunk_size, overlap), page_num)
         page_count = len(pages)
     elif ext == ".txt":
+        report("parsing")
         pages = extract_text_from_txt(file_path)
+        title = extract_document_title(filename, file_path, pages=pages)
         chunker = CHUNKERS[strategy]
         for page_num, page_text in pages:
             add_chunks(chunker(page_text, chunk_size, overlap), page_num)
     elif ext == ".docx":
+        report("parsing")
         blocks = extract_blocks_from_docx(file_path)
+        title = extract_document_title(filename, file_path, blocks=blocks)
         add_chunks(chunk_blocks(blocks, chunk_size, overlap, structure_aware=(strategy == "structure_aware")), 1)
     elif ext == ".md":
+        report("parsing")
         blocks = extract_blocks_from_markdown(file_path)
+        title = extract_document_title(filename, file_path, blocks=blocks)
         add_chunks(chunk_blocks(blocks, chunk_size, overlap, structure_aware=(strategy == "structure_aware")), 1)
     elif ext == ".csv":
+        report("parsing")
         csv_chunks, data_rows = extract_csv_chunks(file_path, chunk_size)
+        report("chunking")
         for chunk_text, row_start, row_end in csv_chunks:
             add_chunks([chunk_text], 1, {"row_start": row_start, "row_end": row_end})
         page_count = data_rows  # page_count carries the data-row count for CSVs
 
+    report("chunking")
+    report("embedding")
     embeddings = embed_chunks(all_chunks)
 
     # Store in Chroma collection
+    report("indexing")
     session = get_session_vectors(session_id)
     collection = session["collection"]
     ids = [f"{filename}_p{meta['page_number']}_c{i}" for i, meta in enumerate(metadata)]
+    if title:
+        for meta in metadata:
+            meta["title"] = title
     collection.add(
         documents=all_chunks,
         embeddings=embeddings.tolist(),
@@ -321,4 +503,4 @@ def ingest_document(
     session["bm25"] = bm25
     session["bm25_ids"] = all_docs["ids"]
 
-    return page_count, len(all_chunks)
+    return page_count, len(all_chunks), title

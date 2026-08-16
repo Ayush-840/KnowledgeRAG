@@ -1,0 +1,130 @@
+[
+  {
+    "id": "q1",
+    "question": "How much does the Atlas analytics platform cost?",
+    "evidence": ["$49 per user"],
+    "expected_answer": "Atlas costs $49 per user per month.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q2",
+    "question": "Which Aurora Labs product integrates with Slack?",
+    "evidence": ["Integrates with Slack", "integrates directly with Slack"],
+    "expected_answer": "Beacon integrates with Slack and Microsoft Teams.",
+    "expected_source": "products.csv",
+    "expected_page": 1
+  },
+  {
+    "id": "q3",
+    "question": "What uptime SLA does Nimbus offer?",
+    "evidence": ["99.9% uptime"],
+    "expected_answer": "Nimbus offers a 99.9% uptime service-level agreement.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q4",
+    "question": "Where is Aurora Labs headquartered?",
+    "evidence": ["Portland, Oregon"],
+    "expected_answer": "Aurora Labs is headquartered in Portland, Oregon.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q5",
+    "question": "What security certifications does Aurora Labs hold?",
+    "evidence": ["SOC 2 Type II", "AES-256"],
+    "expected_answer": "Aurora Labs holds a SOC 2 Type II certification and encrypts data at rest with AES-256.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q6",
+    "question": "How many employees work at Aurora Labs?",
+    "evidence": ["employs 400 people"],
+    "expected_answer": "Aurora Labs employs 400 people.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q7",
+    "question": "When was Aurora Labs founded?",
+    "evidence": ["founded in 2019"],
+    "expected_answer": "Aurora Labs was founded in 2019.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q8",
+    "question": "Which investors led Aurora Labs' funding rounds?",
+    "evidence": ["Northgate Partners", "Meridian Capital"],
+    "expected_answer": "Northgate Partners led the Series A and Meridian Capital led the Series B.",
+    "expected_source": "aurora-labs.txt",
+    "expected_page": 1
+  },
+  {
+    "id": "q9",
+    "question": "What does the Atlas Pro plan add?",
+    "evidence": ["Adds SSO and audit logs"],
+    "expected_answer": "Atlas Pro adds SSO and audit logs.",
+    "expected_source": "products.csv",
+    "expected_page": 1
+  },
+  {
+    "id": "q10",
+    "question": "How long is workspace content retained after account deletion?",
+    "evidence": ["30 days after account deletion"],
+    "expected_answer": "Workspace content is retained for 30 days after account deletion.",
+    "expected_source": "data-privacy.md",
+    "expected_page": 1
+  },
+  {
+    "id": "q11",
+    "question": "How quickly must Aurora Labs notify customers of a data breach?",
+    "evidence": ["72 hours"],
+    "expected_answer": "Aurora Labs notifies affected customers within 72 hours of a data breach.",
+    "expected_source": "data-privacy.md",
+    "expected_page": 1
+  },
+  {
+    "id": "q12",
+    "question": "Which companies are Aurora Labs subprocessors?",
+    "evidence": ["Amazon Web Services", "Stripe"],
+    "expected_answer": "Subprocessors include Amazon Web Services, Stripe, and Intercom.",
+    "expected_source": "data-privacy.md",
+    "expected_page": 1
+  },
+  {
+    "id": "q13",
+    "question": "What is the API rate limit on standard plans?",
+    "evidence": ["100 requests per minute"],
+    "expected_answer": "The REST API allows 100 requests per minute on standard plans.",
+    "expected_source": "faq.md",
+    "expected_page": 1
+  },
+  {
+    "id": "q14",
+    "question": "What response time do enterprise support customers receive?",
+    "evidence": ["one-hour response"],
+    "expected_answer": "Enterprise customers receive 24/7 support with a one-hour response time.",
+    "expected_source": "faq.md",
+    "expected_page": 1
+  },
+  {
+    "id": "q15",
+    "question": "How long does the free trial last?",
+    "evidence": ["14-day trial", "14-day free trial"],
+    "expected_answer": "The free trial lasts 14 days.",
+    "expected_source": "faq.md",
+    "expected_page": 1
+  },
+  {
+    "id": "q16",
+    "question": "Does Aurora Labs encrypt customer data at rest?",
+    "evidence": ["encrypted at rest with AES-256"],
+    "expected_answer": "Yes — customer data is encrypted at rest with AES-256.",
+    "expected_source": "faq.md",
+    "expected_page": 1
+  }
+]

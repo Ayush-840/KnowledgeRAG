@@ -81,8 +81,16 @@ def hybrid_search(
 
     # ---- Wide dense retrieval ----
     t_dense = time.perf_counter()
+    # Embed the query with the SAME embedder that indexed the collection. Passing
+    # query_texts alone would make Chroma use its built-in default embedding
+    # function, which breaks EMBEDDER=openai (1536-dim stored vs 384-dim query).
+    # Going through utils.embed_chunks keeps a single embedder accessor for
+    # ingest + query (and lets tests stub it in one place).
+    from .utils import embed_chunks
+
+    query_embedding = embed_chunks([query])[0].tolist()
     dense = collection.query(
-        query_texts=[query],
+        query_embeddings=[query_embedding],
         n_results=candidates,
         include=["documents", "metadatas", "distances"],  # ids are always returned by Chroma
     )
@@ -109,7 +117,9 @@ def hybrid_search(
 
     # ---- RRF fusion ----
     t_fuse = time.perf_counter()
-    bm25_ranked = [bm25_ids[i] for i in top_bm25_idx]
+    # Guard like bm25_by_id below: bm25_ids can be shorter than the corpus if
+    # a stale bm25.json predates persisted ids (falls back to collection order).
+    bm25_ranked = [bm25_ids[i] for i in top_bm25_idx if i < len(bm25_ids)]
     rrf_scores = reciprocal_rank_fusion([dense_ids, bm25_ranked])
 
     # Union of candidate ids from both retrievers
@@ -160,6 +170,7 @@ def hybrid_search(
                 "id": doc_id,
                 "text": text,
                 "filename": meta.get("filename", ""),
+                "title": meta.get("title"),
                 "page_number": meta.get("page_number", 0),
                 "chunk_strategy": meta.get("chunk_strategy", "fixed"),
                 "retrieval_scores": {

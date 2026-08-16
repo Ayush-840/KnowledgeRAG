@@ -18,6 +18,8 @@ JSONL observability, document viewer).
 
 | # | Category | Validation Behavior | Automation | Status |
 |---|----------|---------------------|------------|--------|
+| 0 | PDF Extraction Hygiene | Page-number lines, running headers/footers, and glued numeric prefixes (the `04Build` artifact) are stripped at extraction; legitimate in-body numbers (`2024`, `$49`) are preserved | pytest | `PASS` |
+| 0b | PDF Extraction Regression | Re-extracting the sample corpus matches the stored baseline (regenerate with `UPDATE_BASELINES=1`) | pytest | `PASS` |
 | 1 | Ingestion Boundaries | Rejects unsupported extensions (`.exe`, `.png`) with a clear 400 error before any parsing | pytest | `PASS` |
 | 2 | Ingestion Boundaries | Rejects files over the size limit (default 50 MB) with 413 — no partial indexing | pytest | `PASS` |
 | 3 | Ingestion Boundaries | Rejects CSVs over `MAX_CSV_ROWS` with 400 | pytest | `PASS` |
@@ -29,7 +31,7 @@ JSONL observability, document viewer).
 | 9 | Retrieval Funnel | Widen-then-rerank: `candidates_retrieved` ≥ `candidates_sent_to_llm` (20 → 5 by default) | pytest | `PASS` |
 | 10 | Context Isolation | Queries in session A never surface chunks from session B's documents | pytest | `PASS` |
 | 11 | Citation Verification | Fabricated/out-of-range `[n]` markers stripped from generated answers; valid markers map to actually-retrieved chunks | pytest | `PASS` |
-| 12 | Graceful Degradation | `/chat` returns 503 (no `OPENROUTER_API_KEY`) and 502 (generation failure) instead of hanging | pytest | `PASS` |
+| 12 | Graceful Degradation | `/chat` with no LLM key or a failing generation returns `200` with a grounded extractive fallback answer (never hangs, never fabricates) | pytest | `PASS` |
 | 13 | Observability | Every search/chat writes one structured JSONL record (query, retrieved ids + scores, latency breakdown, answer, tokens) | pytest | `PASS` |
 | 14 | Greeting Handling | Local interceptor answers "hi"/"hello" in < 400 ms with zero backend calls | manual | `MANUAL` |
 
@@ -43,6 +45,17 @@ JSONL observability, document viewer).
 
 ## 2. Detailed Scenario Specs (automated)
 
+### 2.0 PDF Extraction Hygiene (S0, S0b)
+- **S0 — Artifact stripping.** `clean_page_text` removes standalone page-number
+  lines (`3`, `Page 4`, `— 7 —`), running headers/footers detected across pages
+  (normalized digit/punctuation-stripped key, >50% recurrence at page top/bottom),
+  and the glue pattern (`04Build` → `Build`) at the first content line only.
+  Legitimate numbers (`2024 revenue`, `$49`) are never touched.
+- **S0b — Regression baseline.** `tests/baselines/pdf_extraction.json` stores the
+  cleaned extraction of the sample corpus; `test_pdf_extraction_baseline`
+  re-extracts and diffs, so a future parser change that reintroduces
+  contamination fails CI. Regenerate with `UPDATE_BASELINES=1`.
+
 ### 2.1 Ingestion Boundaries
 - **S1 — Extension whitelist.** POST `/ingest/{session}` with a `.exe` file →
   `400` with message listing supported extensions. No chunk is stored.
@@ -52,6 +65,7 @@ JSONL observability, document viewer).
   `400` "CSV exceeds row limit".
 
 ### 2.2 Multi-Format Ingestion (S4)
+
 Each of `.txt`, `.md`, `.csv`, `.docx`, and `.pdf` ingests with `chunk_count ≥ 1`
 and returns page/row counts (`page_count` carries the data-row count for CSVs).
 Chunk metadata records `filename`, `chunk_strategy`, `chunk_size`, `overlap`, and
@@ -85,14 +99,32 @@ both per-session).
 - `verify_citations`: an answer referencing `[1]`, `[2]`, and a fabricated `[9]`
   keeps the valid markers, strips `[9]`, dedupes repeated markers, and returns
   citations mapped to the actual retrieved chunks (id, filename, page).
-- `/chat` without `OPENROUTER_API_KEY` → `503` with a clear message; a failing
-  generation → `502`. Neither hangs.
+- `/chat` degrades gracefully instead of hanging: with no LLM key configured or
+  a failing generation call, it returns `200` with a grounded extractive
+  fallback answer (top chunks quoted verbatim with working `[n]` citations).
 
 ### 2.7 Observability (S13)
 A search writes exactly one JSONL line to `QUERY_LOG_DIR/queries.jsonl`
 containing `query`, `session_id`, `retrieved` (ids + stage scores),
 `reranked_ids`, candidate counts, `latency_ms` breakdown (dense/bm25/fusion/
 rerank/total), and `final_answer` (null for search, populated for chat).
+
+### 2.8 Real ingestion stages + titles (S14)
+- **Streaming ingest.** `POST /ingest/{session}?stream=1` returns
+  `text/event-stream` with real pipeline stages in order — `parsing` →
+  `chunking` → `embedding` → `indexing` → `done` — then the final result
+  (chunk count, title). Mid-stream failures (e.g. an empty CSV) surface as a
+  `stage: error` event, not a broken stream or a 500.
+- **Document titles.** Ingest responses, `/documents`, search results, and
+  citations carry a best-effort `title` (PDF `/Title`, DOCX core properties,
+  Markdown H1, short first line of a `.txt`). CSVs and generic/empty titles
+  return `null` so the UI falls back to the upload filename.
+- **`POST /title`.** Returns a short chat title for a query — LLM summary when
+  a key is configured, else a deterministic first-8-words heuristic; empty
+  queries are rejected with `400`.
+- **Cosine space.** Sessions are indexed with `hnsw:space=cosine` so the
+  `dense_similarity` score reported in search results is an actual cosine
+  similarity, not `1 - L2`.
 
 ---
 
@@ -118,14 +150,30 @@ rerank/total), and `final_answer` (null for search, populated for chat).
    the 120 s `AbortController` window — no frozen spinner.
 3. Restart the backend; the app recovers without a reload.
 
-### 3.4 Document Viewer
+### 3.4 Ingestion Stage Feedback
+1. Upload a large document and watch the progress bar.
+2. Expect human-readable stage labels that match the real backend stages
+   (`Extracting text…` → `Chunking document…` → `Generating embeddings…` →
+   `Indexing…` → `Ready`) — driven by `?stream=1` events, not a timed
+   animation, so the label cannot drift from what the backend is doing.
+
+### 3.5 Auto Chat Titles
+1. Create a chat and upload a document. Expect the sidebar to name the chat
+   after the document's title (or filename) immediately.
+2. Ask a real question. Expect the title to be replaced with a short summary
+   of the query (LLM when a key is set, heuristic otherwise).
+3. Create a new chat and immediately reload the page without uploading or
+   sending anything. Expect the empty "New chat" draft to be gone — it never
+   lingers in the sidebar.
+
+### 3.6 Document Viewer
 1. Ask a question that produces citations, open the Sources panel, click
    **View in document →** on a citation.
 2. Expect the split-screen viewer to open that document, auto-scroll to the
    cited chunk, and highlight the chunk plus the query-relevant sentence.
 3. Test with a CSV citation (chunk shows its row range) and a markdown citation.
 
-### 3.5 Upload Workspace
+### 3.7 Upload Workspace
 1. Drag a file over the dropzone — expect the glow/pulse micro-animation and
    the metadata preview card (type badge, size, staged progress, then page/row
    + chunk counts and strategy).

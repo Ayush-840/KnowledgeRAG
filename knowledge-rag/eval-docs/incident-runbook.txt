@@ -1,0 +1,58 @@
+Aurora Labs On-Call Incident Runbook
+=====================================
+
+This runbook describes how to respond to incidents in the Aurora Labs
+production platform, which runs the Atlas analytics service, the Beacon
+alerting service, and the Nimbus data pipeline.
+
+1. SEVERITY LEVELS
+
+SEV1: total service outage or data loss affecting customers. Respond within
+5 minutes, page the full on-call rotation and the incident commander.
+SEV2: significant degradation affecting a subset of customers. Respond within
+15 minutes, page the primary on-call engineer.
+SEV3: minor issue with a workaround available. Respond within 4 business hours.
+SEV4: cosmetic or non-urgent. Log a ticket, no page required.
+
+2. FIRST FIVE MINUTES
+
+For any SEV1 or SEV2 incident, the responding engineer should follow the
+"first five minutes" checklist: acknowledge the alert in the paging tool,
+join the #incidents Slack channel, declare the incident with a descriptive
+name, open a war room, and assign roles (incident commander, communications
+lead, and scribe). Do not start debugging until the incident is declared and
+roles are assigned.
+
+3. COMMON FAILURE MODES
+
+Nimbus pipeline backpressure: when the pipeline lag exceeds 30 minutes,
+check the Kafka consumer group lag and the worker pool size. Scale out
+workers by adding replicas to the nimbus-worker deployment.
+Atlas query timeouts: when p95 query latency exceeds 2 seconds, check the
+Atlas query engine connection pool. Raise max_connections to 200.
+Beacon delivery delay: when alert delivery is delayed more than 10 minutes,
+check the webhook queue and the rate limiter settings.
+
+4. ESCALATION
+
+If the incident is not mitigated within 60 minutes, escalate to the on-call
+manager. If the incident affects a top-tier customer or lasts more than
+4 hours, escalate to the VP of Engineering and open a customer
+communication thread in the support portal.
+
+5. POST-INCIDENT REVIEW
+
+Within 5 business days of mitigation, the incident commander must run a
+post-incident review: write a timeline, identify contributing factors,
+define corrective actions with owners and due dates, and file the review
+under /incidents in the shared drive. SEV1 incidents additionally require an
+executive summary approved by the VP of Engineering.
+
+6. COMMUNICATION TEMPLATES
+
+Status updates to customers must include: what happened, what we are doing,
+expected next update time. Updates go out every 60 minutes during an active
+SEV1 incident.
+
+Contact details: on-call paging via PagerDuty schedule "prod-primary",
+escalation via #incidents Slack channel.

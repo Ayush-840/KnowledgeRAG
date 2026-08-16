@@ -1,0 +1,15 @@
+Product,Tier,Price,Unit,Billing
+Atlas,Starter,29,per user per month,annual
+Atlas,Standard,49,per user per month,annual
+Atlas,Enterprise,99,per user per month,annual
+Beacon,Starter,19,per user per month,annual
+Beacon,Standard,39,per user per month,annual
+Beacon,Enterprise,79,per user per month,annual
+Nimbus,Free,0,per pipeline,monthly
+Nimbus,Starter,199,per month,annual
+Nimbus,Standard,499,per month,annual
+Nimbus,Enterprise,999,per month,annual
+Nimbus,Enterprise Plus,1999,per month,annual
+Add-on,SSO / SAML,2,per user per month,annual
+Add-on,Audit log retention,5,per user per month,annual
+Add-on,Extra pipeline,49,per month,monthly

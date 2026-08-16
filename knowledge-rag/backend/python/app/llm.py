@@ -50,7 +50,7 @@ def _provider_config():
 
 GENERATION_MODEL = os.getenv(
     "GENERATION_MODEL",
-    "nvidia/llama-3.1-nemotron-70b-instruct" if LLM_PROVIDER == "nvidia" else "openai/gpt-4o"
+    "meta/llama-3.3-70b-instruct" if LLM_PROVIDER == "nvidia" else "openai/gpt-4o"
 )
 GENERATION_MAX_TOKENS = int(os.getenv("GENERATION_MAX_TOKENS", "600"))
 
@@ -58,18 +58,17 @@ CITE_RE = re.compile(r"\[(\d+)\]")
 
 
 def llm_available() -> bool:
-    provider = os.getenv("LLM_PROVIDER", "openrouter").lower()
-    if provider == "nvidia":
+    """True when the key for the configured provider is present.
+    (openrouter -> OPENROUTER_API_KEY, nvidia -> NVIDIA_API_KEY)
+    """
+    if LLM_PROVIDER == "nvidia":
         return bool(os.getenv("NVIDIA_API_KEY"))
-    return bool(os.getenv("OPENROUTER_API_KEY") or os.getenv("NVIDIA_API_KEY"))
+    return bool(os.getenv("OPENROUTER_API_KEY"))
 
 
 def _chat(messages: list, temperature: float = 0.2, max_tokens: int = GENERATION_MAX_TOKENS):
     url, api_key = _provider_config()
-    model = os.getenv(
-        "GENERATION_MODEL",
-        "meta/llama-3.3-70b-instruct" if LLM_PROVIDER == "nvidia" else "openai/gpt-4o"
-    )
+    model = GENERATION_MODEL
     payload = {
         "model": model,
         "messages": messages,
@@ -160,6 +159,45 @@ def generate_answer(query: str, context_chunks: list):
         return _generate_extractive_fallback(query, context_chunks, str(e))
 
 
+def summarize_title(query: str) -> str:
+    """Short chat title from a query: an LLM summary when a key is configured,
+    else a deterministic heuristic. The LLM call is tiny (max 16 tokens) and
+    failures degrade silently to the heuristic."""
+    if llm_available():
+        try:
+            answer, _usage, _ms = _chat(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You generate short chat titles. Reply with a title of "
+                            "6 words or fewer capturing the topic of the user's "
+                            "question. No quotes, no markdown, no explanation."
+                        ),
+                    },
+                    {"role": "user", "content": query},
+                ],
+                temperature=0.0,
+                max_tokens=16,
+            )
+            title = answer.strip().strip('"').strip()
+            if 2 <= len(title) <= 60 and "\n" not in title:
+                return title
+        except Exception:  # noqa: BLE001 - fall back to the heuristic
+            pass
+    return _heuristic_title(query)
+
+
+def _heuristic_title(query: str) -> str:
+    """Deterministic fallback: first ~8 words, punctuation cleaned, capped at 48 chars."""
+    t = re.sub(r"\s+", " ", query).strip()
+    t = re.sub(r"^[^a-zA-Z0-9]+|[?!.]+$", "", t).strip()
+    title = " ".join(t.split()[:8]).strip()
+    if len(title) > 48:
+        title = title[:48].rsplit(" ", 1)[0] + "…"
+    return title or "Untitled chat"
+
+
 def verify_citations(answer: str, context_chunks: list):
     """Cross-check [n] markers in the answer against the retrieved chunks.
 
@@ -182,6 +220,7 @@ def verify_citations(answer: str, context_chunks: list):
                         "marker": n,
                         "id": c["id"],
                         "filename": c["filename"],
+                        "title": c.get("title"),
                         "page_number": c.get("page_number", 0),
                         "text": c["text"],
                         "scores": c.get("scores"),

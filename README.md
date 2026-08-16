@@ -36,6 +36,11 @@ What makes it distinctive:
   scores separately (dense / BM25 / RRF / rerank), the chunking strategy that
   produced it, and inline `[n]` citations verified against the actual
   retrieved chunks.
+- **Clean extraction.** PDF text is scrubbed at the source — standalone page
+  numbers, running headers/footers (detected across pages), and glued numeric
+  prefixes (`04Build`) are removed before chunking, so embeddings and BM25 are
+  never poisoned by layout noise. A stored extraction baseline makes parser
+  regressions fail CI instead of surfacing later.
 - **Per-upload chunking controls.** Chunk size, overlap, and strategy
   (`fixed` | `structure_aware`) are set per upload and recorded in the index
   metadata.
@@ -51,7 +56,8 @@ What makes it distinctive:
 flowchart LR
     subgraph Ingest
         A[PDF / TXT / DOCX / MD / CSV] --> B[Parser<br/>pypdf · pdfplumber · python-docx · csv]
-        B --> C[Chunker<br/>fixed | structure-aware]
+        B --> B2[Artifact scrubber<br/>page numbers · headers/footers · glued prefixes]
+        B2 --> C[Chunker<br/>fixed | structure-aware]
         C --> D[Embedder<br/>MiniLM · swappable via EMBEDDER]
         D --> E[(ChromaDB<br/>per-session)]
         C --> F[BM25 index<br/>rank-bm25]
@@ -139,8 +145,9 @@ cp .env.example .env                # optional
 npm start                           # http://localhost:8000
 ```
 
-The gateway proxies `/ingest`, `/search`, `/chat`, and `/documents` to the
-Python service (`PYTHON_URL`, default `http://localhost:8001`).
+The gateway proxies `/ingest`, `/search`, `/chat`, `/documents`, and `/title`
+to the Python service (`PYTHON_URL`, default `http://localhost:8001`).
+Streaming responses (the `?stream=1` ingest stages) pass through untouched.
 
 ### 3. Frontend
 
@@ -189,6 +196,10 @@ npm run dev                         # http://localhost:5173
 
 Upload a document. Supported formats: **.pdf, .txt, .docx, .md, .csv** (max
 `MAX_UPLOAD_MB`, default 50 MB). Accepts optional per-upload chunking settings.
+With `?stream=1` the response is `text/event-stream` of **real pipeline
+stages** — `parsing` → `chunking` → `embedding` → `indexing` → `done` — so the
+UI progress bar reflects what the backend is actually doing, not a timed
+animation. The non-streaming response stays backward compatible.
 
 | Query param | Default | Description                          |
 | ----------- | ------- | ------------------------------------ |
@@ -271,11 +282,32 @@ usage). Invalid/out-of-range citation markers from the model are stripped —
 fabricated references never reach the UI. Every `/chat` call is also logged to
 the JSONL query log with the final answer, citations, and tokens.
 
+### `POST /title`
+
+Short chat title for a query — the sidebar names chats with a meaningful
+summary instead of "New chat". Uses an LLM summary (max 16 tokens) when a key
+is configured, else a deterministic first-8-words heuristic:
+
+```bash
+curl -X POST "http://localhost:8001/title" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What are the key findings?"}'
+# {"title": "What are the key findings"}
+```
+
 ### `GET /documents/{session_id}` and `GET /documents/{session_id}/{filename}`
 
 Back the in-context document viewer: list a session's documents (filename,
-chunk count, page/row numbers, embedder), and fetch one document's chunks in
-document order with page/row labels.
+title, chunk count, page/row numbers, embedder), and fetch one document's
+chunks in document order with page/row labels.
+
+### Document titles
+
+Every ingest response (and each search result / citation) carries a best-effort
+`title` for display: PDF `/Title` metadata, DOCX core properties, a Markdown
+H1, or a short first line of a `.txt`. The UI prefers it over the raw upload
+filename — the storage identifier stays the internal key. `title` is `null`
+for CSVs and generic/empty titles, in which case the filename is shown.
 
 ### `GET /health`
 
@@ -290,9 +322,11 @@ The React app (`frontend/react`) ships a chat interface at `/#/chat`:
   filtering, and a per-chat quick-action menu (rename, pin, add/remove tag,
   export as JSON, delete). Persisted to localStorage (`knowledge-rag:sessions`).
 - **Upload workspace** — glassmorphism dropzone with drag-over micro-animation,
-  format + size validation, staged progress (Uploading → Parsing → Chunking →
-  Embedding → Indexed), a metadata preview card (filename, size, page/row
-  count, chunk count, strategy), and per-upload advanced chunk settings.
+  format + size validation, staged progress driven by the **real backend
+  stages** (`?stream=1`): Extracting text… → Chunking document… → Generating
+  embeddings… → Indexing… → Ready, plus a metadata preview card (title or
+  filename, size, page/row count, chunk count, strategy), and per-upload
+  advanced chunk settings.
 - **Answers with citations** — inline `[n]` pills open a source drawer showing
   per-chunk filename, page, labeled stage scores (dense/BM25/RRF/rerank),
   confidence %, and the most query-relevant sentence highlighted. Each source
@@ -301,15 +335,21 @@ The React app (`frontend/react`) ships a chat interface at `/#/chat`:
   and scrolls to highlight the cited chunk and its sentence.
 - **Dev metrics panel** — collapsible per-answer breakdown of retrieval,
   rerank, generation, and total latency plus token usage.
+- **Auto-generated chat titles** — the sidebar names each chat from its first
+  uploaded document (title or filename) immediately, then refines it with an
+  LLM summary of the first real query. Empty drafts that never receive a
+  message or upload are dropped instead of lingering as "New chat" entries.
 - **Greeting interceptor** — "hi"/"hello" are answered locally in ~400 ms,
   never hitting the RAG pipeline. All requests use `AbortController` timeouts.
 
-The dev server proxies `/ingest`, `/search`, `/chat`, `/documents` to the
-Python service on `localhost:8001` (set `VITE_API_URL` to point elsewhere).
+The dev server proxies `/ingest`, `/search`, `/chat`, `/documents`, `/title`
+to the Python service on `localhost:8001` (set `VITE_API_URL` to point
+elsewhere).
 
 **Storage compatibility:** sessions live in localStorage under
 `knowledge-rag:sessions`. Newer fields (`pinned`, `tags`) have safe defaults,
-so sessions saved by older versions keep working with no migration.
+so sessions saved by older versions keep working with no migration. On load,
+empty drafts (no messages, no files, default title) are filtered out.
 
 ## Evaluation harness
 
@@ -326,7 +366,7 @@ source .venv/bin/activate
 python -m eval.run_eval --docs ../../eval-docs
 
 # With LLM-as-judge for faithfulness + answer relevance
-# export OPENROUTER_API_KEY=...
+# export NVIDIA_API_KEY=nvapi-...   # or OPENROUTER_API_KEY=sk-...
 python -m eval.run_eval --docs ../../eval-docs --chunk-size 500 --overlap 100 --strategy structure_aware
 
 # Compare without reranking
@@ -342,7 +382,8 @@ Each run ingests the eval corpus into a settings-specific session
 API key is present — **faithfulness** and **answer relevance** via an
 LLM-as-judge call. Reports land in `eval/reports/` as `eval_report.json` and
 a diffable `eval_report.md`, so chunking/retrieval changes can be compared.
-Metrics are computed globally **and** broken out per query type so that a strong
+Metrics are computed globally **and** broken out per query type (in the
+`by_query_type` summary and a per-query-type table) so that a strong
 single-hop score cannot mask weak multi-hop or ambiguous-query behaviour.
 
 ### Eval dataset design
@@ -351,20 +392,24 @@ The golden set is designed to make retrieval genuinely hard — a large pile of
 unrelated documents gives the retriever nothing to confuse it with, which makes
 precision look artificially good while telling you nothing.
 
-**Corpus (`eval-docs/`):** 15–25 documents organised in topical clusters that
-share vocabulary, so the retriever faces real distractors when ranking. The set
-includes:
+**Corpus (`eval-docs/`):** 18 documents organised in 6 topical clusters that
+share vocabulary (data privacy, product catalogue, engineering ops, HR,
+contracts, and a two-part platform report), so the retriever faces real
+distractors when ranking. The set includes:
 
-- **Near-duplicate / superseded pairs** (e.g. two policy versions differing by
-  one changed clause) to stress-test the reranker — the question is whether it
-  picks the *correct* version, not just *a similar* one.
-- **Multi-hop material** where the answer requires joining evidence from two or
-  more documents, making context recall discriminating rather than trivially
-  easy.
+- **3 near-duplicate / superseded pairs** (privacy policy v1/v2 with a changed
+  retention clause, employee handbook v1/v2 with changed PTO, vendor contract
+  v1/v2 with a changed renewal term) to stress-test the reranker — the question
+  is whether it picks the *correct* version, not just *a similar* one.
+- **Multi-hop material** (a two-part platform report, runbook↔SLA pairs,
+  product sheet↔pricing CSV) where the answer requires joining evidence from
+  two or more documents, making context recall discriminating rather than
+  trivially easy.
 - **At least one document per supported format** (.pdf, .txt, .docx, .md, .csv)
-  and cross-format clusters (e.g. a policy PDF plus a CSV that references it).
+  and cross-format clusters (e.g. the Atlas product-sheet PDF references the
+  same SKUs as the pricing CSV).
 
-**Golden queries (`eval/golden_set.json`):** 50–100 queries, each tagged with
+**Golden queries (`eval/golden_set.json`):** 72 queries, each tagged with
 a `query_type` label:
 
 | Type | Description | Distinguishing challenge |
@@ -404,28 +449,47 @@ have step-by-step manual procedures in the plan.
 
 ## Benchmarks
 
-Measured with the eval harness on the `eval-docs/` corpus (15–25 topically
-clustered documents, including near-duplicate pairs and multi-hop material)
-with 50–100 golden queries. Results are broken out by query type so that
-a strong single-hop score cannot mask weak multi-hop or ambiguous-query
-behaviour. **Retrieval latency** is the full stage breakdown (dense + BM25 +
-fusion + rerank) on a single CPU machine. Generation latency and the
-qualitative metrics require `OPENROUTER_API_KEY`.
+Measured with the eval harness on the `eval-docs/` corpus (18 topically
+clustered documents across 5 formats — including 3 near-duplicate/superseded
+pairs and multi-hop material) with a 72-query golden set. Results are broken
+out by query type so that a strong single-hop score cannot mask weak
+multi-hop or ambiguous-query behaviour. **Retrieval latency** is the full
+stage breakdown (dense + BM25 + fusion + rerank) on a single CPU machine.
+Generation latency and the qualitative metrics require a valid LLM API key
+(`OPENROUTER_API_KEY` or `NVIDIA_API_KEY`).
 
-### Config D — structure_aware · 500/100 · reranker on · pool 20 *(representative)*
+### Representative config — fixed · 500/100 · reranker on · pool 20
+
+Measured on the `eval-docs/` corpus (18 documents, 6 topical clusters, 3
+near-duplicate pairs, multi-hop material) with the 72-query golden set,
+`BAAI/bge-reranker-base` reranker, `all-MiniLM-L6-v2` embedder.
 
 | Query type | n | Precision | Recall | Recall@pool | Faithfulness | Ans. relevance |
 | --- | --- | --- | --- | --- | --- | --- |
-| `single_hop` | — | — | — | — | — | — |
-| `multi_hop` | — | — | — | — | — | — |
-| `ambiguous` | — | — | — | — | — | — |
-| `unanswerable` | — | — | — | — | — | — |
-| **overall** | — | — | — | — | — | — |
+| `single_hop` | 36 | 0.222 | 0.880 | 0.917 | — | — |
+| `multi_hop` | 19 | 0.495 | 0.864 | 0.942 | — | — |
+| `ambiguous` | 12 | 0.233 | 0.917 | 0.917 | — | — |
+| `unanswerable` | 5 | 0.000 | 0.000 | 0.000 | — | — |
+| **overall** | 72 | 0.281 | 0.821 | 0.860 | — | — |
 
-> Numbers will be populated once the full `eval-docs/` corpus and 50–100 query
-> golden set are committed. Run `python -m eval.run_eval --docs ../../eval-docs`
-> to reproduce. Per-config reports land in `eval/reports/bench-*.json`,
-> aggregated in `eval/reports/benchmarks.json`.
+> The `unanswerable` row scoring 0/0 is correct: the golden set tags questions
+> whose answer is absent from the corpus, so retrieval must surface nothing.
+> Faithfulness and answer relevance require an LLM API key and are populated
+> when `OPENROUTER_API_KEY`/`NVIDIA_API_KEY` is valid.
+
+### Config comparison (retrieval metrics, no LLM needed)
+
+| Config | Chunking | Reranker | Pool | Precision | Recall | Recall@pool | Latency |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| fixed · 500/100 | fixed | off | 20 | 0.258 | 0.771 | 0.860 | 52 ms |
+| fixed · 500/100 | fixed | on | 20 | 0.281 | 0.821 | 0.860 | ~940 ms |
+| structure_aware · 500/100 | structure_aware | on | 20 | 0.247 | 0.714 | 0.762 | ~835 ms |
+
+> Reproduce with: `cd backend/python && python -m eval.run_eval --docs ../../eval-docs`
+> (add `--strategy structure_aware`, or `RERANKER_ENABLED=false`, to vary the
+> config). Per-config reports land in `eval/reports/bench-*-evaldocs.json`.
+> Reranker latency is steady-state (first-query warmup and the one-time model
+> download excluded).
 
 ### Earlier baseline (sample-docs · 16 flat questions)
 
@@ -463,6 +527,8 @@ one-time ≈70 s bge-reranker download, excluded).
   looks artificially good. The new corpus addresses this.
 
 ## Roadmap
+
+- [x] PDF extraction hygiene (page numbers, running headers/footers, glued prefixes) + regression baseline
 
 - [x] Hybrid retrieval with RRF fusion + cross-encoder reranking
 - [x] Structure-aware chunking + per-upload chunk settings

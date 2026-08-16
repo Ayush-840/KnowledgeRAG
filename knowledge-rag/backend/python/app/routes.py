@@ -1,7 +1,11 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi.responses import StreamingResponse
 from pathlib import Path
+import json
 import os
+import queue
 import re
+import threading
 import time
 
 from .schemas import ChatResponse, IngestResponse, SearchResponse
@@ -13,11 +17,27 @@ from . import llm as llm_client
 
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "50")) * 1024 * 1024
 
+# Chroma collection names allow [a-zA-Z0-9._-], 3-512 chars, alphanumeric
+# start/end. Validate at the API boundary so a bad session id returns a clean
+# 400 instead of an unhandled Chroma crash (500).
+_SESSION_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{1,510}[a-zA-Z0-9]$")
+
+
+def _validate_session_id(session_id: str) -> None:
+    if not (3 <= len(session_id) <= 512 and _SESSION_ID_RE.fullmatch(session_id)):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid session_id: use 3-512 characters from [a-zA-Z0-9._-], "
+            "starting and ending with an alphanumeric character",
+        )
+
+
 router = APIRouter()
 
 @router.get("/documents/{session_id}")
 async def list_documents(session_id: str):
     """List documents in a session (filename, chunk count, page/row numbers, embedder)."""
+    _validate_session_id(session_id)
     session = get_session_vectors(session_id)
     collection = session["collection"]
     got = collection.get(include=["metadatas"])
@@ -25,14 +45,17 @@ async def list_documents(session_id: str):
     for m in got["metadatas"]:
         filename = m.get("filename", "unknown")
         entry = counts.setdefault(
-            filename, {"chunk_count": 0, "pages": set(), "embedder": m.get("embedder", "unknown")}
+            filename, {"chunk_count": 0, "pages": set(), "embedder": m.get("embedder", "unknown"), "title": None}
         )
         entry["chunk_count"] += 1
+        if m.get("title"):
+            entry["title"] = m["title"]
         if m.get("page_number") is not None:
             entry["pages"].add(m["page_number"])
     documents = [
         {
             "filename": f,
+            "title": c.get("title"),
             "chunk_count": c["chunk_count"],
             "pages": sorted(c["pages"]),
             "embedder": c["embedder"],
@@ -45,6 +68,7 @@ async def list_documents(session_id: str):
 @router.get("/documents/{session_id}/{filename}")
 async def get_document(session_id: str, filename: str):
     """Fetch one document's chunks in document order for in-context viewing."""
+    _validate_session_id(session_id)
     session = get_session_vectors(session_id)
     collection = session["collection"]
     got = collection.get(where={"filename": filename}, include=["documents", "metadatas"])
@@ -61,7 +85,8 @@ async def get_document(session_id: str, filename: str):
             }
         )
     chunks.sort(key=lambda c: _chunk_order(c["id"]))
-    return {"filename": filename, "chunk_count": len(chunks), "chunks": chunks}
+    title = next((m.get("title") for m in got["metadatas"] if m.get("title")), None)
+    return {"filename": filename, "title": title, "chunk_count": len(chunks), "chunks": chunks}
 
 
 def _chunk_order(doc_id: str) -> int:
@@ -70,18 +95,23 @@ def _chunk_order(doc_id: str) -> int:
     return int(m.group(1)) if m else 0
 
 
-@router.post("/ingest/{session_id}", response_model=IngestResponse)
+@router.post("/ingest/{session_id}")
 async def ingest_file(
     session_id: str,
     file: UploadFile = File(...),
     chunk_size: int = 500,
     overlap: int = 100,
     strategy: str = "fixed",
+    stream: bool = False,
 ):
-    # Validate session exists
+    """Upload a document. With ?stream=1 the response is text/event-stream of
+    real pipeline stages (parsing -> chunking -> embedding -> indexing -> done),
+    so UIs can show honest progress instead of a timed animation. Without it,
+    the response is the final IngestResponse JSON (backward compatible).
+    """
+    # Validate session id format (sessions are auto-created on first use)
+    _validate_session_id(session_id)
     session = get_session_vectors(session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
 
     # Validate per-upload chunking settings
     if strategy not in CHUNKERS:
@@ -91,8 +121,13 @@ async def ingest_file(
     if overlap < 0 or overlap >= chunk_size:
         raise HTTPException(status_code=400, detail="overlap must be >= 0 and < chunk_size")
 
-    # Validate extension + size before touching anything
-    ext = os.path.splitext(file.filename)[1].lower()
+    # Validate extension + size before touching anything.
+    # Never trust client-supplied paths: strip any directory components
+    # (both / and \ separators) and use the bare basename everywhere.
+    filename = (file.filename or "").replace("\\", "/").rsplit("/", 1)[-1].strip()
+    if not filename:
+        raise HTTPException(status_code=400, detail="Filename is required")
+    ext = os.path.splitext(filename)[1].lower()
     if ext not in SUPPORTED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
@@ -105,17 +140,58 @@ async def ingest_file(
             detail=f"File exceeds the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB upload limit",
         )
 
-    # Save uploaded file temporarily
+    # Save uploaded file temporarily (basename only — never trust client paths)
     upload_dir = Path("/tmp/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
-    file_path = upload_dir / file.filename
+    file_path = upload_dir / filename
     with open(file_path, "wb") as f:
         f.write(content)
 
-    # Process ingestion
+    def ingest_and_report():
+        """Run ingestion in a worker thread, streaming real stage events."""
+        events: "queue.Queue" = queue.Queue()
+
+        def report(stage: str):
+            events.put({"stage": stage})
+
+        def work():
+            try:
+                page_count, chunk_count, title = ingest_document(
+                    session_id, filename, str(file_path),
+                    chunk_size=chunk_size, overlap=overlap, strategy=strategy,
+                    progress_cb=report,
+                )
+                events.put({
+                    "stage": "done",
+                    "result": IngestResponse(
+                        session_id=session_id,
+                        filename=filename,
+                        title=title,
+                        page_count=page_count,
+                        chunk_count=chunk_count,
+                        chunk_size=chunk_size,
+                        overlap=overlap,
+                        chunk_strategy=strategy,
+                    ).model_dump(mode="json"),
+                })
+            except Exception as e:  # noqa: BLE001 - report mid-stream failures as events
+                events.put({"stage": "error", "error": str(e)})
+
+        t = threading.Thread(target=work, daemon=True)
+        t.start()
+        while True:
+            evt = events.get()
+            yield f"data: {json.dumps(evt)}\n\n"
+            if evt["stage"] in ("done", "error"):
+                break
+
+    if stream:
+        return StreamingResponse(ingest_and_report(), media_type="text/event-stream")
+
+    # Non-streaming path (backward compatible)
     try:
-        page_count, chunk_count = ingest_document(
-            session_id, file.filename, str(file_path),
+        page_count, chunk_count, title = ingest_document(
+            session_id, filename, str(file_path),
             chunk_size=chunk_size, overlap=overlap, strategy=strategy,
         )
     except ValueError as e:
@@ -123,7 +199,8 @@ async def ingest_file(
 
     return IngestResponse(
         session_id=session_id,
-        filename=file.filename,
+        filename=filename,
+        title=title,
         page_count=page_count,
         chunk_count=chunk_count,
         chunk_size=chunk_size,
@@ -131,16 +208,26 @@ async def ingest_file(
         chunk_strategy=strategy,
     )
 
+@router.post("/title")
+async def chat_title(body: dict):
+    """Short chat title for a query: LLM summary when a key is configured,
+    else a deterministic heuristic. Called once after the first exchange so the
+    sidebar shows a meaningful title instead of 'New chat'.
+    """
+    q = (body.get("query") or "").strip()
+    if not q:
+        raise HTTPException(status_code=400, detail="Query string required")
+    return {"title": llm_client.summarize_title(q)}
+
 @router.post("/search/{session_id}", response_model=SearchResponse)
 async def search(session_id: str, query: dict):
     # query expects {"query": "..."}
+    _validate_session_id(session_id)
     q = query.get("query")
     if not q:
         raise HTTPException(status_code=400, detail="Query string required")
 
     session = get_session_vectors(session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
 
     collection = session["collection"]
     bm25 = session.get("bm25")
@@ -167,6 +254,7 @@ async def search(session_id: str, query: dict):
             "id": r["id"],
             "text": r["text"],
             "filename": r["filename"],
+            "title": r.get("title"),
             "page_number": r["page_number"],
             "chunk_strategy": r["chunk_strategy"],
             "retrieval_scores": scores,
@@ -204,13 +292,12 @@ async def chat(session_id: str, body: dict):
     with citation verification. Requires an LLM API key (NVIDIA_API_KEY or
     OPENROUTER_API_KEY, selected via LLM_PROVIDER).
     """
+    _validate_session_id(session_id)
     q = (body.get("query") or "").strip()
     if not q:
         raise HTTPException(status_code=400, detail="Query string required")
 
     session = get_session_vectors(session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
     collection = session["collection"]
     bm25 = session.get("bm25")
     if bm25 is None:
@@ -233,6 +320,7 @@ async def chat(session_id: str, body: dict):
             "id": r["id"],
             "text": r["text"],
             "filename": r["filename"],
+            "title": r.get("title"),
             "page_number": r["page_number"],
             "scores": scores,
             "confidence": round(confidence, 4) if confidence is not None else None,

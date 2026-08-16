@@ -50,14 +50,28 @@ def _mean(values) -> float:
     return round(sum(vals) / len(vals), 4) if vals else None
 
 
-def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_dir: Path, golden_path: Path):
+def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_dir: Path, golden_path: Path, query_type: str = None, tag: str = None):
     golden = json.loads(golden_path.read_text(encoding="utf-8"))
-    # Ingest txt/md/csv samples (PDFs are excluded here: the sample PDF duplicates the
-    # TXT content, which would double-count relevant chunks in the recall denominator).
+    if query_type:
+        tagged = [g for g in golden if g.get("query_type") == query_type]
+        if not tagged and not any("query_type" in g for g in golden):
+            print(f"  ⚠️  --query-type {query_type} requested but golden set has no query_type tags — "
+                  "running the full set instead.")
+        else:
+            golden = tagged
+            if not golden:
+                sys.exit(f"No golden queries of type '{query_type}' found")
+        print(f"  filtering to query_type={query_type}: {len(golden)} queries")
+    # Ingest all 5 supported formats. (The old sample corpus excluded PDFs because
+    # the sample PDF duplicated the TXT content, which would double-count relevant
+    # chunks in the recall denominator — the eval-docs corpus has unique content
+    # per file, so all formats participate.)
     docs = sorted(
         list(docs_dir.glob("*.txt"))
         + list(docs_dir.glob("*.md"))
         + list(docs_dir.glob("*.csv"))
+        + list(docs_dir.glob("*.pdf"))
+        + list(docs_dir.glob("*.docx"))
     )
     if not docs:
         sys.exit(f"No sample documents (.txt/.md/.csv) found in {docs_dir}")
@@ -126,6 +140,7 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
 
         row = {
             "id": g["id"],
+            "query_type": g.get("query_type"),
             "question": q,
             "expected_source": g.get("expected_source"),
             "retrieved_count": len(results),
@@ -173,6 +188,9 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
         "answer_relevance": _mean([r["answer_relevance"] for r in rows]),
         "mean_generation_ms": _mean([r["generation_ms"] for r in rows]),
         "mean_total_latency_ms": _mean([r["latency_ms"]["total"] for r in rows]),
+        # Per-query-type breakdown so a strong single-hop score cannot mask weak
+        # multi-hop / ambiguous behaviour (only present when the golden set tags types)
+        "by_query_type": _per_query_type_summary(rows),
     }
 
     report = {
@@ -194,13 +212,35 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
     }
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    json_path = out_dir / "eval_report.json"
-    md_path = out_dir / "eval_report.md"
+    stem = f"bench-{tag}" if tag else "eval_report"
+    json_path = out_dir / f"{stem}.json"
+    md_path = out_dir / f"{stem}.md"
     json_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     md_path.write_text(_render_markdown(report), encoding="utf-8")
 
     print(f"\nReport written to {json_path} and {md_path}")
     print(json.dumps({"summary": summary}, indent=2))
+
+
+def _per_query_type_summary(rows: list) -> dict:
+    """Mean metrics grouped by g["query_type"] (omits None/untagged rows)."""
+    groups = {}
+    for r in rows:
+        qt = r.get("query_type")
+        if not qt:
+            continue
+        groups.setdefault(qt, []).append(r)
+    out = {}
+    for qt, g in sorted(groups.items()):
+        out[qt] = {
+            "n": len(g),
+            "context_precision": _mean([r["context_precision"] for r in g]),
+            "context_recall": _mean([r["context_recall"] for r in g]),
+            "recall_at_pool": _mean([r["recall_at_pool"] for r in g]),
+            "faithfulness": _mean([r["faithfulness"] for r in g]),
+            "answer_relevance": _mean([r["answer_relevance"] for r in g]),
+        }
+    return out
 
 
 def _render_markdown(report: dict) -> str:
@@ -220,17 +260,29 @@ def _render_markdown(report: dict) -> str:
         "| --- | --- |",
     ]
     for k, v in report["summary"].items():
+        if k == "by_query_type":
+            continue
         lines.append(f"| {k} | {v if v is not None else 'n/a'} |")
+
+    by_type = report["summary"].get("by_query_type") or {}
+    if by_type:
+        lines += ["", "### By query type", "", "| Type | n | Precision | Recall | Recall@pool | Faithfulness | Ans. rel. |", "| --- | --- | --- | --- | --- | --- | --- |"]
+        for qt, m in sorted(by_type.items()):
+            lines.append(
+                f"| {qt} | {m['n']} | {m['context_precision']} | {m['context_recall']} | {m['recall_at_pool']} | "
+                f"{m['faithfulness'] if m['faithfulness'] is not None else 'n/a'} | "
+                f"{m['answer_relevance'] if m['answer_relevance'] is not None else 'n/a'} |"
+            )
 
     lines += ["", "### Generation (LLM-as-judge)", "", "| Metric | Mean |", "| --- | --- |"]
     for k in ("faithfulness", "answer_relevance", "mean_generation_ms"):
         v = report["summary"].get(k)
         lines.append(f"| {k} | {v if v is not None else 'n/a'} |")
 
-    lines += ["", "## Per query", "", "| ID | Question | Retrieved | Relevant | Precision | Recall | Recall@pool | Faithfulness | Answer rel. | Latency (ms) |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    lines += ["", "## Per query", "", "| ID | Type | Question | Retrieved | Relevant | Precision | Recall | Recall@pool | Faithfulness | Answer rel. | Latency (ms) |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for r in report["queries"]:
         lines.append(
-            f"| {r['id']} | {r['question']} | {r['retrieved_count']} | {r['relevant_retrieved']} | "
+            f"| {r['id']} | {r.get('query_type') or '—'} | {r['question']} | {r['retrieved_count']} | {r['relevant_retrieved']} | "
             f"{r['context_precision']} | {r['context_recall']} | {r['recall_at_pool']} | "
             f"{r['faithfulness'] if r['faithfulness'] is not None else 'n/a'} | "
             f"{r['answer_relevance'] if r['answer_relevance'] is not None else 'n/a'} | "
@@ -248,11 +300,13 @@ def main():
     parser.add_argument("--chunk-size", type=int, default=500, help="Chunk size (words)")
     parser.add_argument("--overlap", type=int, default=100, help="Chunk overlap (words)")
     parser.add_argument("--strategy", type=str, default="fixed", choices=["fixed", "structure_aware"], help="Chunking strategy")
+    parser.add_argument("--query-type", type=str, default=None, choices=["single_hop", "multi_hop", "ambiguous", "unanswerable"], help="Only evaluate golden queries of this type")
+    parser.add_argument("--tag", type=str, default=None, help="Report filename tag (writes bench-<tag>.json/.md instead of eval_report.*)")
     args = parser.parse_args()
 
     docs_dir = args.docs.resolve()
     print(f"Knowledge RAG eval — docs: {docs_dir}")
-    run_eval(docs_dir, args.chunk_size, args.overlap, args.strategy, args.out, args.golden)
+    run_eval(docs_dir, args.chunk_size, args.overlap, args.strategy, args.out, args.golden, query_type=args.query_type, tag=args.tag)
 
 
 if __name__ == "__main__":

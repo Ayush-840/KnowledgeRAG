@@ -52,9 +52,12 @@ JUDGE_MODEL = os.getenv("EVAL_JUDGE_MODEL", _DEFAULT_MODEL)
 
 
 def llm_available() -> bool:
+    """True when the key for the configured provider is present.
+    (openrouter -> OPENROUTER_API_KEY, nvidia -> NVIDIA_API_KEY)
+    """
     if LLM_PROVIDER == "nvidia":
         return bool(os.getenv("NVIDIA_API_KEY"))
-    return bool(os.getenv("OPENROUTER_API_KEY") or os.getenv("NVIDIA_API_KEY"))
+    return bool(os.getenv("OPENROUTER_API_KEY"))
 
 
 def _post_chat(messages: list, model: str, temperature: float = 0.0, max_tokens: int = 512) -> str:

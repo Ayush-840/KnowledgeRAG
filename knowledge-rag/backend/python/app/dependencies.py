@@ -18,7 +18,15 @@ def get_session_vectors(session_id: str):
     if session_id not in SESSION_REGISTRY:
         # Load or create persistent collection
         client = chromadb.PersistentClient(path=str(BASE_PERSISTENCE_DIR / session_id))
-        collection = client.get_or_create_collection(name=session_id, metadata={"session_id": session_id})
+        # hnsw:space=cosine makes Chroma return cosine distances, so the
+        # dense_similarity = 1 - distance reported by retrieval.py is an actual
+        # cosine similarity (Chroma's default space is L2, which would make the
+        # label a lie). Only affects collections created from here on; existing
+        # persisted collections keep their original space.
+        collection = client.get_or_create_collection(
+            name=session_id,
+            metadata={"session_id": session_id, "hnsw:space": "cosine"},
+        )
         # Load BM25 index from disk if exists
         bm25_path = BASE_PERSISTENCE_DIR / session_id / "bm25.json"
         bm25 = None

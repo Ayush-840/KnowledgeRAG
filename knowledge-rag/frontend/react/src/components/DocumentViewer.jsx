@@ -39,7 +39,7 @@ export default function DocumentViewer({ sessionId, filename, highlightId, query
       <aside className="docviewer" onClick={(e) => e.stopPropagation()}>
         <header className="docviewer-header">
           <div className="docviewer-title">
-            <strong>{doc ? doc.filename : filename}</strong>
+            <strong>{doc ? doc.title || doc.filename : filename}</strong>
             {doc && <span className="docviewer-sub">{doc.chunk_count} chunks</span>}
           </div>
           <button className="drawer-close" onClick={onClose} aria-label="Close document viewer">

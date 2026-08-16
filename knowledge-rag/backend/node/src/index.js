@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { Readable } from "node:stream";
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ app.get("/health", (req, res) => {
 // Generic passthrough proxy for the Python retrieval service.
 // Streams the request body as-is so both JSON (/search, /chat) and
 // multipart uploads (/ingest) work without reformatting.
-app.use(["/ingest", "/search", "/chat"], async (req, res) => {
+app.use(["/ingest", "/search", "/chat", "/documents", "/title"], async (req, res) => {
   const target = `${PYTHON_URL}${req.originalUrl}`;
   try {
     const headers = { ...req.headers, host: new URL(target).host };
@@ -31,10 +32,21 @@ app.use(["/ingest", "/search", "/chat"], async (req, res) => {
     for (const [key, value] of upstream.headers) {
       res.setHeader(key, value);
     }
-    upstream.body.pipe(res);
+    if (upstream.body) {
+      // fetch() bodies are WHATWG web streams; pipe() needs a Node Readable.
+      // Readable.fromWeb keeps backpressure correct and streams SSE/JSON bodies
+      // (including the ?stream=1 ingest stage events) untouched.
+      Readable.fromWeb(upstream.body).pipe(res);
+    } else {
+      res.end();
+    }
   } catch (err) {
     console.error("Proxy error:", err);
-    res.status(502).json({ error: "Failed to reach Python service" });
+    if (!res.headersSent) {
+      res.status(502).json({ error: "Failed to reach Python service" });
+    } else {
+      res.destroy();
+    }
   }
 });
 
