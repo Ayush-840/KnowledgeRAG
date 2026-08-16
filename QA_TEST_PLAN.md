@@ -34,6 +34,8 @@ JSONL observability, document viewer).
 | 12 | Graceful Degradation | `/chat` with no LLM key or a failing generation returns `200` with a grounded extractive fallback answer (never hangs, never fabricates) | pytest | `PASS` |
 | 13 | Observability | Every search/chat writes one structured JSONL record (query, retrieved ids + scores, latency breakdown, answer, tokens) | pytest | `PASS` |
 | 14 | Greeting Handling | Local interceptor answers "hi"/"hello" in < 400 ms with zero backend calls | manual | `MANUAL` |
+| 15 | Vector Space Explorer | `GET /space/{session}` projects every chunk to 3D (UMAP, PCA fallback); `POST /space/{session}/query` drops a query into the same map with the retrieval funnel's promoted/retrieved ids; clustering fallback + per-doc-set caching | pytest | `PASS` |
+| 16 | Eval Golden-Set Fallback | `run_eval --docs sample-docs` auto-uses the archived 16-query golden set (the 72-query eval-docs set against the tiny sample corpus would score near-zero recall) | pytest | `PASS` |
 
 > **Adapted from the original matrix**: the original's *Auto-Summarization* scenario is
 > out of scope — Knowledge RAG has no auto-summary stage; its closest equivalent
@@ -126,6 +128,34 @@ rerank/total), and `final_answer` (null for search, populated for chat).
   `dense_similarity` score reported in search results is an actual cosine
   similarity, not `1 - L2`.
 
+### 2.9 Vector space explorer (S15)
+- **Projection.** `GET /space/{session}` returns one `{id, x, y, z, filename}`
+  point per chunk, `method` (`umap` or `pca` fallback), and `clustered`
+  false/true. Empty sessions return `404`.
+- **Query drop-in.** `POST /space/{session}/query` returns a `point` plus the
+  retrieval funnel's `promoted_ids` (top-k) and `retrieved_ids` (fused pool) —
+  same `hybrid_search` the chat uses, so the styling matches what the LLM saw.
+  The transform is deterministic: identical queries give identical coordinates
+  (no re-layout), and points are clamped inside the view bounds.
+- **Clustering fallback.** With `UMAP_CLUSTER_THRESHOLD` below the chunk count,
+  the projection degrades to representative markers with a `count` field.
+- **Caching.** The fit is cached per document set: repeated calls return
+  identical coordinates; only `?force=1` or an added/removed document
+  recomputes.
+
+### 2.10 Eval golden-set fallback (S16)
+- **Sample corpus pairing.** `resolve_golden(docs_dir, golden_path)` swaps the
+  default 72-query eval-docs golden set for the archived 16-query
+  `golden_set_sample.json` when the docs directory is named `sample-docs`.
+- **Explicit `--golden` never overridden.** A caller-supplied golden path is
+  always used as-is.
+- **Regression guard.** `test_s16` covers all three branches so the README's
+  reproducible sample baseline cannot silently break again.
+- **Clean-slate re-runs.** The harness resets its persistent eval session
+  (`reset_session`) before ingesting, so re-running the same settings combo
+  reproduces the README baselines instead of accumulating duplicate chunks in
+  the Chroma dir (`test_s16_eval_session_reset`).
+
 ---
 
 ## 3. Manual Frontend Checks
@@ -166,14 +196,29 @@ rerank/total), and `final_answer` (null for search, populated for chat).
    sending anything. Expect the empty "New chat" draft to be gone — it never
    lingers in the sidebar.
 
-### 3.6 Document Viewer
+### 3.6 Vector Space Explorer
+1. Upload the sample corpus, then click **Vector space** in the header.
+2. Expect a navigable 3D point cloud (drag to orbit, scroll to zoom), colored
+   per document, with topical clusters visibly separated.
+3. Ask a question in chat. Expect a cyan tetrahedron to drop into the existing
+   map (no full re-layout), with the reranked chunks enlarged and linked to it
+   and everything else receded.
+4. Click a point — expect the citation panel to open with that chunk's detail
+   (and **View in document** working).
+5. Focus the panel and use arrow keys + Enter — the selection ring moves and
+   Enter opens the same detail.
+6. With OS reduced-motion enabled, the view must not auto-rotate. On a
+   low-core device (`hardwareConcurrency <= 4`) it must render the static 2D
+   scatter instead.
+
+### 3.7 Document Viewer
 1. Ask a question that produces citations, open the Sources panel, click
    **View in document →** on a citation.
 2. Expect the split-screen viewer to open that document, auto-scroll to the
    cited chunk, and highlight the chunk plus the query-relevant sentence.
 3. Test with a CSV citation (chunk shows its row range) and a markdown citation.
 
-### 3.7 Upload Workspace
+### 3.8 Upload Workspace
 1. Drag a file over the dropzone — expect the glow/pulse micro-animation and
    the metadata preview card (type badge, size, staged progress, then page/row
    + chunk counts and strategy).

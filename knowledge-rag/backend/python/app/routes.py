@@ -13,6 +13,7 @@ from .utils import ingest_document, CHUNKERS, SUPPORTED_EXTENSIONS
 from .dependencies import get_session_vectors
 from .retrieval import hybrid_search, RETRIEVE_CANDIDATES, RERANK_TOP_K
 from .observability import log_query, utc_now_iso
+from .space import get_space, transform_query
 from . import llm as llm_client
 
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "50")) * 1024 * 1024
@@ -207,6 +208,61 @@ async def ingest_file(
         overlap=overlap,
         chunk_strategy=strategy,
     )
+
+@router.get("/space/{session_id}")
+async def vector_space(session_id: str, force: bool = False):
+    """3D projection of every chunk in the session (UMAP, cached per document
+    set). Returns compact {id, x, y, z, filename} points — full chunk text is
+    fetched on demand, not shipped up front. ?force=1 recomputes the fit.
+    """
+    _validate_session_id(session_id)
+    try:
+        space = get_space(session_id, force=force)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {
+        "session_id": session_id,
+        "method": space["method"],
+        "embedder": space["embedder"],
+        "point_count": space["point_count"],
+        "clustered": space["clustered"],
+        "threshold": space["threshold"],
+        "points": space["points"],
+    }
+
+
+@router.post("/space/{session_id}/query")
+async def vector_space_query(session_id: str, body: dict):
+    """Drop a query into the existing map (UMAP .transform() — no re-layout)
+    and report which chunks the retrieval funnel promoted vs. receded.
+    """
+    _validate_session_id(session_id)
+    q = (body.get("query") or "").strip()
+    if not q:
+        raise HTTPException(status_code=400, detail="Query string required")
+
+    session = get_session_vectors(session_id)
+    bm25 = session.get("bm25")
+    if bm25 is None:
+        raise HTTPException(status_code=500, detail="BM25 index not initialized — upload a document first")
+
+    out = hybrid_search(
+        session["collection"], bm25, q,
+        bm25_ids=session.get("bm25_ids"),
+        candidates=RETRIEVE_CANDIDATES,
+        top_k=RERANK_TOP_K,
+    )
+    point = transform_query(session_id, q)
+    return {
+        "session_id": session_id,
+        "query": q,
+        **point,
+        "promoted_ids": out["reranked_ids"],
+        "retrieved_ids": [c["id"] for c in out["fused_pool"]],
+        "candidates_retrieved": out["candidates_retrieved"],
+        "candidates_sent_to_llm": out["candidates_sent_to_llm"],
+    }
+
 
 @router.post("/title")
 async def chat_title(body: dict):

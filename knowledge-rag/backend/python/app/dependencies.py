@@ -44,6 +44,26 @@ def get_session_vectors(session_id: str):
         }
     return SESSION_REGISTRY[session_id]
 
+def reset_session(session_id: str):
+    """Drop a session completely — in-memory registry, persisted Chroma
+    collection, and BM25 file. The eval harness calls this before ingesting so
+    re-running the same settings combo starts from a clean collection: without
+    it, the persistent Chroma dir accumulates duplicate chunks on every run,
+    which silently skews recall denominators and breaks the README baselines.
+    Deletes the collection through the Chroma API rather than removing the
+    directory, because PersistentClient caches clients per path and a cached
+    client would resurrect the old data after a bare rmtree."""
+    SESSION_REGISTRY.pop(session_id, None)
+    try:
+        client = chromadb.PersistentClient(path=str(BASE_PERSISTENCE_DIR / session_id))
+        client.delete_collection(session_id)
+    except Exception:  # noqa: BLE001 - collection may not exist yet (first run)
+        pass
+    bm25_path = BASE_PERSISTENCE_DIR / session_id / "bm25.json"
+    if bm25_path.exists():
+        bm25_path.unlink()
+
+
 def persist_bm25(session_id: str, tokenized_corpus: list, ids: list = None):
     """Persist BM25 tokenized corpus (and matching Chroma ids) to disk for later reload."""
     bm25_dir = BASE_PERSISTENCE_DIR / session_id

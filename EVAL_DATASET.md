@@ -4,11 +4,11 @@ This document defines the requirements for the evaluation corpus (`eval-docs/`)
 and golden query set (`backend/python/eval/golden_set.json`) used by the eval
 harness (`python -m eval.run_eval`).
 
-> **Status:** complete. The `eval-docs/` corpus (18 documents, 6 topical
-> clusters, 3 near-duplicate pairs, all 5 formats) and the 72-query golden set
-> (`eval/golden_set.json`, tagged `single_hop` / `multi_hop` / `ambiguous` /
-> `unanswerable`) are committed, and the README Benchmarks table contains
-> measured numbers from real runs.
+> **Status:** complete. The `eval-docs/` corpus (18 documents, ~71 chunks at
+> the default 500/100 setting, 6 topical clusters, 3 near-duplicate pairs, all
+> 5 formats) and the 72-query golden set (`eval/golden_set.json`, tagged
+> `single_hop` / `multi_hop` / `ambiguous` / `unanswerable`) are committed, and
+> the README Benchmarks table contains measured numbers from real runs.
 
 ---
 

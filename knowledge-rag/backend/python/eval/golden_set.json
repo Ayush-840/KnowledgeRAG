@@ -3,7 +3,7 @@
     "id": "q001",
     "query_type": "single_hop",
     "question": "How much does Atlas Standard cost per user per month?",
-    "evidence": ["Atlas,Standard,49"],
+    "evidence": ["Atlas, Standard, 49"],
     "expected_answer": "Atlas Standard costs $49 per user per month.",
     "expected_source": ["product-pricing.csv"],
     "expected_page": 1
@@ -237,7 +237,7 @@
     "id": "q027",
     "query_type": "multi_hop",
     "question": "What uptime guarantee does the product behind Beacon offer, and what pricing tier is available?",
-    "evidence": ["99.95%", "Beacon,Starter,19"],
+    "evidence": ["99.95%", "Beacon, Starter, 19"],
     "expected_answer": "Beacon offers 99.95% uptime; Starter is $19 per user per month.",
     "expected_source": ["sla-agreement.md", "product-pricing.csv"],
     "expected_page": 1
@@ -273,7 +273,7 @@
     "id": "q031",
     "query_type": "multi_hop",
     "question": "Which data sources can Atlas connect to, and what does the Atlas Enterprise edition cost?",
-    "evidence": ["Snowflake, BigQuery, Postgres, Redshift", "Atlas,Enterprise,99"],
+    "evidence": ["Snowflake, BigQuery, Postgres, Redshift", "Atlas, Enterprise, 99"],
     "expected_answer": "Atlas connects to Snowflake, BigQuery, Postgres, and Redshift; Enterprise is $99 per user per month.",
     "expected_source": ["feature-comparison.md", "product-pricing.csv"],
     "expected_page": 1
@@ -291,7 +291,7 @@
     "id": "q033",
     "query_type": "multi_hop",
     "question": "How much does the Nimbus Enterprise tier cost, and what uptime guarantee does it receive?",
-    "evidence": ["Nimbus,Enterprise,999", "99.99%"],
+    "evidence": ["Nimbus, Enterprise, 999", "99.99%"],
     "expected_answer": "Nimbus Enterprise costs $999 per month and receives a 99.99% uptime guarantee.",
     "expected_source": ["product-pricing.csv", "sla-agreement.md"],
     "expected_page": 1
@@ -318,7 +318,7 @@
     "id": "q036",
     "query_type": "multi_hop",
     "question": "Which product integrates with Slack, and how much does its Standard tier cost?",
-    "evidence": ["Beacon", "Beacon,Standard,39"],
+    "evidence": ["Beacon", "Beacon, Standard, 39"],
     "expected_answer": "Beacon integrates with Slack; its Standard tier is $39 per user per month.",
     "expected_source": ["feature-comparison.md", "product-pricing.csv"],
     "expected_page": 1
@@ -393,7 +393,7 @@
     "id": "q044",
     "query_type": "ambiguous",
     "question": "What does Atlas cost?",
-    "evidence": ["Atlas,Enterprise,99"],
+    "evidence": ["Atlas, Enterprise, 99"],
     "expected_answer": "Atlas Enterprise costs $99 per user per month (pricing varies by tier).",
     "expected_source": ["product-pricing.csv"],
     "expected_page": 1
@@ -531,7 +531,7 @@
     "id": "q059",
     "query_type": "single_hop",
     "question": "What is the Nimbus Free tier price?",
-    "evidence": ["Nimbus,Free,0"],
+    "evidence": ["Nimbus, Free, 0"],
     "expected_answer": "Nimbus Free is $0 per pipeline.",
     "expected_source": ["product-pricing.csv"],
     "expected_page": 1
@@ -594,7 +594,7 @@
     "id": "q066",
     "query_type": "single_hop",
     "question": "What is the standard Nimbus monthly price for the Standard tier?",
-    "evidence": ["Nimbus,Standard,499"],
+    "evidence": ["Nimbus, Standard, 499"],
     "expected_answer": "Nimbus Standard costs $499 per month.",
     "expected_source": ["product-pricing.csv"],
     "expected_page": 1

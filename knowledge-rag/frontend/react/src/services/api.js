@@ -109,6 +109,16 @@ export async function generateTitle(query) {
   return data.title
 }
 
+/** 3D projection of every chunk in a session: { method, points: [{id,x,y,z,filename,count?}], clustered }. */
+export function getSpace(sessionId) {
+  return request(`/space/${sessionId}`, { timeoutMs: 120000 })
+}
+
+/** Drop a query into the existing map: { point: {x,y,z}, promoted_ids, retrieved_ids }. */
+export function querySpace(sessionId, query) {
+  return request(`/space/${sessionId}/query`, { method: 'POST', body: { query } })
+}
+
 /** Full RAG chat: retrieval -> rerank -> LLM generation with citations. */
 export function chatRequest(sessionId, query, signal) {
   return request(`/chat/${sessionId}`, { method: 'POST', body: { query }, signal })

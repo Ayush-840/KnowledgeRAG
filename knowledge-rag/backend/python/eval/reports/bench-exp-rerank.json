@@ -1,0 +1,1963 @@
+{
+  "generated_at": "2026-08-16T16:47:16.934318+00:00",
+  "settings": {
+    "chunk_size": 500,
+    "overlap": 100,
+    "strategy": "fixed",
+    "retrieve_candidates": 20,
+    "rerank_top_k": 5,
+    "reranker_enabled": true,
+    "judge_model": "meta/llama-3.3-70b-instruct",
+    "generation_model": "meta/llama-3.3-70b-instruct",
+    "llm_enabled": true
+  },
+  "documents": [
+    "api-reference.md",
+    "atlas-product-sheet.pdf",
+    "benefits-faq.md",
+    "employee-handbook-v1.md",
+    "employee-handbook-v2.md",
+    "feature-comparison.md",
+    "gdpr-faq.md",
+    "incident-runbook.txt",
+    "oncall-handbook.md",
+    "platform-report-part1.md",
+    "platform-report-part2.md",
+    "privacy-policy-v1.md",
+    "privacy-policy-v2.md",
+    "product-pricing.csv",
+    "security-policy.docx",
+    "sla-agreement.md",
+    "vendor-contract-v2.md",
+    "vendor-contract.md"
+  ],
+  "summary": {
+    "context_precision": 0.2861,
+    "context_recall": 0.6936,
+    "recall_at_pool": 0.8533,
+    "faithfulness": null,
+    "answer_relevance": null,
+    "mean_generation_ms": null,
+    "mean_total_latency_ms": 889.1197,
+    "by_query_type": {
+      "ambiguous": {
+        "n": 12,
+        "context_precision": 0.1833,
+        "context_recall": 0.75,
+        "recall_at_pool": 0.9167,
+        "faithfulness": null,
+        "answer_relevance": null
+      },
+      "multi_hop": {
+        "n": 19,
+        "context_precision": 0.4737,
+        "context_recall": 0.5547,
+        "recall_at_pool": 0.867,
+        "faithfulness": null,
+        "answer_relevance": null
+      },
+      "single_hop": {
+        "n": 36,
+        "context_precision": 0.2611,
+        "context_recall": 0.8445,
+        "recall_at_pool": 0.9435,
+        "faithfulness": null,
+        "answer_relevance": null
+      },
+      "unanswerable": {
+        "n": 5,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "recall_at_pool": 0.0,
+        "faithfulness": null,
+        "answer_relevance": null
+      }
+    }
+  },
+  "queries": [
+    {
+      "id": "q001",
+      "query_type": "single_hop",
+      "question": "How much does Atlas Standard cost per user per month?",
+      "expected_source": [
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 14.59,
+        "bm25": 0.19,
+        "fusion": 0.61,
+        "rerank": 7601.99,
+        "total": 7617.62
+      }
+    },
+    {
+      "id": "q002",
+      "query_type": "single_hop",
+      "question": "What monthly uptime guarantee does Beacon offer under the SLA?",
+      "expected_source": [
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 24.63,
+        "bm25": 0.96,
+        "fusion": 1.07,
+        "rerank": 771.17,
+        "total": 797.9
+      }
+    },
+    {
+      "id": "q003",
+      "query_type": "single_hop",
+      "question": "What is the p95 warm query latency of the Calcite query engine?",
+      "expected_source": [
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 3,
+      "context_precision": 0.4,
+      "context_recall": 0.6667,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 20.5,
+        "bm25": 0.25,
+        "fusion": 1.09,
+        "rerank": 767.53,
+        "total": 789.52
+      }
+    },
+    {
+      "id": "q004",
+      "query_type": "single_hop",
+      "question": "What percentage does Aurora Labs match on employee 401(k) contributions?",
+      "expected_source": [
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 23.31,
+        "bm25": 0.31,
+        "fusion": 0.99,
+        "rerank": 780.66,
+        "total": 805.33
+      }
+    },
+    {
+      "id": "q005",
+      "query_type": "single_hop",
+      "question": "How quickly must an on-call engineer acknowledge a SEV1 page?",
+      "expected_source": [
+        "oncall-handbook.md",
+        "incident-runbook.txt"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 20.18,
+        "bm25": 0.28,
+        "fusion": 1.07,
+        "rerank": 776.87,
+        "total": 798.46
+      }
+    },
+    {
+      "id": "q006",
+      "query_type": "single_hop",
+      "question": "What is the SKU of the Atlas analytics platform?",
+      "expected_source": [
+        "atlas-product-sheet.pdf"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 8.9,
+        "bm25": 0.22,
+        "fusion": 1.05,
+        "rerank": 770.44,
+        "total": 780.65
+      }
+    },
+    {
+      "id": "q007",
+      "query_type": "single_hop",
+      "question": "What is the annual fee Acme Corp pays under the current Master Services Agreement?",
+      "expected_source": [
+        "vendor-contract-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 16.39,
+        "bm25": 0.23,
+        "fusion": 0.74,
+        "rerank": 777.69,
+        "total": 795.11
+      }
+    },
+    {
+      "id": "q008",
+      "query_type": "single_hop",
+      "question": "Which Aurora Labs product is the alerting and monitoring service?",
+      "expected_source": [
+        "feature-comparison.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 20.31,
+        "bm25": 0.29,
+        "fusion": 1.11,
+        "rerank": 773.62,
+        "total": 795.39
+      }
+    },
+    {
+      "id": "q009",
+      "query_type": "single_hop",
+      "question": "What is the base URL of the Aurora Labs REST API?",
+      "expected_source": [
+        "api-reference.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.3,
+        "bm25": 0.39,
+        "fusion": 1.14,
+        "rerank": 785.73,
+        "total": 796.63
+      }
+    },
+    {
+      "id": "q010",
+      "query_type": "single_hop",
+      "question": "How long is the probation period for new hires at Aurora Labs?",
+      "expected_source": [
+        "employee-handbook-v1.md",
+        "employee-handbook-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 11.22,
+        "bm25": 0.41,
+        "fusion": 1.55,
+        "rerank": 784.19,
+        "total": 797.45
+      }
+    },
+    {
+      "id": "q011",
+      "query_type": "single_hop",
+      "question": "How many named users does Acme Corp get under the current MSA?",
+      "expected_source": [
+        "vendor-contract-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.12,
+        "bm25": 0.26,
+        "fusion": 1.23,
+        "rerank": 777.47,
+        "total": 789.13
+      }
+    },
+    {
+      "id": "q012",
+      "query_type": "single_hop",
+      "question": "What is the codename of the stream processor behind Nimbus?",
+      "expected_source": [
+        "platform-report-part1.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 7,
+      "context_precision": 0.2,
+      "context_recall": 0.1429,
+      "recall_at_pool": 0.5714,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.86,
+        "bm25": 0.33,
+        "fusion": 2.5,
+        "rerank": 770.03,
+        "total": 785.78
+      }
+    },
+    {
+      "id": "q013",
+      "query_type": "single_hop",
+      "question": "How many chart types does the Atlas dashboard builder support?",
+      "expected_source": [
+        "feature-comparison.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.6,
+        "bm25": 0.43,
+        "fusion": 1.57,
+        "rerank": 776.04,
+        "total": 787.71
+      }
+    },
+    {
+      "id": "q014",
+      "query_type": "single_hop",
+      "question": "What is the Nimbus Enterprise monthly uptime guarantee?",
+      "expected_source": [
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.78,
+        "bm25": 0.32,
+        "fusion": 1.4,
+        "rerank": 768.39,
+        "total": 780.94
+      }
+    },
+    {
+      "id": "q015",
+      "query_type": "single_hop",
+      "question": "What is the API rate limit for the free tier?",
+      "expected_source": [
+        "api-reference.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 13.42,
+        "bm25": 0.79,
+        "fusion": 2.39,
+        "rerank": 773.05,
+        "total": 789.73
+      }
+    },
+    {
+      "id": "q016",
+      "query_type": "single_hop",
+      "question": "How long after an incident must the post-incident review be completed?",
+      "expected_source": [
+        "incident-runbook.txt"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 0.5,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.33,
+        "bm25": 0.46,
+        "fusion": 1.41,
+        "rerank": 779.7,
+        "total": 791.96
+      }
+    },
+    {
+      "id": "q017",
+      "query_type": "single_hop",
+      "question": "What is the wellness stipend amount per month?",
+      "expected_source": [
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 14.12,
+        "bm25": 0.25,
+        "fusion": 1.24,
+        "rerank": 770.03,
+        "total": 785.71
+      }
+    },
+    {
+      "id": "q018",
+      "query_type": "single_hop",
+      "question": "Which codename is used for the Aurora Labs catalog service?",
+      "expected_source": [
+        "platform-report-part1.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 9,
+      "context_precision": 0.2,
+      "context_recall": 0.1111,
+      "recall_at_pool": 0.7778,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 11.94,
+        "bm25": 0.42,
+        "fusion": 1.58,
+        "rerank": 769.54,
+        "total": 783.56
+      }
+    },
+    {
+      "id": "q019",
+      "query_type": "single_hop",
+      "question": "How often must API keys be rotated according to the security policy?",
+      "expected_source": [
+        "security-policy.docx"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.69,
+        "bm25": 0.33,
+        "fusion": 1.07,
+        "rerank": 770.06,
+        "total": 784.22
+      }
+    },
+    {
+      "id": "q020",
+      "query_type": "single_hop",
+      "question": "What is the p95 write latency of the Marina catalog service?",
+      "expected_source": [
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.34,
+        "bm25": 0.26,
+        "fusion": 1.12,
+        "rerank": 773.11,
+        "total": 784.88
+      }
+    },
+    {
+      "id": "q021",
+      "query_type": "single_hop",
+      "question": "What is the learning budget per employee per year?",
+      "expected_source": [
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 3,
+      "context_precision": 0.6,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 27.23,
+        "bm25": 0.21,
+        "fusion": 0.91,
+        "rerank": 770.64,
+        "total": 799.1
+      }
+    },
+    {
+      "id": "q022",
+      "query_type": "single_hop",
+      "question": "Who is Aurora Labs' EU representative under GDPR?",
+      "expected_source": [
+        "gdpr-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 4,
+      "context_precision": 0.6,
+      "context_recall": 0.75,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 27.84,
+        "bm25": 0.34,
+        "fusion": 1.28,
+        "rerank": 789.7,
+        "total": 819.23
+      }
+    },
+    {
+      "id": "q023",
+      "query_type": "single_hop",
+      "question": "What is the p95 end-to-end processing latency of Kestrel?",
+      "expected_source": [
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 19.34,
+        "bm25": 0.3,
+        "fusion": 0.98,
+        "rerank": 772.98,
+        "total": 793.64
+      }
+    },
+    {
+      "id": "q024",
+      "query_type": "single_hop",
+      "question": "What is the initial term of the current Acme Master Services Agreement?",
+      "expected_source": [
+        "vendor-contract-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 11.58,
+        "bm25": 0.45,
+        "fusion": 1.25,
+        "rerank": 768.99,
+        "total": 782.32
+      }
+    },
+    {
+      "id": "q025",
+      "query_type": "multi_hop",
+      "question": "Which product does the Calcite query engine power, and what is its warm p95 latency?",
+      "expected_source": [
+        "platform-report-part1.md",
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 4,
+      "context_precision": 0.6,
+      "context_recall": 0.75,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 15.78,
+        "bm25": 0.29,
+        "fusion": 0.82,
+        "rerank": 766.44,
+        "total": 783.4
+      }
+    },
+    {
+      "id": "q026",
+      "query_type": "multi_hop",
+      "question": "What happens when Nimbus pipeline lag exceeds 30 minutes, and what does the SLA commit for pipeline lag?",
+      "expected_source": [
+        "incident-runbook.txt",
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 3,
+      "context_precision": 0.4,
+      "context_recall": 0.6667,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.01,
+        "bm25": 0.27,
+        "fusion": 0.61,
+        "rerank": 765.44,
+        "total": 778.39
+      }
+    },
+    {
+      "id": "q027",
+      "query_type": "multi_hop",
+      "question": "What uptime guarantee does the product behind Beacon offer, and what pricing tier is available?",
+      "expected_source": [
+        "sla-agreement.md",
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 8.27,
+        "bm25": 0.32,
+        "fusion": 0.86,
+        "rerank": 764.56,
+        "total": 774.08
+      }
+    },
+    {
+      "id": "q028",
+      "query_type": "multi_hop",
+      "question": "What is the retention period in the version of the privacy policy that supersedes Version 1?",
+      "expected_source": [
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 3,
+      "context_precision": 0.4,
+      "context_recall": 0.6667,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 13.93,
+        "bm25": 0.32,
+        "fusion": 0.91,
+        "rerank": 768.85,
+        "total": 784.08
+      }
+    },
+    {
+      "id": "q029",
+      "query_type": "multi_hop",
+      "question": "Which service does the incident runbook say powers the data pipeline, and what is its throughput ceiling per the benchmark report?",
+      "expected_source": [
+        "platform-report-part1.md",
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 2,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 17.5,
+        "bm25": 0.41,
+        "fusion": 0.9,
+        "rerank": 769.52,
+        "total": 788.39
+      }
+    },
+    {
+      "id": "q030",
+      "query_type": "multi_hop",
+      "question": "What does the current employee handbook say about parental leave, and what additional weeks does the benefits FAQ mention?",
+      "expected_source": [
+        "employee-handbook-v2.md",
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 14.84,
+        "bm25": 0.33,
+        "fusion": 0.87,
+        "rerank": 766.73,
+        "total": 782.82
+      }
+    },
+    {
+      "id": "q031",
+      "query_type": "multi_hop",
+      "question": "Which data sources can Atlas connect to, and what does the Atlas Enterprise edition cost?",
+      "expected_source": [
+        "feature-comparison.md",
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 0.5,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.09,
+        "bm25": 0.37,
+        "fusion": 1.45,
+        "rerank": 768.37,
+        "total": 779.35
+      }
+    },
+    {
+      "id": "q032",
+      "query_type": "multi_hop",
+      "question": "What is the SEV2 response time in the runbook, and what is the SLA credit percentage for Beacon?",
+      "expected_source": [
+        "incident-runbook.txt",
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 5,
+      "total_relevant": 9,
+      "context_precision": 1.0,
+      "context_recall": 0.5556,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 21.77,
+        "bm25": 0.53,
+        "fusion": 1.19,
+        "rerank": 774.0,
+        "total": 797.56
+      }
+    },
+    {
+      "id": "q033",
+      "query_type": "multi_hop",
+      "question": "How much does the Nimbus Enterprise tier cost, and what uptime guarantee does it receive?",
+      "expected_source": [
+        "product-pricing.csv",
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 18.27,
+        "bm25": 0.28,
+        "fusion": 0.96,
+        "rerank": 769.56,
+        "total": 789.12
+      }
+    },
+    {
+      "id": "q034",
+      "query_type": "multi_hop",
+      "question": "What is the maximum catalog size tested for Marina, and which codename is the query engine?",
+      "expected_source": [
+        "platform-report-part2.md",
+        "platform-report-part1.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 5,
+      "total_relevant": 9,
+      "context_precision": 1.0,
+      "context_recall": 0.5556,
+      "recall_at_pool": 0.8889,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 7.31,
+        "bm25": 0.38,
+        "fusion": 0.95,
+        "rerank": 763.76,
+        "total": 772.44
+      }
+    },
+    {
+      "id": "q035",
+      "query_type": "multi_hop",
+      "question": "What encryption does the privacy policy promise at rest, and what does the security policy require for restricted data?",
+      "expected_source": [
+        "privacy-policy-v1.md",
+        "security-policy.docx"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 3,
+      "context_precision": 0.6,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.6,
+        "bm25": 0.37,
+        "fusion": 0.94,
+        "rerank": 768.75,
+        "total": 779.7
+      }
+    },
+    {
+      "id": "q036",
+      "query_type": "multi_hop",
+      "question": "Which product integrates with Slack, and how much does its Standard tier cost?",
+      "expected_source": [
+        "feature-comparison.md",
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 26,
+      "context_precision": 0.6,
+      "context_recall": 0.1154,
+      "recall_at_pool": 0.3846,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 13.67,
+        "bm25": 0.61,
+        "fusion": 1.49,
+        "rerank": 770.03,
+        "total": 785.89
+      }
+    },
+    {
+      "id": "q037",
+      "query_type": "multi_hop",
+      "question": "What is the equity vesting schedule in the employee handbook, and what is the 401(k) match percentage?",
+      "expected_source": [
+        "employee-handbook-v1.md",
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 3,
+      "context_precision": 0.6,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 17.17,
+        "bm25": 0.32,
+        "fusion": 1.41,
+        "rerank": 768.52,
+        "total": 787.5
+      }
+    },
+    {
+      "id": "q038",
+      "query_type": "multi_hop",
+      "question": "How long does the runbook say an incident can run before escalating to the VP of Engineering, and what is the SLA's Nimbus lag commitment?",
+      "expected_source": [
+        "incident-runbook.txt",
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 4,
+      "context_precision": 0.6,
+      "context_recall": 0.75,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 26.64,
+        "bm25": 0.68,
+        "fusion": 1.14,
+        "rerank": 771.92,
+        "total": 800.43
+      }
+    },
+    {
+      "id": "q039",
+      "query_type": "multi_hop",
+      "question": "Which two data sources can Atlas and Nimbus both write to according to the feature comparison?",
+      "expected_source": [
+        "feature-comparison.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 5,
+      "context_precision": 0.2,
+      "context_recall": 0.2,
+      "recall_at_pool": 0.8,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.17,
+        "bm25": 0.32,
+        "fusion": 1.05,
+        "rerank": 782.37,
+        "total": 792.96
+      }
+    },
+    {
+      "id": "q040",
+      "query_type": "multi_hop",
+      "question": "What is the backpressure onset lag measured for Kestrel, and which Kafka-based product does it power?",
+      "expected_source": [
+        "platform-report-part2.md",
+        "platform-report-part1.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 4,
+      "total_relevant": 26,
+      "context_precision": 0.8,
+      "context_recall": 0.1538,
+      "recall_at_pool": 0.4615,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 8.82,
+        "bm25": 0.35,
+        "fusion": 0.9,
+        "rerank": 773.42,
+        "total": 783.57
+      }
+    },
+    {
+      "id": "q041",
+      "query_type": "ambiguous",
+      "question": "What is the current data retention period in the Aurora Labs privacy policy?",
+      "expected_source": [
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 1,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 6.82,
+        "bm25": 0.27,
+        "fusion": 0.78,
+        "rerank": 765.59,
+        "total": 773.53
+      }
+    },
+    {
+      "id": "q042",
+      "query_type": "ambiguous",
+      "question": "How many PTO days do employees get per year?",
+      "expected_source": [
+        "employee-handbook-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.38,
+        "bm25": 0.22,
+        "fusion": 0.88,
+        "rerank": 792.54,
+        "total": 806.08
+      }
+    },
+    {
+      "id": "q043",
+      "query_type": "ambiguous",
+      "question": "What is the renewal term in the Acme Master Services Agreement?",
+      "expected_source": [
+        "vendor-contract-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.43,
+        "bm25": 0.27,
+        "fusion": 0.91,
+        "rerank": 771.32,
+        "total": 781.98
+      }
+    },
+    {
+      "id": "q044",
+      "query_type": "ambiguous",
+      "question": "What does Atlas cost?",
+      "expected_source": [
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 1,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 55.86,
+        "bm25": 0.12,
+        "fusion": 0.82,
+        "rerank": 780.09,
+        "total": 836.96
+      }
+    },
+    {
+      "id": "q045",
+      "query_type": "ambiguous",
+      "question": "What is the uptime guarantee for the Nimbus pipeline?",
+      "expected_source": [
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 11.09,
+        "bm25": 0.38,
+        "fusion": 1.09,
+        "rerank": 769.9,
+        "total": 782.53
+      }
+    },
+    {
+      "id": "q046",
+      "query_type": "ambiguous",
+      "question": "What encryption does Aurora Labs use for data at rest?",
+      "expected_source": [
+        "privacy-policy-v1.md",
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 15.42,
+        "bm25": 0.48,
+        "fusion": 1.62,
+        "rerank": 777.74,
+        "total": 795.33
+      }
+    },
+    {
+      "id": "q047",
+      "query_type": "ambiguous",
+      "question": "What happens to customer content after the subscription term ends?",
+      "expected_source": [
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 4,
+      "context_precision": 0.4,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 8.9,
+        "bm25": 0.25,
+        "fusion": 1.4,
+        "rerank": 772.78,
+        "total": 783.4
+      }
+    },
+    {
+      "id": "q048",
+      "query_type": "ambiguous",
+      "question": "What is the p95 query latency target for Atlas?",
+      "expected_source": [
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 15.05,
+        "bm25": 0.48,
+        "fusion": 1.64,
+        "rerank": 791.29,
+        "total": 808.54
+      }
+    },
+    {
+      "id": "q049",
+      "query_type": "ambiguous",
+      "question": "Which document describes how to respond to a SEV1 incident?",
+      "expected_source": [
+        "incident-runbook.txt"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.69,
+        "bm25": 0.32,
+        "fusion": 1.22,
+        "rerank": 780.29,
+        "total": 791.6
+      }
+    },
+    {
+      "id": "q050",
+      "query_type": "ambiguous",
+      "question": "What happens when an incident lasts more than 4 hours?",
+      "expected_source": [
+        "incident-runbook.txt"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.52,
+        "bm25": 0.27,
+        "fusion": 1.04,
+        "rerank": 778.99,
+        "total": 790.88
+      }
+    },
+    {
+      "id": "q051",
+      "query_type": "ambiguous",
+      "question": "What is the Nimbus pipeline lag commitment?",
+      "expected_source": [
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 7.71,
+        "bm25": 0.16,
+        "fusion": 0.73,
+        "rerank": 771.46,
+        "total": 780.1
+      }
+    },
+    {
+      "id": "q052",
+      "query_type": "ambiguous",
+      "question": "How many PTO days carry over into the next year?",
+      "expected_source": [
+        "employee-handbook-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 7.85,
+        "bm25": 0.22,
+        "fusion": 1.03,
+        "rerank": 784.88,
+        "total": 794.04
+      }
+    },
+    {
+      "id": "q053",
+      "query_type": "unanswerable",
+      "question": "What is Aurora Labs' revenue for fiscal year 2024?",
+      "expected_source": [],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.31,
+        "bm25": 0.27,
+        "fusion": 0.92,
+        "rerank": 772.7,
+        "total": 786.25
+      }
+    },
+    {
+      "id": "q054",
+      "query_type": "unanswerable",
+      "question": "What is the email address of Aurora Labs' CEO?",
+      "expected_source": [],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 11.2,
+        "bm25": 0.27,
+        "fusion": 1.34,
+        "rerank": 787.96,
+        "total": 800.85
+      }
+    },
+    {
+      "id": "q055",
+      "query_type": "unanswerable",
+      "question": "What is the interest rate on Aurora Labs' line of credit?",
+      "expected_source": [],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.33,
+        "bm25": 0.3,
+        "fusion": 1.15,
+        "rerank": 778.68,
+        "total": 789.52
+      }
+    },
+    {
+      "id": "q056",
+      "query_type": "unanswerable",
+      "question": "How many employees does Aurora Labs have in Tokyo?",
+      "expected_source": [],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.89,
+        "bm25": 0.35,
+        "fusion": 1.91,
+        "rerank": 783.74,
+        "total": 798.95
+      }
+    },
+    {
+      "id": "q057",
+      "query_type": "unanswerable",
+      "question": "What is the version number of the Aurora mobile app?",
+      "expected_source": [],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.05,
+        "bm25": 0.35,
+        "fusion": 1.19,
+        "rerank": 779.66,
+        "total": 791.3
+      }
+    },
+    {
+      "id": "q058",
+      "query_type": "single_hop",
+      "question": "What is the maximum number of concurrent queries Calcite sustained in the benchmark?",
+      "expected_source": [
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 42.83,
+        "bm25": 0.33,
+        "fusion": 1.2,
+        "rerank": 822.54,
+        "total": 866.96
+      }
+    },
+    {
+      "id": "q059",
+      "query_type": "single_hop",
+      "question": "What is the Nimbus Free tier price?",
+      "expected_source": [
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.29,
+        "bm25": 0.22,
+        "fusion": 1.11,
+        "rerank": 779.92,
+        "total": 790.62
+      }
+    },
+    {
+      "id": "q060",
+      "query_type": "single_hop",
+      "question": "How long does Aurora Labs respond to a verified data subject access request?",
+      "expected_source": [
+        "privacy-policy-v1.md",
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 3,
+      "total_relevant": 13,
+      "context_precision": 0.6,
+      "context_recall": 0.2308,
+      "recall_at_pool": 0.6154,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 11.23,
+        "bm25": 0.44,
+        "fusion": 1.3,
+        "rerank": 785.69,
+        "total": 798.72
+      }
+    },
+    {
+      "id": "q061",
+      "query_type": "single_hop",
+      "question": "What is the p95 write latency of Marina?",
+      "expected_source": [
+        "platform-report-part2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 8.36,
+        "bm25": 0.26,
+        "fusion": 0.94,
+        "rerank": 777.42,
+        "total": 787.06
+      }
+    },
+    {
+      "id": "q062",
+      "query_type": "single_hop",
+      "question": "What is the monthly uptime guarantee for Atlas analytics?",
+      "expected_source": [
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 14.41,
+        "bm25": 0.44,
+        "fusion": 1.48,
+        "rerank": 781.44,
+        "total": 797.84
+      }
+    },
+    {
+      "id": "q063",
+      "query_type": "single_hop",
+      "question": "How long are Aurora Labs usage telemetry records retained under the current policy?",
+      "expected_source": [
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.59,
+        "bm25": 0.36,
+        "fusion": 0.99,
+        "rerank": 790.64,
+        "total": 804.63
+      }
+    },
+    {
+      "id": "q064",
+      "query_type": "single_hop",
+      "question": "What is the health insurance premium coverage for employee dependents?",
+      "expected_source": [
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 12.14,
+        "bm25": 0.37,
+        "fusion": 1.46,
+        "rerank": 785.84,
+        "total": 799.88
+      }
+    },
+    {
+      "id": "q065",
+      "query_type": "single_hop",
+      "question": "Which error code does the API return for rate limit exceeded?",
+      "expected_source": [
+        "api-reference.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 8.98,
+        "bm25": 0.38,
+        "fusion": 1.09,
+        "rerank": 786.67,
+        "total": 797.18
+      }
+    },
+    {
+      "id": "q066",
+      "query_type": "single_hop",
+      "question": "What is the standard Nimbus monthly price for the Standard tier?",
+      "expected_source": [
+        "product-pricing.csv"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 9.95,
+        "bm25": 0.29,
+        "fusion": 1.7,
+        "rerank": 790.36,
+        "total": 802.37
+      }
+    },
+    {
+      "id": "q067",
+      "query_type": "single_hop",
+      "question": "How many weeks of paid parental leave do new parents receive?",
+      "expected_source": [
+        "employee-handbook-v2.md",
+        "benefits-faq.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 2,
+      "context_precision": 0.4,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 15.41,
+        "bm25": 0.39,
+        "fusion": 1.52,
+        "rerank": 793.61,
+        "total": 810.99
+      }
+    },
+    {
+      "id": "q068",
+      "query_type": "single_hop",
+      "question": "What is the liability cap in the current Acme MSA?",
+      "expected_source": [
+        "vendor-contract-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 1,
+      "context_precision": 0.2,
+      "context_recall": 1.0,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.29,
+        "bm25": 0.27,
+        "fusion": 1.33,
+        "rerank": 790.53,
+        "total": 802.49
+      }
+    },
+    {
+      "id": "q069",
+      "query_type": "single_hop",
+      "question": "How many production regions does the Aurora Labs platform run in?",
+      "expected_source": [
+        "platform-report-part1.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 0,
+      "total_relevant": 2,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "recall_at_pool": 0.5,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 13.99,
+        "bm25": 0.49,
+        "fusion": 1.66,
+        "rerank": 793.17,
+        "total": 809.38
+      }
+    },
+    {
+      "id": "q070",
+      "query_type": "multi_hop",
+      "question": "What is the Beacon delivery delay limit in the runbook, and what uptime guarantee does Beacon carry in the SLA?",
+      "expected_source": [
+        "incident-runbook.txt",
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 1,
+      "total_relevant": 2,
+      "context_precision": 0.2,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 10.86,
+        "bm25": 0.55,
+        "fusion": 0.96,
+        "rerank": 813.94,
+        "total": 826.4
+      }
+    },
+    {
+      "id": "q071",
+      "query_type": "multi_hop",
+      "question": "What does the runbook say to check when Atlas query timeouts occur, and what is the SLA latency target for Atlas?",
+      "expected_source": [
+        "incident-runbook.txt",
+        "sla-agreement.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 4,
+      "context_precision": 0.4,
+      "context_recall": 0.5,
+      "recall_at_pool": 1.0,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 20.85,
+        "bm25": 0.43,
+        "fusion": 1.09,
+        "rerank": 805.66,
+        "total": 828.1
+      }
+    },
+    {
+      "id": "q072",
+      "query_type": "multi_hop",
+      "question": "Which regions host customer data per the GDPR FAQ, and what is the retention period for usage telemetry in the current privacy policy?",
+      "expected_source": [
+        "gdpr-faq.md",
+        "privacy-policy-v2.md"
+      ],
+      "retrieved_count": 5,
+      "relevant_retrieved": 2,
+      "total_relevant": 16,
+      "context_precision": 0.4,
+      "context_recall": 0.125,
+      "recall_at_pool": 0.4375,
+      "answer": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "generation_ms": null,
+      "llm_error": "HTTP Error 403: Forbidden",
+      "latency_ms": {
+        "dense": 14.28,
+        "bm25": 0.36,
+        "fusion": 0.78,
+        "rerank": 795.02,
+        "total": 810.51
+      }
+    }
+  ]
+}

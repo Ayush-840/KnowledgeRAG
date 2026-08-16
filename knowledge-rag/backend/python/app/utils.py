@@ -323,7 +323,7 @@ CHUNKERS = {
 # ----- Document titles -----
 
 # Titles that are "empty/generic" and shouldn't be shown instead of a filename.
-_GENERIC_TITLES = {"", "untitled", "untitled document", "document", "pdf", "microsoft word", "microsoft word document", "new document"}
+_GENERIC_TITLES = {"", "untitled", "untitled document", "document", "pdf", "microsoft word", "microsoft word document", "new document", "(anonymous)"}
 
 
 def extract_document_title(filename: str, file_path: str, pages: Optional[List[Tuple[int, str]]] = None, blocks: Optional[List[dict]] = None) -> Optional[str]:

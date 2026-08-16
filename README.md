@@ -79,8 +79,15 @@ flowchart LR
         F --> N
         M --> N
         N --> O[Eval harness<br/>precision · recall · faithfulness · relevance]
+        E --> P[Vector space explorer<br/>UMAP 3D projection · optional/advanced]
+        P --> N
     end
 ```
+
+The Vector Space Explorer is an **optional, advanced** feature: it renders the
+session's chunk embeddings as a navigable 3D point cloud (see below) and is
+shown as an observer of the indexed embeddings, never in the critical
+retrieval/generation path.
 
 Sessions are fully isolated: each session gets its own persistent Chroma
 collection and BM25 index under `CHROMA_PERSISTENCE_DIR`, so documents never
@@ -180,6 +187,7 @@ npm run dev                         # http://localhost:5173
 | `NVIDIA_API_KEY`       | —                          | Required for `/chat` answers when `LLM_PROVIDER=nvidia` (free key at build.nvidia.com) |
 | `GENERATION_MODEL`     | `openai/gpt-4o`            | LLM used for chat answers (`meta/llama-3.3-70b-instruct` on NVIDIA) |
 | `GENERATION_MAX_TOKENS`| `600`                      | Max completion tokens per chat answer            |
+| `UMAP_CLUSTER_THRESHOLD` | `4000`                  | Above this chunk count the 3D view clusters points into representative markers |
 | `EVAL_GENERATION_MODEL`| `openai/gpt-4o`            | Model used to generate eval answers (uses same `LLM_PROVIDER`) |
 | `EVAL_JUDGE_MODEL`     | `openai/gpt-4o`            | Model used to judge faithfulness + relevance     |
 
@@ -342,14 +350,65 @@ The React app (`frontend/react`) ships a chat interface at `/#/chat`:
 - **Greeting interceptor** — "hi"/"hello" are answered locally in ~400 ms,
   never hitting the RAG pipeline. All requests use `AbortController` timeouts.
 
-The dev server proxies `/ingest`, `/search`, `/chat`, `/documents`, `/title`
-to the Python service on `localhost:8001` (set `VITE_API_URL` to point
-elsewhere).
+The dev server proxies `/ingest`, `/search`, `/chat`, `/documents`, `/title`,
+`/space` to the Python service on `localhost:8001` (set `VITE_API_URL` to
+point elsewhere).
 
 **Storage compatibility:** sessions live in localStorage under
 `knowledge-rag:sessions`. Newer fields (`pinned`, `tags`) have safe defaults,
 so sessions saved by older versions keep working with no migration. On load,
 empty drafts (no messages, no files, default title) are filtered out.
+
+## Vector Space Explorer (optional, advanced)
+
+A toggleable **3D view of the session's actual chunk embeddings** — the one
+place depth is not decoration: it renders literally what retrieval did with
+your query. Click **Vector space** in the header (or open it after asking a
+question).
+
+- **Projection — UMAP, not t-SNE.** The backend (`app/space.py`) reduces the
+  chunk embeddings (384-dim MiniLM, or whatever `EMBEDDER` produces) to 3D.
+  UMAP is deliberate: its fitted model can `.transform()` a **new query
+  embedding into the existing map in real time** (t-SNE is non-parametric and
+  cannot), and it preserves global cluster structure better — so "which
+  document is this cluster" is visible, not just local neighborhoods.
+- **Recompute discipline.** The full projection is fitted once per document
+  set and cached (recomputed only when chunks are added/removed) — it is
+  *never* re-run per query, so points don't jitter between questions. The
+  query transform is the only per-query computation (~ms).
+- **What's plotted.** Every chunk is a point colored by source document. On a
+  chat query, the query embedding drops in as a distinct cyan **tetrahedron**
+  (shape, not just color — colorblind-safe); reranked chunks are enlarged and
+  linked to it by thin lines, retrieved chunks hold full color, and everything
+  else recedes. Clicking any point opens the same citation panel as the chat
+  answers (one source of truth, no second chunk UI).
+- **Scaling.** Above `UMAP_CLUSTER_THRESHOLD` (default 4000) chunks, points
+  are grid-clustered into representative markers sized by cluster count.
+  Low-end devices (`hardwareConcurrency <= 4`) automatically get a static 2D
+  SVG scatter of the same coordinates instead of a forced 3D experience.
+  `prefers-reduced-motion` disables idle auto-rotation. The panel is
+  keyboard-navigable (arrow keys select a point, Enter opens it).
+- **Bundle discipline.** The three.js / React Three Fiber stack is
+  lazy-loaded — it ships as a separate chunk fetched only when the panel
+  opens, so it never taxes the main chat bundle.
+
+### `GET /space/{session_id}` and `POST /space/{session_id}/query`
+
+```bash
+curl "http://localhost:8001/space/my-session"
+# { method: "umap", point_count: 342, clustered: false,
+#   points: [{ id, x, y, z, filename }] }
+
+curl -X POST "http://localhost:8001/space/my-session/query" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What are the key findings?"}'
+# { point: { x, y, z }, promoted_ids: [...], retrieved_ids: [...] }
+```
+
+The query endpoint reuses the same `hybrid_search` funnel as `/chat`, so the
+promoted/receded styling is driven by the exact scores the LLM saw — no
+separate scoring logic. `method` is `umap`, or `pca` when UMAP is unavailable
+or the corpus is too small for it.
 
 ## Evaluation harness
 
@@ -392,10 +451,10 @@ The golden set is designed to make retrieval genuinely hard — a large pile of
 unrelated documents gives the retriever nothing to confuse it with, which makes
 precision look artificially good while telling you nothing.
 
-**Corpus (`eval-docs/`):** 18 documents organised in 6 topical clusters that
-share vocabulary (data privacy, product catalogue, engineering ops, HR,
-contracts, and a two-part platform report), so the retriever faces real
-distractors when ranking. The set includes:
+**Corpus (`eval-docs/`):** 18 documents (~71 chunks at the default 500/100
+setting) organised in 6 topical clusters that share vocabulary (data privacy,
+product catalogue, engineering ops, HR, contracts, and a two-part platform
+report), so the retriever faces real distractors when ranking. The set includes:
 
 - **3 near-duplicate / superseded pairs** (privacy policy v1/v2 with a changed
   retention clause, employee handbook v1/v2 with changed PTO, vendor contract
@@ -451,26 +510,27 @@ have step-by-step manual procedures in the plan.
 
 Measured with the eval harness on the `eval-docs/` corpus (18 topically
 clustered documents across 5 formats — including 3 near-duplicate/superseded
-pairs and multi-hop material) with a 72-query golden set. Results are broken
-out by query type so that a strong single-hop score cannot mask weak
-multi-hop or ambiguous-query behaviour. **Retrieval latency** is the full
-stage breakdown (dense + BM25 + fusion + rerank) on a single CPU machine.
+pairs and multi-hop material — expanded to ~71 chunks at the default chunk
+size so the retriever faces real distractors) with a 72-query golden set.
+Results are broken out by query type so that a strong single-hop score cannot
+mask weak multi-hop or ambiguous-query behaviour. **Retrieval latency** is the
+full stage breakdown (dense + BM25 + fusion + rerank) on a single CPU machine.
 Generation latency and the qualitative metrics require a valid LLM API key
 (`OPENROUTER_API_KEY` or `NVIDIA_API_KEY`).
 
-### Representative config — fixed · 500/100 · reranker on · pool 20
+### Representative config — structure_aware · 500/100 · reranker on · pool 20
 
 Measured on the `eval-docs/` corpus (18 documents, 6 topical clusters, 3
-near-duplicate pairs, multi-hop material) with the 72-query golden set,
-`BAAI/bge-reranker-base` reranker, `all-MiniLM-L6-v2` embedder.
+near-duplicate pairs, multi-hop material, ~71 chunks) with the 72-query
+golden set, `BAAI/bge-reranker-base` reranker, `all-MiniLM-L6-v2` embedder.
 
 | Query type | n | Precision | Recall | Recall@pool | Faithfulness | Ans. relevance |
 | --- | --- | --- | --- | --- | --- | --- |
-| `single_hop` | 36 | 0.222 | 0.880 | 0.917 | — | — |
-| `multi_hop` | 19 | 0.495 | 0.864 | 0.942 | — | — |
-| `ambiguous` | 12 | 0.233 | 0.917 | 0.917 | — | — |
+| `single_hop` | 36 | 0.294 | 0.904 | 0.911 | — | — |
+| `multi_hop` | 19 | 0.495 | 0.609 | 0.675 | — | — |
+| `ambiguous` | 12 | 0.183 | 0.833 | 0.833 | — | — |
 | `unanswerable` | 5 | 0.000 | 0.000 | 0.000 | — | — |
-| **overall** | 72 | 0.281 | 0.821 | 0.860 | — | — |
+| **overall** | 72 | 0.308 | 0.752 | 0.773 | — | — |
 
 > The `unanswerable` row scoring 0/0 is correct: the golden set tags questions
 > whose answer is absent from the corpus, so retrieval must surface nothing.
@@ -481,47 +541,51 @@ near-duplicate pairs, multi-hop material) with the 72-query golden set,
 
 | Config | Chunking | Reranker | Pool | Precision | Recall | Recall@pool | Latency |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| fixed · 500/100 | fixed | off | 20 | 0.258 | 0.771 | 0.860 | 52 ms |
-| fixed · 500/100 | fixed | on | 20 | 0.281 | 0.821 | 0.860 | ~940 ms |
-| structure_aware · 500/100 | structure_aware | on | 20 | 0.247 | 0.714 | 0.762 | ~835 ms |
+| fixed · 500/100 | fixed | off | 20 | 0.281 | 0.661 | 0.853 | 24 ms |
+| fixed · 500/100 | fixed | on | 20 | 0.286 | 0.694 | 0.853 | ~889 ms |
+| structure_aware · 500/100 | structure_aware | on | 20 | 0.308 | 0.752 | 0.773 | ~695 ms |
 
 > Reproduce with: `cd backend/python && python -m eval.run_eval --docs ../../eval-docs`
 > (add `--strategy structure_aware`, or `RERANKER_ENABLED=false`, to vary the
-> config). Per-config reports land in `eval/reports/bench-*-evaldocs.json`.
-> Reranker latency is steady-state (first-query warmup and the one-time model
-> download excluded).
+> config). Per-config reports land in `eval/reports/` as `eval_report.json`
+> (or `bench-<tag>.json` with `--tag <tag>`). Reranker latency is
+> steady-state (first-query warmup and the one-time model download excluded).
 
 ### Earlier baseline (sample-docs · 16 flat questions)
 
 These numbers were produced on the small bundled sample corpus (aurora-labs.txt,
 faq.md, products.csv, data-privacy.md — 9 chunks fixed / 32 structure-aware,
 16 golden questions with no query-type tagging). They are kept here as a
-regression baseline only — **do not treat them as performance claims**.
+regression baseline only — **do not treat them as performance claims**. Re-run
+with `python -m eval.run_eval --docs ../../sample-docs` (the harness auto-uses
+the archived 16-query golden set for `sample-docs`); values below were
+re-measured on the current code (cosine space, whitespace-insensitive matching).
 
 | Config | Chunking | Reranker | Pool | Precision | Recall | Recall@pool | Latency |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| A | fixed · 500/100 | off | 20 | 0.288 | 0.750 | 0.875 | 53 ms |
-| B | structure_aware · 500/100 | off | 20 | 0.225 | 0.634 | 0.938 | 55 ms |
-| C | structure_aware · 500/100 | on | 20 | 0.313 | 0.863 | 0.938 | ~803 ms* |
-| D | fixed · 500/100 | on | 20 | 0.325 | 0.859 | 0.875 | ~396 ms* |
-| E | fixed · 250/50 | off | 20 | 0.288 | 0.683 | 0.938 | 51 ms |
-| F | fixed · 1000/200 | off | 20 | 0.288 | 0.875 | 0.875 | 51 ms |
-| G | structure_aware · 250/50 | off | 20 | 0.275 | 0.660 | 0.938 | 52 ms |
-| H | fixed · 500/100 | off | 50 | 0.288 | 0.750 | 0.875 | 54 ms |
+| A | fixed · 500/100 | off | 20 | 0.325 | 0.693 | 1.000 | 19 ms |
+| B | structure_aware · 500/100 | off | 20 | 0.213 | 0.432 | 0.984 | 19 ms |
+| C | structure_aware · 500/100 | on | 20 | 0.375 | 0.771 | 0.984 | ~1265 ms* |
+| D | fixed · 500/100 | on | 20 | 0.425 | 0.859 | 1.000 | ~1054 ms* |
+| E | fixed · 250/50 | off | 20 | 0.288 | 0.553 | 1.000 | 18 ms |
+| F | fixed · 1000/200 | off | 20 | 0.350 | 0.750 | 1.000 | 17 ms |
+| G | structure_aware · 250/50 | off | 20 | 0.250 | 0.516 | 0.974 | 20 ms |
+| H | fixed · 500/100 | off | 50 | 0.325 | 0.693 | 1.000 | 23 ms |
 
 *Reranker latencies are steady-state means (first-query warmup ≈7 s, plus the
 one-time ≈70 s bge-reranker download, excluded).
 
 **What the baseline shows:**
 
-- **Reranker measurably helps**: lifts recall (fixed 0.750→0.859,
-  structure-aware 0.634→0.863) and precision (0.225→0.313) — invisible on the
-  tiny original corpus where recall was already 1.0. Cost: ~350–750 ms/query.
-- **`recall@pool` > `recall`**: the wide fused pool catches the evidence; the
+- **Reranker measurably helps**: lifts recall (fixed 0.693→0.859,
+  structure-aware 0.432→0.771) and precision (0.325→0.425,
+  0.213→0.375) — invisible on the tiny original corpus where recall was
+  already 1.0. Cost: ~1.0–1.3 s/query.
+- **`recall@pool` ≥ `recall`**: the wide fused pool catches the evidence; the
   top-5 cut drops it — the funnel is doing its job.
-- Fixed edges structure-aware *without* reranking (0.750 vs 0.634 recall);
+- Fixed edges structure-aware *without* reranking (0.693 vs 0.432 recall);
   reranking closes the gap. Larger chunks (1000/200) give best no-rerank recall
-  (0.875). Pool width 20 vs 50 changes nothing here.
+  (0.750). Pool width 20 vs 50 changes nothing here.
 - **Why these numbers understate the problem**: 16 untagged questions on four
   unrelated documents gives the retriever no real distractors, so precision
   looks artificially good. The new corpus addresses this.
@@ -542,6 +606,7 @@ one-time ≈70 s bge-reranker download, excluded).
 - [x] LLM generation stage with citation verification (`/chat`)
 - [x] Dev metrics panel (retrieval/rerank/generation latency + token usage)
 - [x] Document viewer (click a citation to see the excerpt in-context)
+- [x] 3D vector space explorer (UMAP projection, live query drop-in, promoted/receded chunks, 2D fallback)
 
 ## License
 

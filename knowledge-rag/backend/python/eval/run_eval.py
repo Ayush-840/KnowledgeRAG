@@ -21,6 +21,7 @@ RETRIEVE_CANDIDATES). Set RERANKER_ENABLED=false to compare without reranking.
 
 import argparse
 import json
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -31,7 +32,7 @@ from dotenv import load_dotenv
 # Load .env before any module reads configuration (LLM_PROVIDER, NVIDIA_API_KEY, ...)
 load_dotenv()
 
-from app.dependencies import get_session_vectors
+from app.dependencies import get_session_vectors, reset_session
 from app.observability import log_query, utc_now_iso
 from app.retrieval import RETRIEVE_CANDIDATES, RERANK_TOP_K, RERANKER_ENABLED, hybrid_search
 from app.utils import ingest_document
@@ -41,8 +42,11 @@ DEFAULT_GOLDEN = Path(__file__).parent / "golden_set.json"
 
 
 def _relevant(text: str, evidence: list) -> bool:
-    low = text.lower()
-    return any(ev.lower() in low for ev in evidence)
+    """Substring match, insensitive to line wrapping: both sides are
+    whitespace-normalized so an evidence phrase split across lines in the
+    corpus ("must remain\nbelow 30 minutes") still matches."""
+    low = re.sub(r"\s+", " ", text.lower())
+    return any(re.sub(r"\s+", " ", ev.lower()) in low for ev in evidence)
 
 
 def _mean(values) -> float:
@@ -50,7 +54,21 @@ def _mean(values) -> float:
     return round(sum(vals) / len(vals), 4) if vals else None
 
 
+def resolve_golden(docs_dir: Path, golden_path: Path) -> Path:
+    """Auto-fallback: the bundled sample-docs corpus is tiny and pairs with the
+    archived 16-question golden set; the eval-docs corpus (with its 72 tagged
+    queries) is meaningless against it. Only triggers when the caller did not
+    explicitly pass --golden (the default resolves to eval/golden_set.json)."""
+    if golden_path == DEFAULT_GOLDEN and docs_dir.resolve().name == "sample-docs":
+        sample_golden = Path(__file__).parent / "golden_set_sample.json"
+        if sample_golden.exists():
+            print(f"  ℹ️  sample-docs detected — using archived {sample_golden.name} (16 flat queries)")
+            return sample_golden
+    return golden_path
+
+
 def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_dir: Path, golden_path: Path, query_type: str = None, tag: str = None):
+    golden_path = resolve_golden(docs_dir, golden_path)
     golden = json.loads(golden_path.read_text(encoding="utf-8"))
     if query_type:
         tagged = [g for g in golden if g.get("query_type") == query_type]
@@ -78,6 +96,9 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
 
     # Dedicated session per settings combo so configs can be diffed without cross-contamination
     session_id = f"eval-{chunk_size}-{overlap}-{strategy}"
+    reset_session(session_id)  # a re-run of the same combo starts clean — without
+    # this, the persistent collection accumulates duplicate chunks and the
+    # reported metrics silently drift from the README baselines.
 
     for doc in docs:
         print(f"  ingesting {doc.name} (chunk_size={chunk_size}, overlap={overlap}, strategy={strategy})")

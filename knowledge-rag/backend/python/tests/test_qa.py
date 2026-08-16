@@ -510,3 +510,118 @@ def test_s14_search_carries_title(client, session_id):
     assert sr.status_code == 200
     for chunk in sr.json()["results"]:
         assert chunk["title"] == "Aurora Labs FAQ"
+
+
+# ---------- S15: 3D vector space explorer ----------
+
+def test_s15_space_projection(client, ready_session):
+    """GET /space returns compact 3D points for every chunk in the session."""
+    r = client.get(f"/space/{ready_session}")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["point_count"] >= 1
+    assert body["method"] in ("umap", "pca")
+    assert body["clustered"] is False
+    assert len(body["points"]) == body["point_count"]
+    for p in body["points"]:
+        assert {"id", "x", "y", "z", "filename"} <= set(p.keys())
+        assert isinstance(p["x"], (int, float))
+
+
+def test_s15_space_query_drop_in(client, ready_session):
+    """A query transforms into the existing map (no re-layout) and reports the
+    retrieval funnel's promoted vs. retrieved ids."""
+    r = client.post(f"/space/{ready_session}/query", json={"query": "Atlas price"})
+    assert r.status_code == 200
+    body = r.json()
+    assert {"x", "y", "z"} <= set(body["point"].keys())
+    assert body["promoted_ids"], "expected promoted (top-k) chunk ids"
+    assert len(body["promoted_ids"]) <= 5  # RERANK_TOP_K default
+    assert body["retrieved_ids"]
+    assert len(body["retrieved_ids"]) >= len(body["promoted_ids"])
+    assert set(body["promoted_ids"]) <= set(body["retrieved_ids"])
+
+
+def test_s15_space_query_requires_query(client, ready_session):
+    r = client.post(f"/space/{ready_session}/query", json={"query": "  "})
+    assert r.status_code == 400
+
+
+def test_s15_space_empty_session_404(client, session_id):
+    r = client.get(f"/space/{session_id}")
+    assert r.status_code == 404
+
+
+def test_s15_space_clustering_threshold(client, ready_session, monkeypatch):
+    """Above UMAP_CLUSTER_THRESHOLD the projection degrades to representative
+    cluster markers instead of a laggy full point cloud."""
+    import app.space as space_mod
+
+    monkeypatch.setattr(space_mod, "UMAP_CLUSTER_THRESHOLD", 0)
+    r = client.get(f"/space/{ready_session}?force=1")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["clustered"] is True
+    assert len(body["points"]) <= body["point_count"]
+    for p in body["points"]:
+        assert "count" in p and p["count"] >= 1
+
+
+def test_s15_space_projection_cached(client, ready_session):
+    """The fit is cached per document set: two calls return identical
+    coordinates (no jitter), and only an added document recomputes."""
+    a = client.get(f"/space/{ready_session}").json()
+    b = client.get(f"/space/{ready_session}").json()
+    assert a["points"] == b["points"]
+
+
+def test_s16_sample_docs_uses_archived_golden(monkeypatch, tmp_path):
+    """run_eval auto-switches to the archived 16-query golden set when docs_dir
+    is sample-docs, so the README regression baseline stays reproducible
+    (a 72-query eval-docs golden set against the tiny sample corpus would
+    score near-zero recall)."""
+    import eval.run_eval as run_eval
+
+    docs = tmp_path / "sample-docs"
+    docs.mkdir()
+    (docs / "a.txt").write_text("Aurora Labs analytics platform overview.")
+
+    default_golden = Path(run_eval.__file__).parent / "golden_set.json"
+    sample_golden = Path(run_eval.__file__).parent / "golden_set_sample.json"
+    assert sample_golden.exists(), "archived sample golden set missing"
+
+    monkeypatch.setattr(run_eval, "DEFAULT_GOLDEN", default_golden)
+
+    # sample-docs + default golden -> archived set
+    resolved = run_eval.resolve_golden(docs, default_golden)
+    assert resolved == sample_golden
+
+    # explicit --golden is never overridden
+    explicit = docs / "my-golden.json"
+    explicit.write_text("[]")
+    assert run_eval.resolve_golden(docs, explicit) == explicit
+
+    # non-sample docs dir keeps the default
+    other = tmp_path / "other"
+    other.mkdir()
+    assert run_eval.resolve_golden(other, default_golden) == default_golden
+
+
+def test_s16_eval_session_reset(client, session_id):
+    """Re-running the same eval settings combo must start from a clean
+    collection: the persistent Chroma dir otherwise accumulates duplicate
+    chunks, silently skewing recall denominators and breaking the README's
+    reproducible baselines (regression guard for the reset run_eval now calls)."""
+    from app import dependencies as deps
+
+    _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    sess = deps.get_session_vectors(session_id)
+    assert len(sess["collection"].get()["ids"]) == 1
+    assert sess["bm25"] is not None
+
+    deps.reset_session(session_id)
+    assert session_id not in deps.SESSION_REGISTRY
+
+    fresh = deps.get_session_vectors(session_id)
+    assert fresh["collection"].get()["ids"] == []
+    assert fresh["bm25"] is None

@@ -2,14 +2,44 @@ Product,Tier,Price,Unit,Billing
 Atlas,Starter,29,per user per month,annual
 Atlas,Standard,49,per user per month,annual
 Atlas,Enterprise,99,per user per month,annual
+Atlas,Enterprise Plus,149,per user per month,annual
 Beacon,Starter,19,per user per month,annual
 Beacon,Standard,39,per user per month,annual
 Beacon,Enterprise,79,per user per month,annual
+Beacon,Enterprise Plus,119,per user per month,annual
 Nimbus,Free,0,per pipeline,monthly
 Nimbus,Starter,199,per month,annual
 Nimbus,Standard,499,per month,annual
 Nimbus,Enterprise,999,per month,annual
 Nimbus,Enterprise Plus,1999,per month,annual
+Bundle,Atlas + Beacon,59,per user per month,annual
+Bundle,Atlas + Nimbus,229,per user per month,annual
+Bundle,All three,249,per user per month,annual
 Add-on,SSO / SAML,2,per user per month,annual
 Add-on,Audit log retention,5,per user per month,annual
 Add-on,Extra pipeline,49,per month,monthly
+Add-on,Extra seat block (10),90,per month,annual
+Add-on,API rate limit boost,20,per month,monthly
+Add-on,Data residency (extra region),150,per month,annual
+Add-on,Dedicated support,300,per month,annual
+Add-on,ML anomaly detection,10,per user per month,annual
+Atlas,Starter (monthly),35,per user per month,monthly
+Atlas,Standard (monthly),59,per user per month,monthly
+Atlas,Enterprise (monthly),119,per user per month,monthly
+Beacon,Starter (monthly),23,per user per month,monthly
+Beacon,Standard (monthly),47,per user per month,monthly
+Beacon,Enterprise (monthly),95,per user per month,monthly
+Nimbus,Starter (monthly),239,per month,monthly
+Nimbus,Standard (monthly),599,per month,monthly
+Nimbus,Enterprise (monthly),1199,per month,monthly
+Nimbus,Enterprise Plus (monthly),2399,per month,monthly
+Bundle,Atlas + Beacon (monthly),71,per user per month,monthly
+Bundle,All three (monthly),299,per user per month,monthly
+Atlas,Student,9,per user per month,monthly
+Atlas,Nonprofit discount,34,per user per month,annual
+Beacon,Nonprofit discount,27,per user per month,annual
+Nimbus,Nonprofit discount,349,per month,annual
+Add-on,Extra pipeline (batch of 5),199,per month,monthly
+Add-on,Embed SDK,150,per month,annual
+Atlas,Education (per institution),2500,per year,annual
+Nimbus,Education (per institution),3000,per year,annual

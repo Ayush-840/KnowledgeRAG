@@ -17,7 +17,7 @@ app.get("/health", (req, res) => {
 // Generic passthrough proxy for the Python retrieval service.
 // Streams the request body as-is so both JSON (/search, /chat) and
 // multipart uploads (/ingest) work without reformatting.
-app.use(["/ingest", "/search", "/chat", "/documents", "/title"], async (req, res) => {
+app.use(["/ingest", "/search", "/chat", "/documents", "/title", "/space"], async (req, res) => {
   const target = `${PYTHON_URL}${req.originalUrl}`;
   try {
     const headers = { ...req.headers, host: new URL(target).host };

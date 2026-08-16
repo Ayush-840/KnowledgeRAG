@@ -12,6 +12,8 @@ export default defineConfig({
       '/search': 'http://localhost:8001',
       '/chat': 'http://localhost:8001',
       '/documents': 'http://localhost:8001',
+      '/title': 'http://localhost:8001',
+      '/space': 'http://localhost:8001',
     },
   },
 })
