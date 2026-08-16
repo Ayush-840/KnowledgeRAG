@@ -20,7 +20,17 @@ export default function VectorSpaceView({ points, query, promotedIds, retrievedI
   const byId = useMemo(() => new Map(points.map((p) => [p.id, p])), [points])
 
   return (
-    <Canvas camera={{ position: [0, 0, 18], fov: 50 }} dpr={[1, 2]} className="space-canvas">
+    <Canvas
+      camera={{ position: [0, 0, 18], fov: 50 }}
+      dpr={[1, 2]}
+      className="space-canvas"
+      // `flat` disables ACESFilmic tone mapping — R3F applies it
+      // unconditionally AFTER creating the renderer, so a gl={{ toneMapping }}
+      // prop is silently ignored. With tone mapping off (and sRGB output
+      // kept), the cyan query marker renders as the exact #22d3ee instead of
+      // a tone-mapped pale blue, and every other color is unchanged.
+      flat
+    >
       <ambientLight intensity={0.7} />
       <PointCloud points={points} promotedIds={promotedIds} retrievedIds={retrievedIds} onSelectPoint={onSelectPoint} />
       {query && <QueryMarker position={[query.x, query.y, query.z]} />}
