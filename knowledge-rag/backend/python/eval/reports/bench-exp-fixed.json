@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T16:42:05.842664+00:00",
+  "generated_at": "2026-08-16T17:49:15.023524+00:00",
   "settings": {
     "chunk_size": 500,
     "overlap": 100,
@@ -38,7 +38,7 @@
     "faithfulness": null,
     "answer_relevance": null,
     "mean_generation_ms": null,
-    "mean_total_latency_ms": 23.9767,
+    "mean_total_latency_ms": 26.04,
     "by_query_type": {
       "ambiguous": {
         "n": 12,
@@ -94,11 +94,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 118.87,
-        "bm25": 0.29,
-        "fusion": 0.68,
+        "dense": 13.88,
+        "bm25": 1.93,
+        "fusion": 0.76,
         "rerank": 0.0,
-        "total": 119.87
+        "total": 16.61
       }
     },
     {
@@ -120,11 +120,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 145.17,
-        "bm25": 0.16,
-        "fusion": 0.69,
+        "dense": 37.58,
+        "bm25": 0.59,
+        "fusion": 1.14,
         "rerank": 0.0,
-        "total": 146.05
+        "total": 39.39
       }
     },
     {
@@ -146,11 +146,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 23.82,
-        "bm25": 0.32,
-        "fusion": 1.2,
+        "dense": 25.9,
+        "bm25": 0.34,
+        "fusion": 1.03,
         "rerank": 0.0,
-        "total": 25.4
+        "total": 27.32
       }
     },
     {
@@ -172,11 +172,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 80.76,
-        "bm25": 0.19,
-        "fusion": 0.69,
+        "dense": 26.98,
+        "bm25": 0.3,
+        "fusion": 0.81,
         "rerank": 0.0,
-        "total": 81.67
+        "total": 28.13
       }
     },
     {
@@ -199,11 +199,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 26.96,
-        "bm25": 0.28,
-        "fusion": 1.14,
+        "dense": 31.35,
+        "bm25": 0.41,
+        "fusion": 1.53,
         "rerank": 0.0,
-        "total": 28.44
+        "total": 33.35
       }
     },
     {
@@ -225,11 +225,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.18,
-        "bm25": 0.31,
-        "fusion": 1.4,
+        "dense": 17.68,
+        "bm25": 0.42,
+        "fusion": 1.58,
         "rerank": 0.0,
-        "total": 15.95
+        "total": 19.75
       }
     },
     {
@@ -251,11 +251,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.44,
-        "bm25": 0.3,
-        "fusion": 0.88,
+        "dense": 20.0,
+        "bm25": 0.29,
+        "fusion": 0.77,
         "rerank": 0.0,
-        "total": 18.67
+        "total": 21.11
       }
     },
     {
@@ -277,11 +277,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 23.71,
-        "bm25": 0.25,
-        "fusion": 1.04,
+        "dense": 28.78,
+        "bm25": 0.37,
+        "fusion": 1.35,
         "rerank": 0.0,
-        "total": 25.05
+        "total": 30.55
       }
     },
     {
@@ -303,11 +303,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.24,
-        "bm25": 0.37,
-        "fusion": 1.14,
+        "dense": 25.78,
+        "bm25": 0.47,
+        "fusion": 1.92,
         "rerank": 0.0,
-        "total": 17.81
+        "total": 28.25
       }
     },
     {
@@ -330,11 +330,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 18.03,
-        "bm25": 0.32,
-        "fusion": 1.42,
+        "dense": 19.45,
+        "bm25": 0.31,
+        "fusion": 1.28,
         "rerank": 0.0,
-        "total": 19.82
+        "total": 21.09
       }
     },
     {
@@ -356,11 +356,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.33,
-        "bm25": 0.3,
-        "fusion": 1.29,
+        "dense": 20.82,
+        "bm25": 0.63,
+        "fusion": 2.67,
         "rerank": 0.0,
-        "total": 14.97
+        "total": 24.56
       }
     },
     {
@@ -382,11 +382,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 9.55,
-        "bm25": 0.22,
-        "fusion": 1.09,
+        "dense": 24.33,
+        "bm25": 0.49,
+        "fusion": 2.03,
         "rerank": 0.0,
-        "total": 10.9
+        "total": 26.92
       }
     },
     {
@@ -408,11 +408,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.12,
-        "bm25": 0.26,
-        "fusion": 1.27,
+        "dense": 20.06,
+        "bm25": 1.2,
+        "fusion": 2.85,
         "rerank": 0.0,
-        "total": 13.69
+        "total": 24.21
       }
     },
     {
@@ -434,11 +434,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.64,
-        "bm25": 0.29,
-        "fusion": 1.12,
+        "dense": 18.75,
+        "bm25": 0.27,
+        "fusion": 1.43,
         "rerank": 0.0,
-        "total": 14.1
+        "total": 20.5
       }
     },
     {
@@ -460,11 +460,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.68,
-        "bm25": 0.21,
-        "fusion": 1.11,
+        "dense": 29.31,
+        "bm25": 0.36,
+        "fusion": 1.59,
         "rerank": 0.0,
-        "total": 13.04
+        "total": 31.33
       }
     },
     {
@@ -486,11 +486,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.13,
-        "bm25": 0.38,
-        "fusion": 1.16,
+        "dense": 19.27,
+        "bm25": 0.63,
+        "fusion": 2.03,
         "rerank": 0.0,
-        "total": 13.72
+        "total": 22.02
       }
     },
     {
@@ -512,11 +512,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.12,
-        "bm25": 0.26,
-        "fusion": 0.93,
+        "dense": 16.59,
+        "bm25": 0.31,
+        "fusion": 1.25,
         "rerank": 0.0,
-        "total": 13.35
+        "total": 18.21
       }
     },
     {
@@ -538,11 +538,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.43,
-        "bm25": 0.41,
-        "fusion": 1.74,
+        "dense": 27.57,
+        "bm25": 0.3,
+        "fusion": 1.29,
         "rerank": 0.0,
-        "total": 17.64
+        "total": 29.2
       }
     },
     {
@@ -564,11 +564,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.37,
-        "bm25": 0.41,
-        "fusion": 1.28,
+        "dense": 14.51,
+        "bm25": 0.3,
+        "fusion": 0.89,
         "rerank": 0.0,
-        "total": 17.1
+        "total": 15.73
       }
     },
     {
@@ -590,11 +590,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.01,
-        "bm25": 0.26,
-        "fusion": 0.92,
+        "dense": 14.89,
+        "bm25": 0.35,
+        "fusion": 1.43,
         "rerank": 0.0,
-        "total": 13.24
+        "total": 16.74
       }
     },
     {
@@ -616,11 +616,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 102.12,
-        "bm25": 0.18,
-        "fusion": 0.69,
+        "dense": 30.22,
+        "bm25": 0.33,
+        "fusion": 1.1,
         "rerank": 0.0,
-        "total": 103.03
+        "total": 31.71
       }
     },
     {
@@ -642,11 +642,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.03,
-        "bm25": 0.35,
-        "fusion": 1.45,
+        "dense": 17.17,
+        "bm25": 0.27,
+        "fusion": 1.23,
         "rerank": 0.0,
-        "total": 18.89
+        "total": 18.73
       }
     },
     {
@@ -668,11 +668,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.38,
-        "bm25": 0.21,
-        "fusion": 0.96,
+        "dense": 25.72,
+        "bm25": 0.3,
+        "fusion": 1.22,
         "rerank": 0.0,
-        "total": 18.59
+        "total": 27.29
       }
     },
     {
@@ -694,11 +694,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 18.87,
-        "bm25": 0.33,
-        "fusion": 5.13,
+        "dense": 16.19,
+        "bm25": 0.46,
+        "fusion": 1.56,
         "rerank": 0.0,
-        "total": 24.95
+        "total": 18.28
       }
     },
     {
@@ -721,11 +721,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.88,
-        "bm25": 0.36,
-        "fusion": 0.92,
+        "dense": 42.17,
+        "bm25": 0.53,
+        "fusion": 1.41,
         "rerank": 0.0,
-        "total": 19.2
+        "total": 44.18
       }
     },
     {
@@ -748,11 +748,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 65.32,
-        "bm25": 0.32,
-        "fusion": 0.77,
+        "dense": 29.1,
+        "bm25": 0.39,
+        "fusion": 0.93,
         "rerank": 0.0,
-        "total": 66.45
+        "total": 30.48
       }
     },
     {
@@ -775,11 +775,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.62,
-        "bm25": 0.3,
-        "fusion": 0.8,
+        "dense": 16.61,
+        "bm25": 0.57,
+        "fusion": 1.29,
         "rerank": 0.0,
-        "total": 12.77
+        "total": 18.53
       }
     },
     {
@@ -801,11 +801,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 27.53,
-        "bm25": 0.46,
-        "fusion": 1.31,
+        "dense": 23.59,
+        "bm25": 0.33,
+        "fusion": 0.96,
         "rerank": 0.0,
-        "total": 29.35
+        "total": 24.93
       }
     },
     {
@@ -828,11 +828,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 34.77,
-        "bm25": 0.52,
-        "fusion": 1.04,
+        "dense": 46.89,
+        "bm25": 0.48,
+        "fusion": 1.09,
         "rerank": 0.0,
-        "total": 36.38
+        "total": 48.5
       }
     },
     {
@@ -855,11 +855,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.73,
-        "bm25": 0.3,
-        "fusion": 0.7,
+        "dense": 19.11,
+        "bm25": 0.29,
+        "fusion": 0.66,
         "rerank": 0.0,
-        "total": 16.76
+        "total": 20.1
       }
     },
     {
@@ -882,11 +882,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.18,
-        "bm25": 0.32,
-        "fusion": 0.95,
+        "dense": 11.08,
+        "bm25": 0.34,
+        "fusion": 1.12,
         "rerank": 0.0,
-        "total": 17.49
+        "total": 12.57
       }
     },
     {
@@ -909,11 +909,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.03,
-        "bm25": 0.3,
-        "fusion": 0.74,
+        "dense": 26.9,
+        "bm25": 0.59,
+        "fusion": 1.24,
         "rerank": 0.0,
-        "total": 17.11
+        "total": 28.78
       }
     },
     {
@@ -936,11 +936,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 21.25,
-        "bm25": 0.32,
-        "fusion": 0.95,
+        "dense": 27.5,
+        "bm25": 0.34,
+        "fusion": 1.03,
         "rerank": 0.0,
-        "total": 22.56
+        "total": 28.91
       }
     },
     {
@@ -963,11 +963,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.12,
-        "bm25": 0.33,
-        "fusion": 1.01,
+        "dense": 18.2,
+        "bm25": 0.8,
+        "fusion": 2.45,
         "rerank": 0.0,
-        "total": 12.51
+        "total": 21.54
       }
     },
     {
@@ -990,11 +990,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.06,
-        "bm25": 0.56,
-        "fusion": 1.36,
+        "dense": 23.48,
+        "bm25": 0.76,
+        "fusion": 1.67,
         "rerank": 0.0,
-        "total": 15.04
+        "total": 25.98
       }
     },
     {
@@ -1017,11 +1017,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.62,
-        "bm25": 0.44,
-        "fusion": 1.33,
+        "dense": 16.88,
+        "bm25": 0.77,
+        "fusion": 2.06,
         "rerank": 0.0,
-        "total": 14.46
+        "total": 19.8
       }
     },
     {
@@ -1044,11 +1044,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 23.01,
-        "bm25": 0.46,
-        "fusion": 1.36,
+        "dense": 32.28,
+        "bm25": 0.5,
+        "fusion": 1.23,
         "rerank": 0.0,
-        "total": 24.89
+        "total": 34.06
       }
     },
     {
@@ -1071,11 +1071,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.97,
-        "bm25": 0.44,
-        "fusion": 0.78,
+        "dense": 16.67,
+        "bm25": 0.39,
+        "fusion": 0.7,
         "rerank": 0.0,
-        "total": 19.22
+        "total": 17.8
       }
     },
     {
@@ -1097,9 +1097,9 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 19.26,
-        "bm25": 0.68,
-        "fusion": 1.46,
+        "dense": 18.15,
+        "bm25": 0.75,
+        "fusion": 2.46,
         "rerank": 0.0,
         "total": 21.46
       }
@@ -1124,11 +1124,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.87,
-        "bm25": 0.42,
-        "fusion": 1.22,
+        "dense": 17.09,
+        "bm25": 0.6,
+        "fusion": 1.82,
         "rerank": 0.0,
-        "total": 14.57
+        "total": 19.59
       }
     },
     {
@@ -1150,11 +1150,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.87,
-        "bm25": 0.36,
-        "fusion": 0.9,
+        "dense": 20.16,
+        "bm25": 0.54,
+        "fusion": 1.54,
         "rerank": 0.0,
-        "total": 12.18
+        "total": 22.3
       }
     },
     {
@@ -1176,11 +1176,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.41,
+        "dense": 20.58,
         "bm25": 0.41,
-        "fusion": 1.31,
+        "fusion": 1.57,
         "rerank": 0.0,
-        "total": 18.18
+        "total": 22.64
       }
     },
     {
@@ -1202,11 +1202,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.18,
-        "bm25": 0.42,
-        "fusion": 1.36,
+        "dense": 18.46,
+        "bm25": 0.47,
+        "fusion": 1.44,
         "rerank": 0.0,
-        "total": 18.03
+        "total": 20.44
       }
     },
     {
@@ -1228,11 +1228,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 44.17,
-        "bm25": 0.13,
-        "fusion": 0.93,
+        "dense": 52.73,
+        "bm25": 0.14,
+        "fusion": 0.87,
         "rerank": 0.0,
-        "total": 45.26
+        "total": 53.77
       }
     },
     {
@@ -1254,11 +1254,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.28,
-        "bm25": 0.27,
-        "fusion": 1.31,
+        "dense": 20.59,
+        "bm25": 0.46,
+        "fusion": 1.81,
         "rerank": 0.0,
-        "total": 16.91
+        "total": 22.93
       }
     },
     {
@@ -1281,11 +1281,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.0,
-        "bm25": 0.34,
-        "fusion": 1.02,
+        "dense": 18.04,
+        "bm25": 0.4,
+        "fusion": 1.36,
         "rerank": 0.0,
-        "total": 15.41
+        "total": 19.87
       }
     },
     {
@@ -1307,11 +1307,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 12.02,
-        "bm25": 0.26,
-        "fusion": 0.82,
+        "dense": 31.27,
+        "bm25": 0.57,
+        "fusion": 1.64,
         "rerank": 0.0,
-        "total": 13.14
+        "total": 33.55
       }
     },
     {
@@ -1333,11 +1333,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.98,
-        "bm25": 0.28,
-        "fusion": 1.13,
+        "dense": 20.43,
+        "bm25": 0.53,
+        "fusion": 2.3,
         "rerank": 0.0,
-        "total": 17.44
+        "total": 23.39
       }
     },
     {
@@ -1359,11 +1359,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 20.53,
-        "bm25": 0.23,
-        "fusion": 0.93,
+        "dense": 13.48,
+        "bm25": 0.24,
+        "fusion": 0.77,
         "rerank": 0.0,
-        "total": 21.74
+        "total": 14.52
       }
     },
     {
@@ -1385,11 +1385,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.7,
-        "bm25": 0.22,
-        "fusion": 0.79,
+        "dense": 22.89,
+        "bm25": 0.45,
+        "fusion": 1.76,
         "rerank": 0.0,
-        "total": 11.75
+        "total": 25.17
       }
     },
     {
@@ -1411,11 +1411,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.47,
-        "bm25": 0.32,
-        "fusion": 1.34,
+        "dense": 18.01,
+        "bm25": 0.46,
+        "fusion": 1.7,
         "rerank": 0.0,
-        "total": 16.19
+        "total": 20.25
       }
     },
     {
@@ -1437,11 +1437,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.21,
+        "dense": 24.78,
         "bm25": 0.37,
-        "fusion": 1.53,
+        "fusion": 1.86,
         "rerank": 0.0,
-        "total": 18.17
+        "total": 27.07
       }
     },
     {
@@ -1461,11 +1461,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 19.4,
-        "bm25": 0.41,
-        "fusion": 1.89,
+        "dense": 21.15,
+        "bm25": 0.42,
+        "fusion": 1.71,
         "rerank": 0.0,
-        "total": 21.77
+        "total": 23.35
       }
     },
     {
@@ -1485,11 +1485,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.38,
-        "bm25": 0.32,
-        "fusion": 1.26,
+        "dense": 18.49,
+        "bm25": 0.36,
+        "fusion": 1.28,
         "rerank": 0.0,
-        "total": 17.03
+        "total": 20.19
       }
     },
     {
@@ -1509,11 +1509,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.89,
-        "bm25": 0.26,
-        "fusion": 1.0,
+        "dense": 31.72,
+        "bm25": 0.48,
+        "fusion": 1.83,
         "rerank": 0.0,
-        "total": 16.2
+        "total": 34.1
       }
     },
     {
@@ -1533,11 +1533,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.1,
-        "bm25": 0.22,
-        "fusion": 0.83,
+        "dense": 21.23,
+        "bm25": 0.42,
+        "fusion": 1.61,
         "rerank": 0.0,
-        "total": 12.19
+        "total": 23.33
       }
     },
     {
@@ -1557,11 +1557,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.68,
-        "bm25": 0.37,
-        "fusion": 1.52,
+        "dense": 21.92,
+        "bm25": 0.62,
+        "fusion": 2.57,
         "rerank": 0.0,
-        "total": 18.63
+        "total": 25.21
       }
     },
     {
@@ -1583,11 +1583,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 11.03,
-        "bm25": 0.35,
-        "fusion": 1.16,
+        "dense": 25.57,
+        "bm25": 0.42,
+        "fusion": 1.42,
         "rerank": 0.0,
-        "total": 12.59
+        "total": 27.47
       }
     },
     {
@@ -1609,11 +1609,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.15,
-        "bm25": 0.21,
-        "fusion": 1.1,
+        "dense": 25.6,
+        "bm25": 0.3,
+        "fusion": 1.4,
         "rerank": 0.0,
-        "total": 14.51
+        "total": 27.36
       }
     },
     {
@@ -1636,11 +1636,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 17.02,
-        "bm25": 0.43,
-        "fusion": 1.24,
+        "dense": 20.3,
+        "bm25": 0.49,
+        "fusion": 1.41,
         "rerank": 0.0,
-        "total": 18.75
+        "total": 22.26
       }
     },
     {
@@ -1662,11 +1662,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.26,
-        "bm25": 0.33,
-        "fusion": 1.26,
+        "dense": 28.72,
+        "bm25": 1.14,
+        "fusion": 9.8,
         "rerank": 0.0,
-        "total": 17.91
+        "total": 39.74
       }
     },
     {
@@ -1688,11 +1688,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.29,
+        "dense": 11.74,
         "bm25": 0.35,
-        "fusion": 1.13,
+        "fusion": 1.0,
         "rerank": 0.0,
-        "total": 15.83
+        "total": 13.14
       }
     },
     {
@@ -1714,11 +1714,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 13.94,
-        "bm25": 0.43,
-        "fusion": 1.15,
+        "dense": 24.06,
+        "bm25": 0.64,
+        "fusion": 1.83,
         "rerank": 0.0,
-        "total": 15.57
+        "total": 26.61
       }
     },
     {
@@ -1740,11 +1740,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 14.69,
-        "bm25": 0.38,
-        "fusion": 1.19,
+        "dense": 22.7,
+        "bm25": 0.62,
+        "fusion": 2.22,
         "rerank": 0.0,
-        "total": 16.33
+        "total": 25.63
       }
     },
     {
@@ -1766,11 +1766,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.31,
-        "bm25": 0.39,
-        "fusion": 1.26,
+        "dense": 16.43,
+        "bm25": 0.4,
+        "fusion": 1.25,
         "rerank": 0.0,
-        "total": 18.01
+        "total": 18.14
       }
     },
     {
@@ -1792,11 +1792,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 9.43,
-        "bm25": 0.22,
-        "fusion": 0.78,
+        "dense": 21.38,
+        "bm25": 0.76,
+        "fusion": 3.75,
         "rerank": 0.0,
-        "total": 10.47
+        "total": 25.99
       }
     },
     {
@@ -1819,11 +1819,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 18.9,
-        "bm25": 0.35,
-        "fusion": 1.5,
+        "dense": 22.0,
+        "bm25": 0.49,
+        "fusion": 1.75,
         "rerank": 0.0,
-        "total": 20.81
+        "total": 24.31
       }
     },
     {
@@ -1845,11 +1845,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 15.92,
-        "bm25": 0.24,
-        "fusion": 1.13,
+        "dense": 22.33,
+        "bm25": 0.32,
+        "fusion": 1.44,
         "rerank": 0.0,
-        "total": 17.32
+        "total": 24.14
       }
     },
     {
@@ -1871,11 +1871,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 22.38,
-        "bm25": 0.27,
-        "fusion": 0.94,
+        "dense": 24.14,
+        "bm25": 0.41,
+        "fusion": 1.63,
         "rerank": 0.0,
-        "total": 23.62
+        "total": 26.24
       }
     },
     {
@@ -1898,11 +1898,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 10.16,
-        "bm25": 0.34,
-        "fusion": 0.75,
+        "dense": 24.21,
+        "bm25": 0.63,
+        "fusion": 1.35,
         "rerank": 0.0,
-        "total": 11.29
+        "total": 26.25
       }
     },
     {
@@ -1925,11 +1925,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 18.35,
-        "bm25": 0.43,
-        "fusion": 0.91,
+        "dense": 34.35,
+        "bm25": 0.7,
+        "fusion": 1.45,
         "rerank": 0.0,
-        "total": 19.73
+        "total": 36.56
       }
     },
     {
@@ -1952,11 +1952,11 @@
       "generation_ms": null,
       "llm_error": "HTTP Error 403: Forbidden",
       "latency_ms": {
-        "dense": 16.01,
-        "bm25": 0.41,
-        "fusion": 0.76,
-        "rerank": 0.0,
-        "total": 17.2
+        "dense": 69.09,
+        "bm25": 0.5,
+        "fusion": 1.08,
+        "rerank": 0.05,
+        "total": 70.77
       }
     }
   ]

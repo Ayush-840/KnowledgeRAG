@@ -541,9 +541,9 @@ golden set, `BAAI/bge-reranker-base` reranker, `all-MiniLM-L6-v2` embedder.
 
 | Config | Chunking | Reranker | Pool | Precision | Recall | Recall@pool | Latency |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| fixed · 500/100 | fixed | off | 20 | 0.281 | 0.661 | 0.853 | 24 ms |
-| fixed · 500/100 | fixed | on | 20 | 0.286 | 0.694 | 0.853 | ~889 ms |
-| structure_aware · 500/100 | structure_aware | on | 20 | 0.308 | 0.752 | 0.773 | ~695 ms |
+| fixed · 500/100 | fixed | off | 20 | 0.281 | 0.661 | 0.853 | 26 ms |
+| fixed · 500/100 | fixed | on | 20 | 0.286 | 0.694 | 0.853 | ~910 ms |
+| structure_aware · 500/100 | structure_aware | on | 20 | 0.308 | 0.752 | 0.773 | ~713 ms |
 
 > Reproduce with: `cd backend/python && python -m eval.run_eval --docs ../../eval-docs`
 > (add `--strategy structure_aware`, or `RERANKER_ENABLED=false`, to vary the
