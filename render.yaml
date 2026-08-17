@@ -11,7 +11,6 @@
 # Optional env vars to add in the Render dashboard (Settings -> Environment):
 #   OPENROUTER_API_KEY=sk-...   # /chat answers (LLM_PROVIDER=openrouter, default)
 #   or NVIDIA_API_KEY=nvapi-... # /chat answers (LLM_PROVIDER=nvidia)
-#   CORS_ORIGINS=https://<your-vercel-app>.vercel.app  # lock CORS to the frontend
 services:
   - type: web
     name: knowledge-rag-backend
@@ -29,6 +28,10 @@ services:
         value: /data/hf-cache
       - key: RERANKER_ENABLED
         value: "false"
+      # CORS locked to the deployed frontend origin; add other origins (e.g.
+      # a localhost dev origin) as a comma-separated list if needed.
+      - key: CORS_ORIGINS
+        value: https://knowledge-rag-iota.vercel.app
     disk:
       name: rag-data
       mountPath: /data
