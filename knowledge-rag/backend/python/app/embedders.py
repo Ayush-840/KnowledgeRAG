@@ -46,6 +46,14 @@ class MiniLMEmbedder(Embedder):
     name = "all-MiniLM-L6-v2"
 
     def __init__(self):
+        # Pin the runtime to a single thread: torch thread pools reserve
+        # significant RAM on multi-core hosts, which can OOM small containers.
+        os.environ.setdefault("OMP_NUM_THREADS", "1")
+        os.environ.setdefault("MKL_NUM_THREADS", "1")
+        os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+        import torch
+
+        torch.set_num_threads(1)
         from sentence_transformers import SentenceTransformer
 
         self._model = SentenceTransformer(self.name)

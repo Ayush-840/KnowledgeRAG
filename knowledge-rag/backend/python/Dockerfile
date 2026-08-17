@@ -18,7 +18,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HF_HOME=/data/hf-cache \
     CHROMA_PERSISTENCE_DIR=/data/chroma \
     QUERY_LOG_DIR=/data/logs \
-    RERANKER_ENABLED=false
+    RERANKER_ENABLED=false \
+    # Keep the memory footprint down on small instances: torch/sentence-transformers
+    # thread pools can reserve hundreds of MB on multi-core hosts. Single-threaded
+    # inference is fine for MiniLM embeddings and the bge reranker.
+    OMP_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    TOKENIZERS_PARALLELISM=false
 
 WORKDIR /srv
 
