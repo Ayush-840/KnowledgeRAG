@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { docColor } from '../utils/docColors'
 
 const QUERY_COLOR = '#22d3ee' // cyan: the query marker + promoted links
-const SELECTED_COLOR = '#ffffff'
+const SELECTED_COLOR = '#0f172a'
 
 /**
  * 3D point cloud of the session's chunk embeddings (UMAP projection from the
@@ -76,8 +76,8 @@ function PointCloud({ points, promotedIds, retrievedIds, onSelectPoint }) {
       dummy.updateMatrix()
       m.setMatrixAt(i, dummy.matrix)
       color.set(docColor(p.filename))
-      if (isPromoted) color.offsetHSL(0, 0, 0.12)
-      else if (!retrieved.has(p.id)) color.multiplyScalar(0.42) // non-retrieved recede
+      if (isPromoted) color.offsetHSL(0, 0, -0.12)
+      else if (!retrieved.has(p.id)) color.lerp(new THREE.Color('#ffffff'), 0.6) // non-retrieved recede toward the light background
       m.setColorAt(i, color)
     })
     m.instanceMatrix.needsUpdate = true

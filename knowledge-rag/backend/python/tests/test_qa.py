@@ -14,6 +14,7 @@ import pytest
 from app.dependencies import get_session_vectors
 from app.llm import verify_citations
 from app.retrieval import reciprocal_rank_fusion
+from eval import llm as eval_llm
 from app.utils import (
     clean_extracted_pages,
     clean_page_text,
@@ -366,6 +367,60 @@ def test_s11_no_citations_when_none_valid():
     answer, citations = verify_citations("No sources here [3] [42].", [{"id": "c1", "text": "x"}])
     assert answer == "No sources here  ."
     assert citations == []
+
+
+# ---------- S11b: eval response-structure pre-check ----------
+
+COMPLIANT_ANSWER = (
+    "**Executive Summary / Core Answer**\n"
+    "Two plus two is four [1].\n\n"
+    "**Key Takeaways & Concepts**\n"
+    "- Addition is commutative [1].\n\n"
+    "**Citation References**\n"
+    "- [1] Math Notes, page 1"
+)
+
+
+def test_s11b_structure_check_accepts_compliant_answer():
+    ok, issues = eval_llm.check_structure(COMPLIANT_ANSWER, 3)
+    assert ok, issues
+    assert issues == []
+
+
+def test_s11b_structure_check_empty_answer():
+    ok, issues = eval_llm.check_structure("", 3)
+    assert not ok
+    assert "empty" in issues[0]
+
+
+def test_s11b_structure_check_missing_sections():
+    ok, issues = eval_llm.check_structure("**Key Takeaways & Concepts**\n- stuff [1]", 3)
+    assert not ok
+    joined = " | ".join(issues)
+    assert "Executive Summary" in joined
+    assert "Citation References" in joined
+
+
+def test_s11b_structure_check_unresolved_body_marker():
+    answer = (
+        "**Executive Summary**\nFact [2].\n\n"
+        "**Key Takeaways**\n- point\n\n"
+        "**Citation References**\n- [1] Doc, page 1"
+    )
+    ok, issues = eval_llm.check_structure(answer, 3)
+    assert not ok
+    assert any("marker [2]" in i and "missing" in i for i in issues)
+
+
+def test_s11b_structure_check_out_of_range_marker():
+    answer = (
+        "**Executive Summary**\nFact [9].\n\n"
+        "**Key Takeaways**\n- point\n\n"
+        "**Citation References**\n- [9] Doc, page 1"
+    )
+    ok, issues = eval_llm.check_structure(answer, 3)
+    assert not ok
+    assert any("exceeds context size" in i for i in issues)
 
 
 # ---------- S12: graceful degradation ----------

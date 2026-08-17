@@ -1,19 +1,19 @@
 :root {
   /* ---- Design tokens (single source of truth) ---- */
-  --bg: #0a0b0f;
-  --bg-elev: #10121a;
-  --glass: rgba(255, 255, 255, 0.045);
-  --glass-strong: rgba(255, 255, 255, 0.075);
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --text: #a6adbb;
-  --text-h: #f4f6fb;
-  --text-dim: #6b7280;
+  --bg: #f7f5f0;
+  --bg-elev: #ffffff;
+  --glass: rgba(255, 255, 255, 0.6);
+  --glass-strong: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(15, 23, 42, 0.1);
+  --text: #334155;
+  --text-h: #0f172a;
+  --text-dim: #64748b;
 
   /* Brand */
-  --brand-violet: #8b5cf6;
-  --brand-blue: #60a5fa;
-  --brand-blue-light: #93c5fd;
-  --accent: #a78bfa;
+  --brand-amber: #f59e0b;
+  --brand-orange: #fbbf24;
+  --brand-orange-light: #fcd34d;
+  --accent: #d97706;
 
   /* Shape & type */
   --radius: 18px;
@@ -22,7 +22,7 @@
   --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
 
   font: 17px/1.55 var(--sans);
-  color-scheme: dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -39,8 +39,8 @@ body {
   margin: 0;
   min-height: 100svh;
   background:
-    radial-gradient(1100px 520px at 82% -8%, rgba(139, 92, 246, 0.14), transparent 60%),
-    radial-gradient(900px 480px at 8% 0%, rgba(96, 165, 250, 0.1), transparent 55%),
+    radial-gradient(1100px 520px at 82% -8%, rgba(245, 158, 11, 0.09), transparent 60%),
+    radial-gradient(900px 480px at 8% 0%, rgba(251, 191, 36, 0.06), transparent 55%),
     var(--bg);
   background-attachment: fixed;
 }
@@ -69,6 +69,6 @@ a {
 }
 
 ::selection {
-  background: rgba(139, 92, 246, 0.35);
+  background: rgba(245, 158, 11, 0.35);
   color: var(--text-h);
 }

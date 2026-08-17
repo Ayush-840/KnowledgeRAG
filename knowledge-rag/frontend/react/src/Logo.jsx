@@ -17,8 +17,8 @@ export default function Logo({ size = 36 }) {
           y2="29"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="var(--brand-violet)" />
-          <stop offset="1" stopColor="var(--brand-blue)" />
+          <stop stopColor="var(--brand-amber)" />
+          <stop offset="1" stopColor="var(--brand-orange)" />
         </linearGradient>
       </defs>
       {/* document */}
@@ -27,14 +27,14 @@ export default function Logo({ size = 36 }) {
         fill="url(#kr-brand-grad)"
       />
       {/* folded corner */}
-      <path d="M19.5 3v4.5H24" fill="var(--brand-blue-light)" opacity="0.85" />
+      <path d="M19.5 3v4.5H24" fill="var(--brand-orange-light)" opacity="0.85" />
       {/* embedded node/path motif */}
-      <g stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round">
+      <g stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round">
         <path d="M12 13.5l3.5 4.5M15.5 18l4-3.5M12 13.5l7.5-.5" />
       </g>
-      <circle cx="12" cy="13.5" r="2" fill="#ffffff" />
-      <circle cx="15.5" cy="18" r="2" fill="#ffffff" />
-      <circle cx="19.5" cy="13" r="2" fill="#ffffff" />
+      <circle cx="12" cy="13.5" r="2" fill="#0f172a" />
+      <circle cx="15.5" cy="18" r="2" fill="#0f172a" />
+      <circle cx="19.5" cy="13" r="2" fill="#0f172a" />
     </svg>
   )
 }

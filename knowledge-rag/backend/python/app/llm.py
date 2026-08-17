@@ -5,9 +5,10 @@ Supports multiple providers via LLM_PROVIDER env var:
   - "nvidia"               — uses NVIDIA_API_KEY + NVIDIA NIM endpoint (free tier)
 
 generate_answer() returns (answer, usage, latency_ms). The system prompt
-constrains the model to the provided context and requires [n] citation markers,
-which the caller then verifies against the actually-retrieved chunks
-(verify_citations) so fabricated references never reach the UI.
+constrains the model to the provided context, requires [n] citation markers and
+a structured synthesized answer (summary -> takeaways -> citations), which the
+caller then verifies against the actually-retrieved chunks (verify_citations)
+so fabricated references never reach the UI.
 """
 
 import json
@@ -123,36 +124,81 @@ def _generate_extractive_fallback(query: str, context_chunks: list, error_detail
         text = chunk.get("text", "").strip()
         if len(text) > 400:
             text = text[:400].rsplit(" ", 1)[0] + "..."
-        filename = chunk.get("filename", "document")
+        label = chunk.get("title") or chunk.get("filename") or "document"
         page = chunk.get("page_number")
         page_str = f" (Page {page})" if page else ""
-        lines.append(f"• From **{filename}**{page_str} [{i + 1}]:\n  \"{text}\"")
+        lines.append(f"• From **{label}**{page_str} [{i + 1}]:\n  \"{text}\"")
 
     answer = "\n\n".join(lines)
     return answer, {"fallback": True, "error": error_detail}, 10.0
 
 
+# Defensive, citation-enforcing generation prompt. Requires a synthesized answer
+# (never raw quote dumps), human-readable document titles, inline [n] citations,
+# and an explicit "what's missing" statement for low-coverage questions — the
+# eval harness's faithfulness / unanswerable-query slices depend on it.
+GENERATION_SYSTEM_PROMPT = (
+    "You are Knowledge RAG, an intelligent document analysis assistant. "
+    "Your role is to read the retrieved context chunks and synthesize a clear, "
+    "comprehensive, and cohesive answer to the user's query.\n\n"
+    "CRITICAL INSTRUCTIONS:\n"
+    "1. Synthesize, Do Not Quote Dump:\n"
+    "   - Provide a well-structured summary of the core topic.\n"
+    "   - Do NOT output raw chunk listings, unformatted extracts, or isolated "
+    "quotes unless the user specifically requests them.\n"
+    "   - Group related concepts under clear bold headings and bullet points.\n"
+    "2. Document & Metadata Formatting:\n"
+    "   - Always reference documents using their original human-readable title "
+    "(given as Source in the CONTEXT block), never raw filenames, hashes, or "
+    "storage keys.\n"
+    "   - Place numerical citations inline (e.g., [1], [2]) directly after the "
+    "facts they support, matching the CONTEXT numbering.\n"
+    "3. Handling Low-Relevance Chunks:\n"
+    "   - Ignore irrelevant noise or out-of-context text retrieved from the "
+    "documents.\n"
+    "   - If the CONTEXT lacks enough information to answer fully, state "
+    "clearly what information is available and what is missing. Never invent "
+    "facts or references. If nothing relevant was retrieved, reply exactly: "
+    "\"I couldn't find that in the uploaded documents.\"\n\n"
+    "RESPONSE FORMAT:\n"
+    "- Executive Summary / Core Answer: 2-3 sentences with the primary takeaway.\n"
+    "- Key Takeaways & Concepts: a bulleted breakdown of the key points.\n"
+    "- Citation References: mapped directly to the original document titles and "
+    "pages."
+)
+
+
+def _format_context_chunk(index: int, chunk: dict) -> str:
+    """Render one context chunk with its resolved human-readable source label,
+    so the model can cite real document titles instead of storage keys."""
+    title = chunk.get("title") or chunk.get("filename") or "Document"
+    header = f'Source: "{title}"'
+    page = chunk.get("page_number")
+    if page:
+        header += f", page {page}"
+    return f"[{index}] ({header})\n{chunk.get('text', '')}"
+
+
 def generate_answer(query: str, context_chunks: list):
     """Generate a grounded answer with [n] citations.
 
-    context_chunks: list of dicts with at least {"text": ...}. Returns
-    (answer, usage, latency_ms).
+    context_chunks: list of dicts with at least {"text": ...}, plus optional
+    {"title", "filename", "page_number"} used to label sources for the model.
+    Returns (answer, usage, latency_ms).
     """
-    context = "\n\n".join(f"[{i + 1}] {c['text']}" for i, c in enumerate(context_chunks))
-    system = (
-        "You are a document-grounded Q&A assistant for Knowledge RAG. "
-        "Answer ONLY from the provided CONTEXT. Cite the source of each claim "
-        "inline with [n] markers matching the context list. Do not invent "
-        "references or facts. If the CONTEXT does not contain the answer, reply "
-        "exactly: \"I couldn't find that in the uploaded documents.\""
+    context = "\n\n".join(
+        _format_context_chunk(i + 1, c) for i, c in enumerate(context_chunks)
     )
     user = (
         f"CONTEXT:\n{context}\n\nQUESTION: {query}\n\n"
-        "Answer concisely with [n] citations."
+        "Answer using only the CONTEXT above, following the RESPONSE FORMAT."
     )
     try:
         return _chat(
-            [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            [
+                {"role": "system", "content": GENERATION_SYSTEM_PROMPT},
+                {"role": "user", "content": user},
+            ],
             temperature=0.2,
         )
     except Exception as e:

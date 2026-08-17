@@ -1,0 +1,14 @@
+.venv
+venv
+env
+__pycache__
+*.pyc
+.env
+chroma_data
+logs
+.pytest_cache
+tests
+eval/reports
+*.sqlite3
+*.bin
+bm25.json

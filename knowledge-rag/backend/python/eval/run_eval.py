@@ -8,6 +8,8 @@ Metrics per golden question:
   - context precision: relevant chunks in the top-k context / chunks retrieved
   - context recall:    relevant chunks retrieved / all relevant chunks in the corpus
   - recall @ pool:     recall over the wider fused pool (before reranking)
+  - structure:         fast no-LLM pre-check — all three response sections present
+                       and body [n] citations resolve to the Citation References section
   - faithfulness:      LLM judge — is the generated answer grounded in the context?
   - answer relevance:  LLM judge — does the answer address the question?
 
@@ -132,6 +134,15 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
         )
         results = out["results"]
         topk_texts = [r["text"] for r in results]
+        chunks = [
+            {
+                "text": r["text"],
+                "title": r.get("title"),
+                "filename": r["filename"],
+                "page_number": r["page_number"],
+            }
+            for r in results
+        ]
 
         relevant_topk = [r for r in results if _relevant(r["text"], g["evidence"])]
         total_relevant = sum(1 for t in corpus_texts if _relevant(t, g["evidence"]))
@@ -147,13 +158,17 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
         answer = None
         faithfulness = None
         answer_relevance = None
+        structure_ok = None
+        structure_issues = []
         llm_error = None
         generation_ms = None
         if has_llm:
             try:
                 t_gen = time.perf_counter()
-                answer = llm_client.generate_answer(q, topk_texts)
+                answer = llm_client.generate_answer(q, chunks)
                 generation_ms = round((time.perf_counter() - t_gen) * 1000, 2)
+                # Cheap structural pre-check before the expensive LLM judges
+                structure_ok, structure_issues = llm_client.check_structure(answer, len(chunks))
                 faithfulness = llm_client.judge_faithfulness(q, answer, topk_texts)
                 answer_relevance = llm_client.judge_answer_relevance(q, answer)
             except Exception as e:  # noqa: BLE001 - keep the rest of the run going
@@ -173,6 +188,8 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
             "answer": answer,
             "faithfulness": faithfulness,
             "answer_relevance": answer_relevance,
+            "structure_ok": structure_ok,
+            "structure_issues": structure_issues,
             "generation_ms": generation_ms,
             "llm_error": llm_error,
             "latency_ms": out["latency_ms"],
@@ -196,6 +213,8 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
                 "context_precision": precision,
                 "context_recall": recall,
                 "recall_at_pool": recall_at_pool,
+                "structure_ok": structure_ok,
+                "structure_issues": structure_issues,
                 "faithfulness": faithfulness,
                 "answer_relevance": answer_relevance,
             },
@@ -205,6 +224,7 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
         "context_precision": _mean([r["context_precision"] for r in rows]),
         "context_recall": _mean([r["context_recall"] for r in rows]),
         "recall_at_pool": _mean([r["recall_at_pool"] for r in rows]),
+        "structure_pass_rate": _mean([r["structure_ok"] for r in rows]),
         "faithfulness": _mean([r["faithfulness"] for r in rows]),
         "answer_relevance": _mean([r["answer_relevance"] for r in rows]),
         "mean_generation_ms": _mean([r["generation_ms"] for r in rows]),
@@ -258,6 +278,7 @@ def _per_query_type_summary(rows: list) -> dict:
             "context_precision": _mean([r["context_precision"] for r in g]),
             "context_recall": _mean([r["context_recall"] for r in g]),
             "recall_at_pool": _mean([r["recall_at_pool"] for r in g]),
+            "structure_pass_rate": _mean([r["structure_ok"] for r in g]),
             "faithfulness": _mean([r["faithfulness"] for r in g]),
             "answer_relevance": _mean([r["answer_relevance"] for r in g]),
         }
@@ -287,10 +308,11 @@ def _render_markdown(report: dict) -> str:
 
     by_type = report["summary"].get("by_query_type") or {}
     if by_type:
-        lines += ["", "### By query type", "", "| Type | n | Precision | Recall | Recall@pool | Faithfulness | Ans. rel. |", "| --- | --- | --- | --- | --- | --- | --- |"]
+        lines += ["", "### By query type", "", "| Type | n | Precision | Recall | Recall@pool | Structure | Faithfulness | Ans. rel. |", "| --- | --- | --- | --- | --- | --- | --- | --- |"]
         for qt, m in sorted(by_type.items()):
             lines.append(
                 f"| {qt} | {m['n']} | {m['context_precision']} | {m['context_recall']} | {m['recall_at_pool']} | "
+                f"{m['structure_pass_rate'] if m['structure_pass_rate'] is not None else 'n/a'} | "
                 f"{m['faithfulness'] if m['faithfulness'] is not None else 'n/a'} | "
                 f"{m['answer_relevance'] if m['answer_relevance'] is not None else 'n/a'} |"
             )
@@ -300,11 +322,13 @@ def _render_markdown(report: dict) -> str:
         v = report["summary"].get(k)
         lines.append(f"| {k} | {v if v is not None else 'n/a'} |")
 
-    lines += ["", "## Per query", "", "| ID | Type | Question | Retrieved | Relevant | Precision | Recall | Recall@pool | Faithfulness | Answer rel. | Latency (ms) |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    lines += ["", "## Per query", "", "| ID | Type | Question | Retrieved | Relevant | Precision | Recall | Recall@pool | Structure | Faithfulness | Answer rel. | Latency (ms) |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for r in report["queries"]:
+        struct = {True: "✓", False: "✗"}.get(r["structure_ok"], "—")
         lines.append(
             f"| {r['id']} | {r.get('query_type') or '—'} | {r['question']} | {r['retrieved_count']} | {r['relevant_retrieved']} | "
             f"{r['context_precision']} | {r['context_recall']} | {r['recall_at_pool']} | "
+            f"{struct} | "
             f"{r['faithfulness'] if r['faithfulness'] is not None else 'n/a'} | "
             f"{r['answer_relevance'] if r['answer_relevance'] is not None else 'n/a'} | "
             f"{r['latency_ms']['total']} |"

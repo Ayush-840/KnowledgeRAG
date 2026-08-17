@@ -38,7 +38,7 @@ export default function Space2D({ points, query, promotedIds, selectedId, onSele
             r={isPromoted ? 14 : 7}
             fill={docColor(p.filename)}
             opacity={isPromoted || isSelected ? 1 : 0.45}
-            stroke={isSelected ? '#ffffff' : isPromoted ? '#22d3ee' : 'none'}
+            stroke={isSelected ? '#0f172a' : isPromoted ? '#22d3ee' : 'none'}
             strokeWidth={2}
             role="button"
             tabIndex={0}

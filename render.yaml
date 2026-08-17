@@ -1,0 +1,35 @@
+# Render blueprint for the Knowledge RAG backend (FastAPI retrieval service).
+#
+# Deploy steps:
+#   1. Commit and push this repo to GitHub.
+#   2. In Render: New + -> Blueprint -> pick the repo -> Apply.
+#      It auto-detects this render.yaml and provisions the web service + disk.
+#   3. Persistent disks require a paid plan (Starter $7/mo + disk, ~$0.50/mo).
+#   4. After it's live, note the service URL (https://<name>.onrender.com) and
+#      set VITE_API_URL to it when deploying the React frontend to Vercel.
+#
+# Optional env vars to add in the Render dashboard (Settings -> Environment):
+#   OPENROUTER_API_KEY=sk-...   # /chat answers (LLM_PROVIDER=openrouter, default)
+#   or NVIDIA_API_KEY=nvapi-... # /chat answers (LLM_PROVIDER=nvidia)
+#   CORS_ORIGINS=https://<your-vercel-app>.vercel.app  # lock CORS to the frontend
+services:
+  - type: web
+    name: knowledge-rag-backend
+    runtime: docker
+    rootDir: knowledge-rag/backend/python
+    plan: starter
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: CHROMA_PERSISTENCE_DIR
+        value: /data/chroma
+      - key: QUERY_LOG_DIR
+        value: /data/logs
+      - key: HF_HOME
+        value: /data/hf-cache
+      - key: RERANKER_ENABLED
+        value: "false"
+    disk:
+      name: rag-data
+      mountPath: /data
+      sizeGB: 2

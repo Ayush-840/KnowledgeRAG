@@ -8,6 +8,10 @@ app/llm.py):
   - "openrouter" — OpenRouter
 
 The harness runs without qualitative metrics if no API key is present.
+
+Generation reuses the app's structured synthesis prompt (app.llm), and
+check_structure() is a cheap, no-LLM pre-check of the response contract
+(three sections present, body [n] markers resolve to the citation section).
 """
 
 import json
@@ -110,20 +114,93 @@ def _parse_score(text: str) -> float:
     return max(0.0, min(1.0, score))
 
 
+CITE_RE = re.compile(r"\[(\d+)\]")
+
+
+def _as_chunk(c):
+    """Accept either a plain text string or a chunk dict (as produced by the
+    retrieval layer), so callers can pass richer chunks for source labeling."""
+    if isinstance(c, dict):
+        return c
+    return {"text": c}
+
+
 def generate_answer(question: str, context_chunks: list) -> str:
-    """Generate a document-grounded answer with defensive, citation-enforcing prompting."""
-    context = "\n\n".join(f"[{i + 1}] {c}" for i, c in enumerate(context_chunks))
-    system = (
-        "You are a document-grounded Q&A assistant. Answer ONLY from the provided "
-        "context. If the context does not contain the answer, say so explicitly. "
-        "Cite sources inline with [n] markers matching the context list."
+    """Generate a document-grounded answer with the same defensive, structured
+    synthesis prompt the app uses (imported from app.llm), so eval answers obey
+    the same response contract that check_structure() validates."""
+    from app.llm import GENERATION_SYSTEM_PROMPT, _format_context_chunk
+
+    chunks = [_as_chunk(c) for c in context_chunks]
+    context = "\n\n".join(
+        _format_context_chunk(i + 1, c) for i, c in enumerate(chunks)
     )
-    user = f"CONTEXT:\n{context}\n\nQUESTION: {question}\n\nAnswer concisely with [n] citations."
+    user = (
+        f"CONTEXT:\n{context}\n\nQUESTION: {question}\n\n"
+        "Answer using only the CONTEXT above, following the RESPONSE FORMAT."
+    )
     return _post_chat(
-        [{"role": "system", "content": system}, {"role": "user", "content": user}],
+        [{"role": "system", "content": GENERATION_SYSTEM_PROMPT}, {"role": "user", "content": user}],
         GENERATION_MODEL,
         temperature=0.2,
     )
+
+
+def check_structure(answer: str, n_chunks: int):
+    """Fast, no-LLM pre-check of the response contract.
+
+    Verifies (1) all three response sections are present — Executive Summary /
+    Core Answer, Key Takeaways & Concepts, Citation References — and (2) every
+    [n] marker used in the body resolves to an entry in the Citation References
+    section and stays within the retrieved context size.
+
+    Returns (ok: bool, issues: list[str]).
+    """
+    issues = []
+    if not answer or not answer.strip():
+        return False, ["answer is empty"]
+
+    lines = answer.splitlines()
+    header_re = re.compile(
+        r"^\s*(?:#+\s*)?(?:\*\*)?"
+        r"(executive summary|core answer|key takeaways|key points|"
+        r"citation references|citations|references)"
+        r"(?:\*\*)?:?(\s|$)",
+        re.IGNORECASE,
+    )
+
+    def find_header(*patterns):
+        for i, line in enumerate(lines):
+            t = line.strip()
+            if header_re.match(t) and any(p.search(t) for p in patterns):
+                return i
+        return None
+
+    sum_idx = find_header(re.compile(r"executive summary|core answer", re.IGNORECASE))
+    take_idx = find_header(re.compile(r"key takeaways|key points", re.IGNORECASE))
+    cite_idx = find_header(re.compile(r"citation references|citations|references", re.IGNORECASE))
+
+    if sum_idx is None:
+        issues.append("missing Executive Summary / Core Answer section")
+    if take_idx is None:
+        issues.append("missing Key Takeaways & Concepts section")
+    if cite_idx is None:
+        issues.append("missing Citation References section")
+
+    cite_start = cite_idx if cite_idx is not None else len(lines)
+    body = "\n".join(lines[:cite_start])
+    cite_section = "\n".join(lines[cite_start:]) if cite_idx is not None else ""
+
+    body_markers = sorted({int(m) for m in CITE_RE.findall(body)})
+    cite_markers = {int(m) for m in CITE_RE.findall(cite_section)}
+
+    for n in body_markers:
+        if n < 1 or n > n_chunks:
+            issues.append(f"marker [{n}] exceeds context size ({n_chunks} chunks)")
+        elif n not in cite_markers:
+            issues.append(f"marker [{n}] used in body but missing from Citation References")
+
+    return not issues, issues
 
 
 def judge_faithfulness(question: str, answer: str, context_chunks: list) -> float:

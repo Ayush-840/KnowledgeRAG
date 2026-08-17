@@ -1,19 +1,58 @@
 import { useState } from 'react'
 import MetricsPanel from './MetricsPanel'
 
-function renderAnswer(text, onOpenSource) {
-  const parts = text.split(/(\[\d+\])/g)
-  return parts.map((part, i) => {
-    const m = part.match(/^\[(\d+)\]$/)
-    if (m) {
+// Renders assistant answers with the three structures the generation prompt
+// produces: clickable [n] citation pills, **bold** headings, and "-" bullets.
+// No markdown dependency — this covers the actual output contract.
+function renderRich(text, onOpenSource) {
+  const tokens = text.split(/(\[\d+\]|\*\*[^*]+\*\*)/g)
+  return tokens.map((token, i) => {
+    const cite = token.match(/^\[(\d+)\]$/)
+    if (cite) {
       return (
-        <button key={i} className="cite-pill" onClick={() => onOpenSource(Number(m[1]))}>
-          {m[0]}
+        <button key={i} className="cite-pill" onClick={() => onOpenSource(Number(cite[1]))}>
+          {token}
         </button>
       )
     }
-    return <span key={i}>{part}</span>
+    const bold = token.match(/^\*\*([^*]+)\*\*$/)
+    if (bold) return <strong key={i}>{bold[1]}</strong>
+    return <span key={i}>{token}</span>
   })
+}
+
+function renderAnswer(text, onOpenSource) {
+  const blocks = []
+  let list = []
+  const flushList = () => {
+    if (list.length) {
+      blocks.push(
+        <ul key={`list-${blocks.length}`} className="answer-list">
+          {list.map((item, i) => (
+            <li key={i}>{renderRich(item, onOpenSource)}</li>
+          ))}
+        </ul>
+      )
+      list = []
+    }
+  }
+  text.split('\n').forEach((line, i) => {
+    const bullet = line.trim().match(/^[-•*]\s+(.*)$/)
+    if (bullet) {
+      list.push(bullet[1])
+      return
+    }
+    flushList()
+    if (line.trim()) {
+      blocks.push(
+        <p key={`line-${i}`} className="answer-line">
+          {renderRich(line, onOpenSource)}
+        </p>
+      )
+    }
+  })
+  flushList()
+  return blocks
 }
 
 export default function Message({ message, onOpenSource }) {
