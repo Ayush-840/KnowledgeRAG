@@ -1,0 +1,56 @@
+# Root-level compose file: builds and runs both backend services together.
+#
+#   docker compose build          # build both images
+#   docker compose up --build -d  # build and start both
+#
+# Endpoints once up:
+#   Python retrieval service: http://localhost:8001  (/health)
+#   Node gateway (proxy):     http://localhost:8000  (/health)
+#
+# Optional LLM keys for /chat answers: export them (or put them in a root
+# .env file, which compose reads automatically), e.g.:
+#   OPENROUTER_API_KEY=sk-... docker compose up -d
+#
+# The React frontend has no container — run it as before:
+#   cd knowledge-rag/frontend/react && npm install && npm run dev
+
+services:
+  backend:
+    build:
+      context: knowledge-rag/backend/python
+    container_name: knowledge-rag-backend
+    ports:
+      - "8001:8001"
+    environment:
+      # Persistent data: Chroma + BM25 indexes, HF model cache, query logs.
+      HF_HOME: /data/hf-cache
+      CHROMA_PERSISTENCE_DIR: /data/chroma
+      QUERY_LOG_DIR: /data/logs
+      # The image's Dockerfile defaults RERANKER_ENABLED to false (the ~1.1 GB
+      # bge-reranker cross-encoder is heavy for small instances); set it to
+      # "true" for rerank-quality results on a machine with >= 2.5 GB free RAM.
+      RERANKER_ENABLED: "${RERANKER_ENABLED:-false}"
+      # LLM keys for /chat answers (both optional — omit to run retrieval-only).
+      LLM_PROVIDER: "${LLM_PROVIDER:-openrouter}"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      NVIDIA_API_KEY: "${NVIDIA_API_KEY:-}"
+    volumes:
+      - rag-data:/data
+    # The image declares its own HEALTHCHECK on /health, which the gateway's
+    # depends_on below relies on.
+
+  gateway:
+    build:
+      context: knowledge-rag/backend/node
+    container_name: knowledge-rag-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: "8000"
+      PYTHON_URL: http://backend:8001
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  rag-data:
