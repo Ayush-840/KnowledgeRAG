@@ -28,6 +28,12 @@ app.add_middleware(
 # Include routers
 app.include_router(api_router)
 
+@app.get("/")
+async def root():
+    return {"message": "Knowledge RAG backend"}
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+
