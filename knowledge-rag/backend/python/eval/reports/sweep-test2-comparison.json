@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "file": "bench-test2-c50_t3_k60.json",
+      "candidates": 50,
+      "top_k": 3,
+      "rrf_k": 60,
+      "precision": 0.5417,
+      "recall": 0.7135,
+      "recall_at_pool": 1.0,
+      "structure_pass_rate": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "mean_latency_ms": 1388.2894,
+      "by_query_type": {}
+    },
+    {
+      "file": "bench-test2-c20_t5_k60.json",
+      "candidates": 20,
+      "top_k": 5,
+      "rrf_k": 60,
+      "precision": 0.375,
+      "recall": 0.7708,
+      "recall_at_pool": 0.9844,
+      "structure_pass_rate": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "mean_latency_ms": 1223.2462,
+      "by_query_type": {}
+    },
+    {
+      "file": "bench-test2-c30_t5_k60.json",
+      "candidates": 30,
+      "top_k": 5,
+      "rrf_k": 60,
+      "precision": 0.375,
+      "recall": 0.7708,
+      "recall_at_pool": 1.0,
+      "structure_pass_rate": null,
+      "faithfulness": null,
+      "answer_relevance": null,
+      "mean_latency_ms": 1201.7444,
+      "by_query_type": {}
+    }
+  ],
+  "generated_at": "2026-08-18T11:22:25.493309+00:00"
+}

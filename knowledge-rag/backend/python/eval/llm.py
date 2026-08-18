@@ -235,3 +235,55 @@ def judge_answer_relevance(question: str, answer: str) -> float:
     return _parse_score(
         _post_chat([{"role": "user", "content": prompt}], JUDGE_MODEL, temperature=0.0)
     )
+
+
+# ---- Unanswerable query handling ----
+
+# Phrases that indicate the system correctly declined to answer
+_DECLINE_PATTERNS = re.compile(
+    r"couldn't find|cannot find|not found|not in the|not available|"
+    r"no relevant|no information|don't have|does(?:n't| not) contain|"
+    r"unable to answer|not present in|no data|no mention|"
+    r"i don't have enough|insufficient information|"
+    r"the uploaded documents don't|the context (?:does|doesn't)(?: not)? contain",
+    re.IGNORECASE,
+)
+
+
+def check_decline(answer: str) -> bool:
+    """Cheap, no-LLM regex check for whether an answer correctly declines.
+    Returns True if the answer contains phrases indicating the system couldn't
+    find the information in the uploaded documents."""
+    if not answer or not answer.strip():
+        return False
+    return bool(_DECLINE_PATTERNS.search(answer))
+
+
+def judge_declined_correctly(question: str, answer: str) -> float:
+    """For unanswerable queries: score whether the system correctly declined
+    to answer rather than fabricating a response.
+
+    Returns 1.0 if the answer correctly declines, 0.0 if it fabricates.
+    Uses a cheap regex pre-check first; falls back to LLM judge for ambiguous cases.
+    """
+    # Fast path: regex detects clear decline phrases
+    if check_decline(answer):
+        return 1.0
+    # Fast path: empty or very short answer that doesn't fabricate
+    if not answer or len(answer.strip()) < 20:
+        return 0.5  # uncertain — too short to tell
+    # LLM judge for ambiguous cases
+    prompt = (
+        "You are evaluating whether an answer correctly declines to answer a question "
+        "when the information is not available.\n\n"
+        f"QUESTION: {question}\n\n"
+        f"ANSWER:\n{answer}\n\n"
+        "The QUESTION asks about information that is NOT in the provided documents. "
+        "The correct behavior is to DECLINE to answer (e.g., 'I couldn\'t find that in "
+        "the uploaded documents' or 'The context doesn\'t contain this information').\n\n"
+        "Does the ANSWER correctly decline, or does it fabricate/hallucinate an answer?\n"
+        "Return ONLY a single number: 1.0 if it correctly declines, 0.0 if it fabricates."
+    )
+    return _parse_score(
+        _post_chat([{"role": "user", "content": prompt}], JUDGE_MODEL, temperature=0.0)
+    )

@@ -162,6 +162,8 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
         structure_issues = []
         llm_error = None
         generation_ms = None
+        declined_correctly = None
+        is_unanswerable = g.get("query_type") == "unanswerable"
         if has_llm:
             try:
                 t_gen = time.perf_counter()
@@ -169,8 +171,15 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
                 generation_ms = round((time.perf_counter() - t_gen) * 1000, 2)
                 # Cheap structural pre-check before the expensive LLM judges
                 structure_ok, structure_issues = llm_client.check_structure(answer, len(chunks))
-                faithfulness = llm_client.judge_faithfulness(q, answer, topk_texts)
-                answer_relevance = llm_client.judge_answer_relevance(q, answer)
+                if is_unanswerable:
+                    # For unanswerable queries: verify the system declines correctly
+                    # instead of hallucinating. Skip faithfulness/relevance which
+                    # are meaningless when the correct answer is "I don't know".
+                    declined_correctly = llm_client.judge_declined_correctly(q, answer)
+                else:
+                    # For answerable queries: standard faithfulness + relevance
+                    faithfulness = llm_client.judge_faithfulness(q, answer, topk_texts)
+                    answer_relevance = llm_client.judge_answer_relevance(q, answer)
             except Exception as e:  # noqa: BLE001 - keep the rest of the run going
                 llm_error = str(e)
 
@@ -188,6 +197,7 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
             "answer": answer,
             "faithfulness": faithfulness,
             "answer_relevance": answer_relevance,
+            "declined_correctly": declined_correctly,
             "structure_ok": structure_ok,
             "structure_issues": structure_issues,
             "generation_ms": generation_ms,
@@ -220,13 +230,21 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
             },
         })
 
+    # Separate answerable from unanswerable for aggregate metrics.
+    # Unanswerable queries have no relevant chunks, so their precision/recall
+    # are always 0.0 — including them in the aggregate would artificially
+    # deflate the retrieval metrics.
+    answerable_rows = [r for r in rows if r.get("query_type") != "unanswerable"]
+    unanswerable_rows = [r for r in rows if r.get("query_type") == "unanswerable"]
+
     summary = {
-        "context_precision": _mean([r["context_precision"] for r in rows]),
-        "context_recall": _mean([r["context_recall"] for r in rows]),
-        "recall_at_pool": _mean([r["recall_at_pool"] for r in rows]),
+        "context_precision": _mean([r["context_precision"] for r in answerable_rows]),
+        "context_recall": _mean([r["context_recall"] for r in answerable_rows]),
+        "recall_at_pool": _mean([r["recall_at_pool"] for r in answerable_rows]),
         "structure_pass_rate": _mean([r["structure_ok"] for r in rows]),
-        "faithfulness": _mean([r["faithfulness"] for r in rows]),
-        "answer_relevance": _mean([r["answer_relevance"] for r in rows]),
+        "faithfulness": _mean([r["faithfulness"] for r in answerable_rows]),
+        "answer_relevance": _mean([r["answer_relevance"] for r in answerable_rows]),
+        "declined_correctly": _mean([r["declined_correctly"] for r in unanswerable_rows]) if unanswerable_rows else None,
         "mean_generation_ms": _mean([r["generation_ms"] for r in rows]),
         "mean_total_latency_ms": _mean([r["latency_ms"]["total"] for r in rows]),
         # Per-query-type breakdown so a strong single-hop score cannot mask weak
@@ -264,7 +282,12 @@ def run_eval(docs_dir: Path, chunk_size: int, overlap: int, strategy: str, out_d
 
 
 def _per_query_type_summary(rows: list) -> dict:
-    """Mean metrics grouped by g["query_type"] (omits None/untagged rows)."""
+    """Mean metrics grouped by g["query_type"] (omits None/untagged rows).
+
+    For unanswerable queries, faithfulness/answer_relevance are not computed
+    (they don't apply when the correct answer is a decline). Instead,
+    declined_correctly is reported.
+    """
     groups = {}
     for r in rows:
         qt = r.get("query_type")
@@ -273,7 +296,7 @@ def _per_query_type_summary(rows: list) -> dict:
         groups.setdefault(qt, []).append(r)
     out = {}
     for qt, g in sorted(groups.items()):
-        out[qt] = {
+        entry = {
             "n": len(g),
             "context_precision": _mean([r["context_precision"] for r in g]),
             "context_recall": _mean([r["context_recall"] for r in g]),
@@ -282,6 +305,9 @@ def _per_query_type_summary(rows: list) -> dict:
             "faithfulness": _mean([r["faithfulness"] for r in g]),
             "answer_relevance": _mean([r["answer_relevance"] for r in g]),
         }
+        if qt == "unanswerable":
+            entry["declined_correctly"] = _mean([r["declined_correctly"] for r in g])
+        out[qt] = entry
     return out
 
 
@@ -308,13 +334,14 @@ def _render_markdown(report: dict) -> str:
 
     by_type = report["summary"].get("by_query_type") or {}
     if by_type:
-        lines += ["", "### By query type", "", "| Type | n | Precision | Recall | Recall@pool | Structure | Faithfulness | Ans. rel. |", "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+        lines += ["", "### By query type", "", "| Type | n | Precision | Recall | Recall@pool | Structure | Faithfulness | Ans. rel. | Declined |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
         for qt, m in sorted(by_type.items()):
             lines.append(
                 f"| {qt} | {m['n']} | {m['context_precision']} | {m['context_recall']} | {m['recall_at_pool']} | "
                 f"{m['structure_pass_rate'] if m['structure_pass_rate'] is not None else 'n/a'} | "
                 f"{m['faithfulness'] if m['faithfulness'] is not None else 'n/a'} | "
-                f"{m['answer_relevance'] if m['answer_relevance'] is not None else 'n/a'} |"
+                f"{m['answer_relevance'] if m['answer_relevance'] is not None else 'n/a'} | "
+                f"{m.get('declined_correctly', 'n/a') if m.get('declined_correctly') is not None else 'n/a'} |"
             )
 
     lines += ["", "### Generation (LLM-as-judge)", "", "| Metric | Mean |", "| --- | --- |"]
@@ -322,15 +349,17 @@ def _render_markdown(report: dict) -> str:
         v = report["summary"].get(k)
         lines.append(f"| {k} | {v if v is not None else 'n/a'} |")
 
-    lines += ["", "## Per query", "", "| ID | Type | Question | Retrieved | Relevant | Precision | Recall | Recall@pool | Structure | Faithfulness | Answer rel. | Latency (ms) |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    lines += ["", "## Per query", "", "| ID | Type | Question | Retrieved | Relevant | Precision | Recall | Recall@pool | Structure | Faithfulness | Answer rel. | Declined | Latency (ms) |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for r in report["queries"]:
         struct = {True: "✓", False: "✗"}.get(r["structure_ok"], "—")
+        declined = {True: "✓", False: "✗"}.get(r.get("declined_correctly"), "—")
         lines.append(
             f"| {r['id']} | {r.get('query_type') or '—'} | {r['question']} | {r['retrieved_count']} | {r['relevant_retrieved']} | "
             f"{r['context_precision']} | {r['context_recall']} | {r['recall_at_pool']} | "
             f"{struct} | "
             f"{r['faithfulness'] if r['faithfulness'] is not None else 'n/a'} | "
             f"{r['answer_relevance'] if r['answer_relevance'] is not None else 'n/a'} | "
+            f"{declined} | "
             f"{r['latency_ms']['total']} |"
         )
     lines.append("")

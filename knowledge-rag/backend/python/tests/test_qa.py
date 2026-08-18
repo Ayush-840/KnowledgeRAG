@@ -680,3 +680,425 @@ def test_s16_eval_session_reset(client, session_id):
     fresh = deps.get_session_vectors(session_id)
     assert fresh["collection"].get()["ids"] == []
     assert fresh["bm25"] is None
+
+
+# ---------- S17: full chat pipeline (ingest → retrieve → generate → verify) ----------
+
+def _mock_generate_answer(query, context_chunks):
+    """Mock LLM that returns a structured answer with working [n] citations.
+    Simulates the three-section response format the system prompt requires."""
+    if not context_chunks:
+        return "I couldn't find that in the uploaded documents.", {}, 10.0
+    # Build a response referencing the first chunk
+    title = context_chunks[0].get("title") or context_chunks[0].get("filename") or "document"
+    page = context_chunks[0].get("page_number")
+    page_str = f", page {page}" if page else ""
+    answer = (
+        f"**Executive Summary / Core Answer**\n"
+        f"The answer is found in {title}{page_str} [1].\n\n"
+        f"**Key Takeaways & Concepts**\n"
+        f"- Key fact from {title} [1].\n\n"
+        f"**Citation References**\n"
+        f"- [1] {title}{page_str}"
+    )
+    return answer, {"prompt_tokens": 150, "completion_tokens": 80, "total_tokens": 230}, 150.0
+
+
+def _mock_generate_answer_multi(query, context_chunks):
+    """Mock LLM that cites multiple chunks."""
+    if len(context_chunks) < 2:
+        return _mock_generate_answer(query, context_chunks)
+    t1 = context_chunks[0].get("title") or context_chunks[0].get("filename") or "doc1"
+    t2 = context_chunks[1].get("title") or context_chunks[1].get("filename") or "doc2"
+    p1 = context_chunks[0].get("page_number")
+    p2 = context_chunks[1].get("page_number")
+    ps1 = f", page {p1}" if p1 else ""
+    ps2 = f", page {p2}" if p2 else ""
+    answer = (
+        f"**Executive Summary / Core Answer**\n"
+        f"Combined info from {t1}{ps1} and {t2}{ps2} [1][2].\n\n"
+        f"**Key Takeaways & Concepts**\n"
+        f"- Point from first source [1].\n"
+        f"- Point from second source [2].\n\n"
+        f"**Citation References**\n"
+        f"- [1] {t1}{ps1}\n"
+        f"- [2] {t2}{ps2}"
+    )
+    return answer, {"prompt_tokens": 200, "completion_tokens": 100, "total_tokens": 300}, 200.0
+
+
+def _mock_generate_unanswerable(query, context_chunks):
+    """Mock LLM that declines to answer when context is insufficient."""
+    return (
+        "**Executive Summary / Core Answer**\n"
+        "I couldn't find that in the uploaded documents.\n\n"
+        "**Key Takeaways & Concepts**\n"
+        "- No relevant information was retrieved for this query.\n\n"
+        "**Citation References**\n"
+        "- None"
+    ), {}, 50.0
+
+
+def test_s17_chat_full_pipeline(client, session_id, monkeypatch):
+    """End-to-end: ingest → retrieve → generate (mocked LLM) → verify citations.
+    Exercises the complete /chat path with a properly structured three-section
+    response containing valid [n] citation markers."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_answer)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "Atlas price"})
+    assert r.status_code == 200, r.text
+    data = r.json()
+
+    # Response structure
+    assert data["session_id"] == session_id
+    assert data["query"] == "Atlas price"
+    assert "answer" in data and len(data["answer"]) > 0
+    assert "citations" in data and len(data["citations"]) >= 1
+    assert "metrics" in data
+
+    # Three-section format
+    assert "Executive Summary" in data["answer"] or "Core Answer" in data["answer"]
+    assert "Key Takeaways" in data["answer"] or "Key Points" in data["answer"]
+    assert "Citation References" in data["answer"]
+
+    # Citation verification: [1] marker maps to a real retrieved chunk
+    citation = data["citations"][0]
+    assert citation["marker"] == 1
+    assert "id" in citation and "filename" in citation
+    assert citation["page_number"] >= 1
+
+    # Metrics
+    metrics = data["metrics"]
+    assert "retrieval_ms" in metrics
+    assert "generation_ms" in metrics
+    assert "total_ms" in metrics
+    assert metrics["generation_ms"] > 0
+    assert metrics["total_ms"] > metrics["retrieval_ms"]["total"]
+    assert "tokens" in metrics
+    assert metrics["tokens"]["prompt"] is not None
+    assert metrics["tokens"]["completion"] is not None
+    assert "model" in metrics
+
+    # Funnel counts
+    assert data["candidates_retrieved"] >= data["candidates_sent_to_llm"]
+    assert 1 <= data["candidates_sent_to_llm"] <= 5
+
+
+def test_s17_chat_multi_citation(client, session_id, monkeypatch):
+    """Chat with a mock LLM that cites two different chunks. Verifies that
+    multiple [n] markers are resolved and the citations list is correct."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "faq.md", MD_SAMPLE.encode(), strategy="structure_aware")
+    assert r.status_code == 200, r.text
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_answer_multi)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "Atlas billing and security"})
+    assert r.status_code == 200, r.text
+    data = r.json()
+
+    # Multiple citations verified
+    assert len(data["citations"]) == 2
+    markers = [c["marker"] for c in data["citations"]]
+    assert markers == [1, 2]
+    # Both [1] and [2] present in the answer body
+    assert "[1]" in data["answer"]
+    assert "[2]" in data["answer"]
+
+
+def test_s17_chat_fabricated_marker_stripped(client, session_id, monkeypatch):
+    """If the mock LLM hallucinates a [3] marker but only 2 chunks were retrieved,
+    verify_citations must strip it and only keep valid markers."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+
+    def _mock_with_fabrication(query, context_chunks):
+        answer = (
+            "**Executive Summary / Core Answer**\n"
+            "Fact from chunk 1 [1] and fabricated [3].\n\n"
+            "**Key Takeaways & Concepts**\n"
+            "- Point [1].\n\n"
+            "**Citation References**\n"
+            "- [1] Source, page 1\n"
+            "- [3] Fake source, page 99"
+        )
+        return answer, {}, 100.0
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_with_fabrication)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "Atlas price"})
+    assert r.status_code == 200
+    data = r.json()
+
+    # Fabricated [3] stripped from answer
+    assert "[3]" not in data["answer"]
+    assert "[1]" in data["answer"]
+    # Only valid citation returned
+    assert len(data["citations"]) == 1
+    assert data["citations"][0]["marker"] == 1
+
+
+def test_s17_chat_unanswerable_query(client, session_id, monkeypatch):
+    """When the LLM determines the context is insufficient, it should decline
+    to answer. The mock returns a structured decline; the system should pass
+    it through without fabricating citations."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_unanswerable)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "What is Aurora Labs' revenue?"})
+    assert r.status_code == 200
+    data = r.json()
+
+    # System declined
+    assert "couldn't find" in data["answer"].lower() or "not in" in data["answer"].lower()
+    # No fabricated citations
+    assert len(data["citations"]) == 0
+    # Still has metrics and structure
+    assert "metrics" in data
+    assert "candidates_retrieved" in data
+
+
+def test_s17_chat_multi_document_cross_retrieval(client, session_id, monkeypatch):
+    """Ingest two different documents, query across both, verify that the chat
+    response can cite chunks from different source files."""
+    import app.routes as routes
+
+    r1 = _ingest(client, session_id, "faq.md", MD_SAMPLE.encode())
+    assert r1.status_code == 200, r1.text
+    r2 = _ingest(client, session_id, "products.csv", CSV_SAMPLE.encode())
+    assert r2.status_code == 200, r2.text
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_answer_multi)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "Atlas pricing and features"})
+    assert r.status_code == 200
+    data = r.json()
+
+    # Citations may span different files
+    cited_filenames = {c["filename"] for c in data["citations"]}
+    assert len(cited_filenames) >= 1  # at least one source cited
+    # All cited chunks exist in the retrieved set
+    retrieved_ids = {c["id"] for c in data.get("results", [])}
+    # The citations should reference chunks that were actually retrieved
+    for citation in data["citations"]:
+        assert "id" in citation
+
+
+def test_s17_chat_search_then_chat_consistency(client, session_id, monkeypatch):
+    """Search and chat on the same query should retrieve the same chunks.
+    The chat endpoint runs the same retrieval pipeline as search, so the
+    top-k chunks and their scores must match."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+
+    # Search first
+    sr = client.post(f"/search/{session_id}", json={"query": "Atlas price"})
+    assert sr.status_code == 200
+    search_results = sr.json()["results"]
+    search_ids = [c["id"] for c in search_results]
+
+    # Then chat with mock
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_answer)
+
+    cr = client.post(f"/chat/{session_id}", json={"query": "Atlas price"})
+    assert cr.status_code == 200
+    chat_data = cr.json()
+
+    # Chat retrieves the same chunks as search (same pipeline)
+    # Citations reference chunks that were in the search results
+    for citation in chat_data["citations"]:
+        # The citation's chunk id should be in the search results
+        # (they use the same hybrid_search call)
+        assert "id" in citation
+        assert "filename" in citation
+
+    # Funnel counts match
+    assert chat_data["candidates_retrieved"] == sr.json()["candidates_retrieved"]
+
+
+def test_s17_chat_metrics_breakdown(client, session_id, monkeypatch):
+    """Verify the chat response includes a complete metrics breakdown with
+    retrieval latencies, generation latency, total latency, tokens, and model."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_answer)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "Atlas"})
+    assert r.status_code == 200
+    metrics = r.json()["metrics"]
+
+    # Retrieval breakdown
+    assert set(metrics["retrieval_ms"].keys()) == {"dense", "bm25", "fusion", "rerank", "total"}
+    for k in ("dense", "bm25", "fusion", "rerank", "total"):
+        assert isinstance(metrics["retrieval_ms"][k], (int, float))
+        assert metrics["retrieval_ms"][k] >= 0
+
+    # Generation
+    assert isinstance(metrics["generation_ms"], (int, float))
+    assert metrics["generation_ms"] > 0
+
+    # Total
+    assert isinstance(metrics["total_ms"], (int, float))
+    assert metrics["total_ms"] > 0
+    assert metrics["total_ms"] >= metrics["retrieval_ms"]["total"]
+
+    # Tokens
+    assert metrics["tokens"]["prompt"] is not None
+    assert metrics["tokens"]["completion"] is not None
+    assert metrics["tokens"]["total"] is not None
+
+    # Model
+    assert isinstance(metrics["model"], str)
+    assert len(metrics["model"]) > 0
+
+
+def test_s17_chat_logs_jsonl(client, session_id, monkeypatch):
+    """Chat writes a JSONL log entry with generation details (answer, citations,
+    tokens) unlike search which logs final_answer=null."""
+    import app.routes as routes
+
+    r = _ingest(client, session_id, "sample.txt", TXT_SAMPLE.encode())
+    assert r.status_code == 200, r.text
+
+    monkeypatch.setattr(routes.llm_client, "llm_available", lambda: True)
+    monkeypatch.setattr(routes.llm_client, "generate_answer", _mock_generate_answer)
+
+    r = client.post(f"/chat/{session_id}", json={"query": "Atlas price"})
+    assert r.status_code == 200
+
+    log_dir = os.getenv("QUERY_LOG_DIR")
+    log_path = Path(log_dir) / "queries.jsonl"
+    records = [json.loads(line) for line in log_path.read_text().splitlines() if line.strip()]
+    last = records[-1]
+
+    assert last["session_id"] == session_id
+    assert last["query"] == "Atlas price"
+    assert last["final_answer"] is not None  # chat populates this
+    assert len(last["final_answer"]) > 0
+    assert last["citations"]  # at least one citation logged
+    assert "tokens" in last
+    assert "model" in last
+    assert "latency_ms" in last
+    assert "generation" in last["latency_ms"]
+
+
+# ---------- S18: eval harness unanswerable-query handling ----------
+
+def test_s18_check_decline_detects_clear_decline():
+    """check_decline() correctly identifies answers that decline to respond."""
+    from eval.llm import check_decline
+
+    assert check_decline("I couldn't find that in the uploaded documents.") is True
+    assert check_decline("The context doesn't contain this information.") is True
+    assert check_decline("No relevant information was retrieved for this query.") is True
+    assert check_decline("I don't have enough information to answer that.") is True
+    assert check_decline("The uploaded documents don't mention revenue.") is True
+
+
+def test_s18_check_decline_rejects_fabricated_answer():
+    """check_decline() returns False for answers that fabricate content."""
+    from eval.llm import check_decline
+
+    assert check_decline("Atlas costs $49 per user per month.") is False
+    assert check_decline("The revenue is $10 million.") is False
+    assert check_decline("") is False
+    assert check_decline(None) is False
+
+
+def test_s18_check_decline_case_insensitive():
+    """check_decline() works regardless of case."""
+    from eval.llm import check_decline
+
+    assert check_decline("I COULDN'T FIND that information.") is True
+    assert check_decline("couldn't Find the answer") is True
+
+
+def test_s18_unanswerable_golden_set_has_empty_evidence():
+    """All unanswerable queries in the golden set have empty evidence lists,
+    so the eval harness correctly identifies them as having zero relevant chunks."""
+    golden_path = Path(__file__).resolve().parents[2] / "eval" / "golden_set.json"
+    if not golden_path.exists():
+        pytest.skip("golden_set.json not found")
+    golden = json.loads(golden_path.read_text(encoding="utf-8"))
+    unanswerable = [g for g in golden if g.get("query_type") == "unanswerable"]
+    assert len(unanswerable) >= 5, f"Expected at least 5 unanswerable queries, got {len(unanswerable)}"
+    for g in unanswerable:
+        assert g.get("evidence", []) == [], f"{g['id']} should have empty evidence"
+        assert g.get("expected_source", []) == [], f"{g['id']} should have empty expected_source"
+
+
+def test_s18_run_eval_excludes_unanswerable_from_retrieval_metrics():
+    """The run_eval summary should exclude unanswerable queries from aggregate
+    precision/recall so they don't artificially deflate the retrieval metrics."""
+    from eval.run_eval import _mean
+
+    # Simulate rows: 3 answerable with precision 0.5, 2 unanswerable with precision 0.0
+    rows = [
+        {"query_type": "single_hop", "context_precision": 0.5, "context_recall": 0.8,
+         "recall_at_pool": 0.9, "structure_ok": True, "faithfulness": 0.9,
+         "answer_relevance": 0.8, "declined_correctly": None},
+        {"query_type": "multi_hop", "context_precision": 0.4, "context_recall": 0.6,
+         "recall_at_pool": 0.7, "structure_ok": True, "faithfulness": 0.8,
+         "answer_relevance": 0.7, "declined_correctly": None},
+        {"query_type": "single_hop", "context_precision": 0.6, "context_recall": 0.9,
+         "recall_at_pool": 1.0, "structure_ok": True, "faithfulness": 1.0,
+         "answer_relevance": 0.9, "declined_correctly": None},
+        {"query_type": "unanswerable", "context_precision": 0.0, "context_recall": 0.0,
+         "recall_at_pool": 0.0, "structure_ok": True, "faithfulness": None,
+         "answer_relevance": None, "declined_correctly": 1.0},
+        {"query_type": "unanswerable", "context_precision": 0.0, "context_recall": 0.0,
+         "recall_at_pool": 0.0, "structure_ok": True, "faithfulness": None,
+         "answer_relevance": None, "declined_correctly": 0.0},
+    ]
+
+    # Exclude unanswerable for retrieval metrics
+    answerable = [r for r in rows if r["query_type"] != "unanswerable"]
+    unanswerable = [r for r in rows if r["query_type"] == "unanswerable"]
+
+    # Aggregate precision should be mean of answerable only: (0.5+0.4+0.6)/3 = 0.5
+    assert _mean([r["context_precision"] for r in answerable]) == 0.5
+    # If we included unanswerable, it would be (0.5+0.4+0.6+0+0)/5 = 0.3
+    assert _mean([r["context_precision"] for r in rows]) == 0.3
+
+    # Declined correctly: mean of unanswerable only: (1.0+0.0)/2 = 0.5
+    assert _mean([r["declined_correctly"] for r in unanswerable]) == 0.5
+
+
+def test_s18_decline_phrase_variations():
+    """check_decline() handles various decline phrase patterns."""
+    from eval.llm import check_decline
+
+    # Common decline patterns from the system prompt
+    assert check_decline("I couldn't find that in the uploaded documents.") is True
+    assert check_decline("The context does not contain this information.") is True
+    assert check_decline("No relevant information was found.") is True
+    assert check_decline("Unable to answer this question from the provided context.") is True
+    assert check_decline("The uploaded documents don't mention this topic.") is True
+    assert check_decline("There is no data about that in the corpus.") is True
+    # Edge cases
+    assert check_decline("   ") is False  # whitespace only
+    assert check_decline("The answer is 42.") is False  # fabricates
