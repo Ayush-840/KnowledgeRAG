@@ -1,0 +1,4 @@
+# Only include backend/python/ in the Docker build context
+*
+!backend/python
+!backend/python/**
