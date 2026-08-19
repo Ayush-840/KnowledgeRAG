@@ -12,12 +12,12 @@
 #   OPENROUTER_API_KEY=sk-... docker compose up -d
 #
 # The React frontend has no container — run it as before:
-#   cd knowledge-rag/frontend/react && npm install && npm run dev
+#   cd frontend/react && npm install && npm run dev
 
 services:
   backend:
     build:
-      context: knowledge-rag/backend/python
+      context: backend/python
     container_name: knowledge-rag-backend
     ports:
       - "8001:8001"
@@ -41,7 +41,7 @@ services:
 
   gateway:
     build:
-      context: knowledge-rag/backend/node
+      context: backend/node
     container_name: knowledge-rag-gateway
     ports:
       - "8000:8000"

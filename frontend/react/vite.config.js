@@ -8,12 +8,12 @@ export default defineConfig({
     proxy: {
       // Dev-time passthrough to the FastAPI retrieval service (or run the Node
       // gateway on 8000 and point these at http://localhost:8000 instead)
-      '/ingest': 'http://localhost:8001',
-      '/search': 'http://localhost:8001',
-      '/chat': 'http://localhost:8001',
-      '/documents': 'http://localhost:8001',
-      '/title': 'http://localhost:8001',
-      '/space': 'http://localhost:8001',
+      '/ingest': 'http://localhost:8000',
+      '/search': 'http://localhost:8000',
+      '/chat': 'http://localhost:8000',
+      '/documents': 'http://localhost:8000',
+      '/title': 'http://localhost:8000',
+      '/space': 'http://localhost:8000',
     },
   },
 })

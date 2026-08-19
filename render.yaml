@@ -15,7 +15,7 @@ services:
   - type: web
     name: knowledge-rag-backend
     runtime: docker
-    rootDir: knowledge-rag/backend/python
+    rootDir: backend/python
     plan: starter
     healthCheckPath: /health
     autoDeploy: true
