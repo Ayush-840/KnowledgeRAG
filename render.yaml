@@ -31,7 +31,12 @@ services:
       # CORS locked to the deployed frontend origin; add other origins (e.g.
       # a localhost dev origin) as a comma-separated list if needed.
       - key: CORS_ORIGINS
-        value: https://knowledge-rag-iota.vercel.app
+        value: https://knowledge-rag-iota.vercel.app,http://localhost:5173
+      # Uncomment ONE of these to enable /chat answers:
+      # - key: OPENROUTER_API_KEY
+      #   value: sk-...
+      # - key: NVIDIA_API_KEY
+      #   value: nvapi-...
     disk:
       name: rag-data
       mountPath: /data
