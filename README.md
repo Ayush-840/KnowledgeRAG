@@ -1,6 +1,6 @@
 # Knowledge RAG
 
-[![Tests](https://github.com/YOUR_USERNAME/knowledge-rag/actions/workflows/test.yml/badge.svg)](https://github.com/YOUR_USERNAME/knowledge-rag/actions/workflows/test.yml)
+[![Tests](https://github.com/Ayush-840/KnowledgeRAG/actions/workflows/test.yml/badge.svg)](https://github.com/Ayush-840/KnowledgeRAG/actions/workflows/test.yml)
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
@@ -310,3 +310,4 @@ A corpus of totally unrelated documents can't stress-test retrieval — everythi
 ## License
 
 MIT
+
