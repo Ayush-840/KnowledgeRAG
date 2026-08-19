@@ -8,9 +8,8 @@
 #   4. After it's live, note the service URL (https://<name>.onrender.com) and
 #      set VITE_API_URL to it when deploying the React frontend to Vercel.
 #
-# Optional env vars to add in the Render dashboard (Settings -> Environment):
-#   OPENROUTER_API_KEY=sk-...   # /chat answers (LLM_PROVIDER=openrouter, default)
-#   or NVIDIA_API_KEY=nvapi-... # /chat answers (LLM_PROVIDER=nvidia)
+# NVIDIA_API_KEY supports multiple comma-separated keys for automatic rotation
+# on 401/403/429 failures. Rotate keys in the Render dashboard as needed.
 services:
   - type: web
     name: knowledge-rag-backend
@@ -32,11 +31,11 @@ services:
       # a localhost dev origin) as a comma-separated list if needed.
       - key: CORS_ORIGINS
         value: https://knowledge-rag-iota.vercel.app,http://localhost:5173
-      # Uncomment ONE of these to enable /chat answers:
-      # - key: OPENROUTER_API_KEY
-      #   value: sk-...
-      # - key: NVIDIA_API_KEY
-      #   value: nvapi-...
+      # LLM provider for /chat answers (nvidia = free NIM tier with key rotation)
+      - key: LLM_PROVIDER
+        value: nvidia
+      - key: NVIDIA_API_KEY
+        value: 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,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,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,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,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,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
     disk:
       name: rag-data
       mountPath: /data

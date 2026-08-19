@@ -4,6 +4,10 @@ Supports multiple providers via LLM_PROVIDER env var:
   - "openrouter" (default) — uses OPENROUTER_API_KEY
   - "nvidia"               — uses NVIDIA_API_KEY + NVIDIA NIM endpoint (free tier)
 
+Both providers support multiple comma-separated API keys with automatic
+rotation on 401/403/429 failures.  Rotation events are logged to
+key-rotations.jsonl in QUERY_LOG_DIR.
+
 generate_answer() returns (answer, usage, latency_ms). The system prompt
 constrains the model to the provided context, requires [n] citation markers and
 a structured synthesized answer (summary -> takeaways -> citations), which the
@@ -17,12 +21,87 @@ import re
 import ssl
 import time
 import urllib.request
+import urllib.error
+from datetime import datetime, timezone
+from pathlib import Path
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 NVIDIA_URL     = "https://integrate.api.nvidia.com/v1/chat/completions"
 
 # Provider routing
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openrouter").lower()
+
+# --- Key rotation log ----------------------------------------------------
+_KEY_LOG_DIR = Path(os.getenv("QUERY_LOG_DIR", "./logs"))
+_KEY_LOG_PATH = _KEY_LOG_DIR / "key-rotations.jsonl"
+
+def _log_key_event(provider: str, event: str, key_idx: int,
+                   total: int, key_hint: str | None,
+                   error_code: int | None = None) -> None:
+    """Append a structured key rotation event to key-rotations.jsonl."""
+    try:
+        _KEY_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        record = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "provider": provider,
+            "event": event,
+            "key_index": key_idx,
+            "total_keys": total,
+        }
+        if key_hint:
+            record["key_hint"] = key_hint
+        if error_code is not None:
+            record["http_status"] = error_code
+        with open(_KEY_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
+    except OSError:
+        pass  # logging must never break the request
+
+
+# --- Generic key rotator --------------------------------------------------
+
+class _KeyRotator:
+    """Round-robin rotator for a comma-separated list of API keys.
+
+    Reads from *env_var* at import time.  ``current()`` returns the active
+    key; ``rotate()`` advances to the next one (with optional error logging).
+    """
+
+    def __init__(self, provider: str, env_var: str, hint: str = ""):
+        self.provider = provider
+        self.env_var = env_var
+        self._hint = hint  # shown in error messages when no keys are set
+        raw = os.getenv(env_var, "")
+        self.keys: list[str] = [k.strip() for k in raw.split(",") if k.strip()]
+        self._idx = 0
+        if self.keys:
+            _log_key_event(provider, "startup", self._idx, len(self.keys),
+                           self._hint_fn(self._idx))
+
+    def _hint_fn(self, idx: int) -> str:
+        return self.keys[idx][:15] + "…" if self.keys else None
+
+    @property
+    def available(self) -> bool:
+        return bool(self.keys)
+
+    def current(self) -> str:
+        if not self.keys:
+            raise RuntimeError(f"{self.env_var} not set{self._hint}")
+        return self.keys[self._idx % len(self.keys)]
+
+    def rotate(self, error_code: int | None = None) -> None:
+        if not self.keys:
+            return
+        self._idx = (self._idx + 1) % len(self.keys)
+        _log_key_event(self.provider, "rotate", self._idx, len(self.keys),
+                       self._hint_fn(self._idx), error_code)
+
+_nvidia_rotator = _KeyRotator("nvidia", "NVIDIA_API_KEY",
+                               " — get a free key at https://build.nvidia.com")
+_openrouter_rotator = _KeyRotator("openrouter", "OPENROUTER_API_KEY",
+                                   " — get a key at https://openrouter.ai/keys")
+# ------------------------------------------------------------------------
 
 
 def _ssl_context():
@@ -35,18 +114,16 @@ def _ssl_context():
         return ssl.create_default_context()
 
 
+def _active_rotator() -> _KeyRotator:
+    return _nvidia_rotator if LLM_PROVIDER == "nvidia" else _openrouter_rotator
+
+
 def _provider_config():
     """Return (url, api_key) for the active provider."""
+    rotator = _active_rotator()
     if LLM_PROVIDER == "nvidia":
-        key = os.getenv("NVIDIA_API_KEY", "")
-        if not key:
-            raise RuntimeError("NVIDIA_API_KEY not set — get a free key at https://build.nvidia.com")
-        return NVIDIA_URL, key
-    # default: openrouter
-    key = os.getenv("OPENROUTER_API_KEY", "")
-    if not key:
-        raise RuntimeError("OPENROUTER_API_KEY not set")
-    return OPENROUTER_URL, key
+        return NVIDIA_URL, rotator.current()
+    return OPENROUTER_URL, rotator.current()
 
 
 GENERATION_MODEL = os.getenv(
@@ -59,12 +136,21 @@ CITE_RE = re.compile(r"\[(\d+)\]")
 
 
 def llm_available() -> bool:
-    """True when the key for the configured provider is present.
-    (openrouter -> OPENROUTER_API_KEY, nvidia -> NVIDIA_API_KEY)
-    """
-    if LLM_PROVIDER == "nvidia":
-        return bool(os.getenv("NVIDIA_API_KEY"))
-    return bool(os.getenv("OPENROUTER_API_KEY"))
+    """True when the key for the configured provider is present."""
+    return _active_rotator().available
+
+
+def _build_request(url: str, api_key: str, payload: dict) -> urllib.request.Request:
+    """Build an authenticated POST request for the chat endpoint."""
+    return urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
 
 
 def _chat(messages: list, temperature: float = 0.2, max_tokens: int = GENERATION_MAX_TOKENS):
@@ -76,21 +162,29 @@ def _chat(messages: list, temperature: float = 0.2, max_tokens: int = GENERATION
         "temperature": temperature,
         "max_tokens": max_tokens,
     }
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-    t0 = time.perf_counter()
-    data = _urlopen_with_retry(req)
-    latency_ms = (time.perf_counter() - t0) * 1000
-    answer = data["choices"][0]["message"]["content"].strip()
-    usage = data.get("usage", {}) or {}
-    return answer, usage, round(latency_ms, 2)
+
+    # Rotate through all keys on auth / rate-limit failures.
+    rotator = _active_rotator()
+    max_key_attempts = len(rotator.keys) if rotator.keys else 1
+
+    last_exc: Exception | None = None
+    for _key_attempt in range(max_key_attempts):
+        req = _build_request(url, api_key, payload)
+        try:
+            t0 = time.perf_counter()
+            data = _urlopen_with_retry(req)
+            latency_ms = (time.perf_counter() - t0) * 1000
+            answer = data["choices"][0]["message"]["content"].strip()
+            usage = data.get("usage", {}) or {}
+            return answer, usage, round(latency_ms, 2)
+        except urllib.error.HTTPError as exc:
+            last_exc = exc
+            if exc.code in (401, 403, 429):
+                rotator.rotate(error_code=exc.code)
+                url, api_key = _provider_config()
+                continue
+            raise
+    raise last_exc  # type: ignore[misc]
 
 
 def _urlopen_with_retry(req, attempts: int = 4, base_delay: float = 2.0):
