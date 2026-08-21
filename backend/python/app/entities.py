@@ -51,7 +51,7 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
     )),
     # Percentages: 30%, 99.95%, 60 percent
     ("PERCENTAGE", re.compile(
-        r"\b\d+(?:\.\d+)?\s*%\b"
+        r"\b\d+(?:\.\d+)?\s*%(?!\w)"
         r"|\b\d+(?:\.\d+)?\s+percent\b",
         re.IGNORECASE,
     )),
