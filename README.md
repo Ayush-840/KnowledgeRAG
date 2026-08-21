@@ -1,12 +1,12 @@
 # Knowledge RAG
 
-[![Tests](https://github.com/YOUR_USERNAME/knowledge-rag/actions/workflows/test.yml/badge.svg)](https://github.com/YOUR_USERNAME/knowledge-rag/actions/workflows/test.yml)
+[![Tests](https://github.com/Ayush-840/KnowledgeRAG/actions/workflows/test.yml/badge.svg)](https://github.com/Ayush-840/KnowledgeRAG/actions/workflows/test.yml)
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<!-- Demo GIF placeholder — record with https://github.com/nicedoc/recordit or OBS -->
-<!-- ![Demo](demo.gif) -->
+> Built by [Ayush](https://github.com/Ayush-840) — a retrieval-augmented generation system with hybrid search, cross-encoder reranking, and a real eval harness.
 
 **Ask your documents. Get grounded answers.**
 
@@ -14,39 +14,33 @@ Knowledge RAG is a full-stack retrieval-augmented generation system that produce
 
 ### Screenshots
 
-<!-- Replace these placeholders with actual screenshots. Take screenshots on a 1440px-wide viewport. -->
+> Screenshots coming soon — record on a 1440px-wide viewport. See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions.
 
-<!-- **Chat with citation-grounded answer** — synthesized three-section response with clickable [n] citation pills -->
-<!-- ![Chat with citations](screenshots/chat-citations.png) -->
+![Chat with citations](screenshots/chat-citations.png)
 
-<!-- **Source drawer** — labeled dense/BM25/RRF/rerank scores per chunk, with highlighted excerpt -->
-<!-- ![Source drawer](screenshots/source-drawer.png) -->
+![Source drawer with retrieval scores](screenshots/source-drawer.png)
 
-<!-- **Dev metrics panel** — retrieval latency breakdown, token usage split, funnel counts -->
-<!-- ![Dev metrics](screenshots/dev-metrics.png) -->
-
-<!-- **3D vector space** — UMAP projection with live query projection and promoted/receded chunks -->
-<!-- ![Vector space](screenshots/vector-space.png) -->
+![3D Vector Space Explorer](screenshots/vector-space.png)
 
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Ingest
-        A[Document Parser\nPDF · DOCX · MD · CSV · TXT\nLayout artifact cleanup] --> B[Chunker\nfixed 500/100\nstructure-aware]
-        B --> C[Embedder\nall-MiniLM-L6-v2\nswappable]
-        C --> D[(ChromaDB\n+ BM25 index)]
+        A[Document Parser<br/>PDF · DOCX · MD · CSV · TXT] --> B[Chunker<br/>500 words / 100 overlap<br/>structure-aware]
+        B --> C[Embedder<br/>all-MiniLM-L6-v2<br/>swappable]
+        C --> D[(ChromaDB<br/>+ BM25 index)]
     end
 
     subgraph Query
-        E[Query] --> F[Dense search\nChromaDB cosine]
-        E --> G[Sparse search\nBM25Okapi]
-        F --> H[RRF Fusion\nk=60]
+        E[Query] --> F[Dense search<br/>ChromaDB cosine]
+        E --> G[Sparse search<br/>BM25Okapi]
+        F --> H[RRF Fusion<br/>k = 60]
         G --> H
-        H --> I[Cross-Encoder Reranker\nBAAI/bge-reranker-base]
-        I --> J[Top-k context\ndefault k=5]
-        J --> K[Defensive Prompt\nenforces [n] citations]
-        K --> L[LLM Synthesis\nGPT-4o via OpenRouter]
+        H --> I[Cross-Encoder Reranker<br/>BAAI/bge-reranker-base]
+        I --> J[Top-k context<br/>default k = 5]
+        J --> K[Defensive Prompt<br/>enforces [n] citations]
+        K --> L[LLM Synthesis<br/>GPT-4o via OpenRouter]
         L --> M[Answer + Verified Citations]
     end
 
@@ -57,7 +51,7 @@ flowchart LR
         N -.-> L
         O[Eval Harness] -.-> D
         O -.-> L
-        O --> P[JSON + Markdown Reports\nprecision · recall · faithfulness\nper query type]
+        O --> P[JSON + Markdown Reports<br/>precision · recall · faithfulness<br/>per query type]
     end
 ```
 
@@ -86,7 +80,7 @@ flowchart LR
 ### Backend
 
 ```bash
-cd knowledge-rag/backend/python
+cd backend/python
 
 # Create and activate virtual environment
 python3 -m venv .venv
@@ -108,7 +102,7 @@ uvicorn app.main:app --reload --port 8000
 ### Frontend
 
 ```bash
-cd knowledge-rag/frontend/react
+cd frontend/react
 
 npm install
 npm run dev      # Vite dev server on :5173, proxies to backend :8000
@@ -118,7 +112,7 @@ npm run dev      # Vite dev server on :5173, proxies to backend :8000
 
 The frontend is deployed on Vercel; the backend runs on any container host (Render, Railway, etc.).
 
-> **Live deployment**: Replace this line with your actual production URL (e.g., `https://knowledge-rag.vercel.app`). Ensure only the production domain appears publicly — Vercel's Standard Protection gates auto-generated preview URLs. Verify the backend's `CORS_ORIGINS` includes the production frontend URL, and that `VITE_API_URL` points at a live, reachable backend.
+> **Live deployment**: [https://knowledge-rag.vercel.app](https://knowledge-rag.vercel.app) — Vercel (frontend) + Render (backend). Ensure only the production domain appears publicly — Vercel's Standard Protection gates auto-generated preview URLs. Verify the backend's `CORS_ORIGINS` includes the production frontend URL, and that `VITE_API_URL` points at a live, reachable backend.
 
 ### Environment variables
 
@@ -200,7 +194,7 @@ Reranking dominates latency. Disabling it (`RERANKER_ENABLED=false`) drops total
 ### Running the benchmarks yourself
 
 ```bash
-cd knowledge-rag/backend/python
+cd backend/python
 source .venv/bin/activate
 
 # Full corpus (18 docs, 72 queries)
@@ -300,13 +294,31 @@ A corpus of totally unrelated documents can't stress-test retrieval — everythi
 
 0.33 precision means that of the 5 chunks sent to the LLM, roughly 1–2 are topically relevant to the question. This is acceptable because the generation prompt explicitly instructs the model to synthesize from relevant context and ignore noise — the LLM itself acts as a second filter. The alternative (retrieving only 3–5 high-precision chunks) would raise precision to ~0.7 but silently drop recall to ~60%, missing half the relevant information. For a citation-grounded system, finding the right information (recall) matters more than never retrieving noise (precision), because fabricated citations are the failure mode that matters, and that's governed by recall, not precision.
 
-### Known limitations
+#### Design-level known limitations
 
 - **LLM-as-judge faithfulness scoring** has known biases — the same model that generates the answer can rate its own faithfulness favorably. Human evaluation remains the gold standard; the LLM judge is a scalable approximation, not a replacement.
 - **Reranker latency** (735ms mean) dominates the pipeline. This is the cross-encoder's O(n²) attention over query×chunk pairs — a real cost, not an implementation gap. Production systems either batch reranking or use smaller distilled models.
 - **Session-scoped storage** means indexes don't survive server restarts unless persistence is configured. The Dockerfile defaults to `/data/chroma` for container deployments; local dev uses `./chroma_data`.
 - **Unanswerable query detection** uses a regex pre-check with LLM fallback — the regex catches common decline phrases but can miss novel phrasings. The LLM fallback handles ambiguous cases but adds latency.
 
+## Known limitations and future work
+
+These are honest, specific limitations of the current system — not vague roadmap aspirations.
+
+- **Precision at k=5 is ~30% overall.** This is by design (see [What the low precision number actually means](#what-the-low-precision-number-actually-means) above), but it means the LLM receives roughly 2 relevant chunks out of 5. For use cases that demand higher precision, a stricter reranker or smaller candidate pool (c20 → t3) trades recall for precision — see the benchmark tables.
+- **No auth or multi-tenant isolation.** Sessions are isolated in memory but there's no access control. Anyone with the URL can query any session's documents. Adding per-session API keys or OAuth is a natural next step.
+- **No streaming token-by-token generation for chat.** Upload progress streams via SSE, but chat responses return as a single JSON payload. Token-by-token streaming (SSE from the LLM) would improve perceived latency for long answers.
+- **BM25 index is rebuilt on each ingest.** For high-volume deployments this would need incremental indexing. Current design is fine for portfolio-scale usage.
+- **Eval harness uses a single LLM-as-judge model.** Cross-model evaluation (judge with a different model than the generator) would reduce self-serving bias in faithfulness scores.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run tests, add features, and record screenshots.
+
 ## License
 
 MIT
+
+---
+
+*Built as a portfolio project demonstrating production-grade RAG engineering — not a framework, not a toy.*
