@@ -308,8 +308,8 @@ async def get_graph(session_id: str, force: bool = False):
     result = get_full_graph(G)
     return GraphResponse(
         session_id=session_id,
-        nodes=result.nodes,
-        edges=result.edges,
+        nodes=[n.to_dict() for n in result.nodes],
+        edges=[e.to_dict() for e in result.edges],
         stats=result.stats,
     )
 
@@ -335,8 +335,8 @@ async def graph_query(session_id: str, body: dict):
 
     return GraphResponse(
         session_id=session_id,
-        nodes=result.nodes,
-        edges=result.edges,
+        nodes=[n.to_dict() for n in result.nodes],
+        edges=[e.to_dict() for e in result.edges],
         stats=result.stats,
         query_entities=result.query_entities,
     )

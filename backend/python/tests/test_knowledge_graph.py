@@ -1,9 +1,11 @@
-"""Tests for entity extraction and knowledge graph modules.
+"""Tests for entity extraction, knowledge graph, and graph API endpoints.
 
 Run from backend/python:  .venv/bin/python -m pytest tests/test_knowledge_graph.py -v
-Hermetic: no network, no LLM keys, no ChromaDB — pure unit tests on the
-entity extraction and graph construction logic.
+Hermetic: no network, no LLM keys — uses stub embedder from conftest.py.
 """
+
+import json
+import uuid
 
 import pytest
 
@@ -15,6 +17,17 @@ from app.knowledge_graph import (
     _make_node_id,
     _infer_relationship,
 )
+
+TXT_SAMPLE = (
+    "Aurora Labs is a software company founded in 2019. "
+    "Atlas costs $49 per user per month. Beacon integrates with Slack."
+)
+MD_SAMPLE = (
+    "# Aurora Labs FAQ\n\n"
+    "## Billing\n\nAtlas costs $49 per user per month.\n\n"
+    "## Security\n\nData is encrypted with AES-256."
+)
+CSV_SAMPLE = "Product,Category,Price\nAtlas,Analytics,49\nBeacon,Alerting,19\nNimbus,Pipeline,0\n"
 
 
 # ---------- Entity Extraction ----------
@@ -334,3 +347,191 @@ class TestKnowledgeGraph:
         G = build_graph_from_chunks(chunks)
         assert G.number_of_nodes() >= 2
         assert G.number_of_edges() >= 1
+
+
+# ---------- API Endpoint Tests ----------
+
+
+def _ingest(client, session_id: str, filename: str, content: bytes, **params):
+    """Helper to ingest a file via the API."""
+    return client.post(
+        f"/ingest/{session_id}",
+        files={"file": (filename, content, "application/octet-stream")},
+        params=params,
+    )
+
+
+def _sid():
+    return f"kg-{uuid.uuid4().hex[:8]}"
+
+
+class TestGraphEndpoints:
+    """Integration tests for /graph and /entities API endpoints."""
+
+    def test_graph_empty_session_404(self, client):
+        """GET /graph on a session with no documents returns 404."""
+        sid = _sid()
+        r = client.get(f"/graph/{sid}")
+        assert r.status_code == 404
+        assert "No documents" in r.json()["detail"]
+
+    def test_graph_invalid_session_id(self, client):
+        """GET /graph with invalid session_id returns 400."""
+        r = client.get("/graph/bad id with spaces")
+        assert r.status_code == 400
+
+    def test_graph_query_empty_session_404(self, client):
+        """POST /graph/{sid}/query on empty session returns 404."""
+        sid = _sid()
+        r = client.post(f"/graph/{sid}/query", json={"query": "Atlas"})
+        assert r.status_code == 404
+
+    def test_graph_query_requires_query(self, client):
+        """POST /graph/{sid}/query with empty query returns 400."""
+        sid = _sid()
+        r = client.post(f"/graph/{sid}/query", json={"query": "  "})
+        assert r.status_code == 400
+        assert "Query string required" in r.json()["detail"]
+
+    def test_graph_after_ingest(self, client):
+        """GET /graph returns nodes and edges after ingesting a document."""
+        sid = _sid()
+        r = _ingest(client, sid, "products.csv", CSV_SAMPLE.encode())
+        assert r.status_code == 200, r.text
+
+        gr = client.get(f"/graph/{sid}")
+        assert gr.status_code == 200
+        body = gr.json()
+        assert "nodes" in body
+        assert "edges" in body
+        assert "stats" in body
+        assert len(body["nodes"]) > 0
+        assert len(body["edges"]) > 0
+        assert body["stats"]["total_nodes"] > 0
+
+    def test_graph_node_structure(self, client):
+        """Graph nodes have required fields: id, label, entity_type."""
+        sid = _sid()
+        _ingest(client, sid, "faq.md", MD_SAMPLE.encode())
+        body = client.get(f"/graph/{sid}").json()
+        for node in body["nodes"]:
+            assert "id" in node
+            assert "label" in node
+            assert "label" in node
+            assert "entity_type" in node
+            assert "source_documents" in node
+
+    def test_graph_edge_structure(self, client):
+        """Graph edges have required fields: source, target, weight, relationship."""
+        sid = _sid()
+        _ingest(client, sid, "products.csv", CSV_SAMPLE.encode())
+        body = client.get(f"/graph/{sid}").json()
+        for edge in body["edges"]:
+            assert "source" in edge
+            assert "target" in edge
+            assert "weight" in edge
+            assert "relationship" in edge
+            assert edge["weight"] >= 1
+
+    def test_graph_query_after_ingest(self, client):
+        """POST /graph/{sid}/query finds matching entities and expands neighbors."""
+        sid = _sid()
+        _ingest(client, sid, "products.csv", CSV_SAMPLE.encode())
+        r = client.post(f"/graph/{sid}/query", json={"query": "Atlas pricing"})
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["nodes"]) > 0
+        assert "query_entities" in body
+        assert body["query_entities"]  # at least one entity matched
+
+    def test_graph_query_no_match(self, client):
+        """Query with non-existent entity returns empty graph."""
+        sid = _sid()
+        _ingest(client, sid, "products.csv", CSV_SAMPLE.encode())
+        r = client.post(f"/graph/{sid}/query", json={"query": "zzz_nonexistent_xyz"})
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["nodes"]) == 0
+        assert body["query_entities"] == []
+
+    def test_graph_force_rebuild(self, client):
+        """GET /graph?force=1 rebuilds the graph from chunks."""
+        sid = _sid()
+        _ingest(client, sid, "faq.md", MD_SAMPLE.encode())
+        # First call builds graph
+        r1 = client.get(f"/graph/{sid}")
+        assert r1.status_code == 200
+        # Force rebuild
+        r2 = client.get(f"/graph/{sid}?force=1")
+        assert r2.status_code == 200
+        # Same structure
+        assert len(r2.json()["nodes"]) == len(r1.json()["nodes"])
+
+    def test_entities_empty_session_404(self, client):
+        """GET /entities on a non-existent session returns 404."""
+        sid = _sid()
+        r = client.get(f"/entities/{sid}/chunk1")
+        assert r.status_code == 404
+
+    def test_entities_chunk_not_found(self, client):
+        """GET /entities for a non-existent chunk returns 404."""
+        sid = _sid()
+        _ingest(client, sid, "sample.txt", TXT_SAMPLE.encode())
+        r = client.get(f"/entities/{sid}/nonexistent_chunk_id")
+        assert r.status_code == 404
+        assert "not found" in r.json()["detail"].lower()
+
+    def test_entities_after_ingest(self, client):
+        """GET /entities returns extracted entities for an ingested chunk."""
+        sid = _sid()
+        _ingest(client, sid, "faq.md", MD_SAMPLE.encode())
+        # Get chunk IDs
+        doc = client.get(f"/documents/{sid}/faq.md").json()
+        chunk_id = doc["chunks"][0]["id"]
+
+        r = client.get(f"/entities/{sid}/{chunk_id}")
+        assert r.status_code == 200
+        body = r.json()
+        assert "entities" in body
+        assert len(body["entities"]) > 0
+        # Each entity has required fields
+        for ent in body["entities"]:
+            assert "text" in ent
+            assert "label" in ent
+            assert "start" in ent
+            assert "end" in ent
+
+    def test_entitiescontain_monetary(self, client):
+        """Entities from a pricing document should include monetary values."""
+        sid = _sid()
+        _ingest(client, sid, "faq.md", MD_SAMPLE.encode())
+        doc = client.get(f"/documents/{sid}/faq.md").json()
+        chunk_id = doc["chunks"][0]["id"]
+
+        body = client.get(f"/entities/{sid}/{chunk_id}").json()
+        labels = {e["label"] for e in body["entities"]}
+        assert "MONETARY" in labels
+
+    def test_graph_entity_type_counts(self, client):
+        """Graph stats include entity_type_counts with PROPER_NOUN."""
+        sid = _sid()
+        _ingest(client, sid, "faq.md", MD_SAMPLE.encode())
+        body = client.get(f"/graph/{sid}").json()
+        counts = body["stats"]["entity_type_counts"]
+        assert "PROPER_NOUN" in counts
+        assert counts["PROPER_NOUN"] > 0
+
+    def test_graph_isolation_between_sessions(self, client):
+        """Two sessions have independent graphs."""
+        sid_a = _sid()
+        sid_b = _sid()
+        _ingest(client, sid_a, "faq.md", MD_SAMPLE.encode())
+        _ingest(client, sid_b, "products.csv", CSV_SAMPLE.encode())
+
+        ga = client.get(f"/graph/{sid_a}").json()
+        gb = client.get(f"/graph/{sid_b}").json()
+
+        # Different documents produce different entity sets
+        a_labels = {n["label"] for n in ga["nodes"]}
+        b_labels = {n["label"] for n in gb["nodes"]}
+        assert a_labels != b_labels
