@@ -10,7 +10,7 @@
 
 **Ask your documents. Get grounded answers.**
 
-Knowledge RAG is a full-stack retrieval-augmented generation system that produces LLM-synthesized, citation-grounded answers — not raw snippet dumps. It combines hybrid retrieval (dense embeddings + BM25 sparse search) fused with Reciprocal Rank Fusion, narrowed by a cross-encoder reranker, and fed into a defensive generation prompt that enforces inline `[n]` citations traceable to the exact source chunk. Every retrieval-stage score (cosine similarity, BM25, RRF, reranker relevance) is exposed separately in the UI — never blended into a single opaque number. A RAGAS-style eval harness computes context precision, context recall, faithfulness, and answer relevance per query, broken down by query type, so you can actually tell whether a config change helped or hurt.
+Knowledge RAG is a full-stack retrieval-augmented generation system that produces LLM-synthesized, citation-grounded answers — not raw snippet dumps. It combines hybrid retrieval (dense embeddings + BM25 sparse search) fused with Reciprocal Rank Fusion, narrowed by a cross-encoder reranker, and fed into a defensive generation prompt that enforces inline `[n]` citations traceable to the exact source chunk. Every retrieval-stage score (cosine similarity, BM25, RRF, reranker relevance) is exposed separately in the UI — never blended into a single opaque number. Beyond retrieval, the system builds a **knowledge graph** from extracted entities (regex-based, no NLP dependencies) to map relationships across documents, and provides a **3D vector space explorer** (UMAP + Three.js) for visual inspection. A RAGAS-style eval harness computes context precision, context recall, faithfulness, and answer relevance per query, broken down by query type, so you can actually tell whether a config change helped or hurt.
 
 ### Screenshots
 
@@ -67,6 +67,8 @@ flowchart TD
 | **Rerank** | `BAAI/bge-reranker-base` CrossEncoder | Retrieves 20–50 candidates, reranks to top-k (default 5) |
 | **Generate** | Structured synthesis prompt → OpenRouter → GPT-4o | Enforces Executive Summary → Key Takeaways → Citation References |
 | **Verify** | `verify_citations()` strips fabricated `[n]` markers | Invalid/out-of-range markers removed from final answer |
+| **Extract** | Regex-based entity extraction (monetary, dates, IDs, regulations, etc.) | No NLP dependencies — pure Python, runs during ingestion |
+| **Graph** | NetworkX knowledge graph built from co-occurring entities | Typed nodes + weighted edges; queryable by entity name |
 | **Log** | Structured JSONL per query | Query, retrieved IDs + scores, reranked order, citations, latency breakdown |
 
 ## Getting started
@@ -221,6 +223,8 @@ Reports are written to `eval/reports/` as both JSON (machine-readable) and Markd
 | **Reranker** | BAAI/bge-reranker-base (CrossEncoder) |
 | **LLM** | GPT-4o via OpenRouter / Llama 3.3 70B via NVIDIA NIM |
 | **Eval** | Custom RAGAS-style harness with LLM-as-judge |
+| **Knowledge graph** | NetworkX (typed entities + co-occurrence edges) |
+| **Entity extraction** | Regex-based (monetary, dates, IDs, regulations, proper nouns) |
 | **PDF parsing** | pypdf + pdfplumber (fallback) |
 | **DOCX parsing** | python-docx |
 | **Deployment** | Vercel (frontend), any container host (backend) |

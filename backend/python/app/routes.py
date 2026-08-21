@@ -8,12 +8,14 @@ import re
 import threading
 import time
 
-from .schemas import ChatResponse, IngestResponse, SearchResponse
+from .schemas import ChatResponse, IngestResponse, SearchResponse, GraphResponse, EntityResponse
 from .utils import ingest_document, CHUNKERS, SUPPORTED_EXTENSIONS
-from .dependencies import get_session_vectors
+from .dependencies import get_session_vectors, get_or_build_graph, invalidate_graph
 from .retrieval import hybrid_search, RETRIEVE_CANDIDATES, RERANK_TOP_K
 from .observability import log_query, utc_now_iso
 from .space import get_space, transform_query
+from .entities import extract_entities
+from .knowledge_graph import query_graph, get_full_graph
 from . import llm as llm_client
 
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "50")) * 1024 * 1024
@@ -198,6 +200,9 @@ async def ingest_file(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # Invalidate cached knowledge graph since new chunks were added
+    invalidate_graph(session_id)
+
     return IngestResponse(
         session_id=session_id,
         filename=filename,
@@ -262,6 +267,79 @@ async def vector_space_query(session_id: str, body: dict):
         "candidates_retrieved": out["candidates_retrieved"],
         "candidates_sent_to_llm": out["candidates_sent_to_llm"],
     }
+
+
+@router.get("/entities/{session_id}/{chunk_id}")
+async def get_chunk_entities(session_id: str, chunk_id: str):
+    """Extract entities from a specific chunk's text."""
+    _validate_session_id(session_id)
+    session = get_session_vectors(session_id)
+    collection = session["collection"]
+    try:
+        data = collection.get(ids=[chunk_id], include=["documents"])
+    except Exception:
+        raise HTTPException(status_code=404, detail=f"Chunk {chunk_id} not found")
+    if not data.get("documents"):
+        raise HTTPException(status_code=404, detail=f"Chunk {chunk_id} not found")
+
+    text = data["documents"][0]
+    entities = extract_entities(text)
+    return EntityResponse(
+        session_id=session_id,
+        chunk_id=chunk_id,
+        entities=[e.to_dict() for e in entities],
+    )
+
+
+@router.get("/graph/{session_id}")
+async def get_graph(session_id: str, force: bool = False):
+    """Get the knowledge graph for a session.
+
+    Returns typed nodes (entities) and weighted edges (co-occurrence).
+    Use ?force=1 to rebuild from chunks.
+    """
+    _validate_session_id(session_id)
+    if force:
+        invalidate_graph(session_id)
+    G = get_or_build_graph(session_id)
+    if G is None:
+        raise HTTPException(status_code=404, detail="No documents ingested — upload files first")
+
+    result = get_full_graph(G)
+    return GraphResponse(
+        session_id=session_id,
+        nodes=result.nodes,
+        edges=result.edges,
+        stats=result.stats,
+    )
+
+
+@router.post("/graph/{session_id}/query")
+async def graph_query(session_id: str, body: dict):
+    """Query the knowledge graph with entities extracted from a query string.
+
+    Finds matching nodes and expands to 1-hop neighbors.
+    """
+    _validate_session_id(session_id)
+    q = (body.get("query") or "").strip()
+    if not q:
+        raise HTTPException(status_code=400, detail="Query string required")
+
+    G = get_or_build_graph(session_id)
+    if G is None:
+        raise HTTPException(status_code=404, detail="No documents ingested — upload files first")
+
+    # Extract entities from the query
+    query_entities = [e.text for e in extract_entities(q)]
+    result = query_graph(G, query_entities)
+
+    return GraphResponse(
+        session_id=session_id,
+        nodes=result.nodes,
+        edges=result.edges,
+        stats=result.stats,
+        query_entities=result.query_entities,
+    )
 
 
 @router.post("/title")
@@ -393,6 +471,10 @@ async def chat(session_id: str, body: dict):
     answer, citations = llm_client.verify_citations(raw_answer, context)
     total_ms = round((time.perf_counter() - t0) * 1000, 2)
 
+    # Answer-level confidence: mean of cited chunk confidences
+    cited_confidences = [c.get("confidence") for c in citations if c.get("confidence") is not None]
+    answer_confidence = round(sum(cited_confidences) / len(cited_confidences), 4) if cited_confidences else None
+
     metrics = {
         "retrieval_ms": out["latency_ms"],
         "generation_ms": gen_ms,
@@ -421,6 +503,7 @@ async def chat(session_id: str, body: dict):
         "latency_ms": {**out["latency_ms"], "generation": gen_ms, "total": total_ms},
         "tokens": metrics["tokens"],
         "model": llm_client.GENERATION_MODEL,
+        "answer_confidence": answer_confidence,
     })
 
     return ChatResponse(
@@ -431,4 +514,5 @@ async def chat(session_id: str, body: dict):
         metrics=metrics,
         candidates_retrieved=out["candidates_retrieved"],
         candidates_sent_to_llm=out["candidates_sent_to_llm"],
+        answer_confidence=answer_confidence,
     )

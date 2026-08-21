@@ -1,10 +1,11 @@
 import os
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from chromadb.config import Settings
 import chromadb
 from rank_bm25 import BM25Okapi
+import networkx as nx
 
 # Directory to store persistent index data per session
 BASE_PERSISTENCE_DIR = Path(os.getenv("CHROMA_PERSISTENCE_DIR", "./chroma_data"))
@@ -74,3 +75,50 @@ def persist_bm25(session_id: str, tokenized_corpus: list, ids: list = None):
         payload["ids"] = ids
     with open(bm25_path, "w", encoding="utf-8") as f:
         json.dump(payload, f)
+
+
+def get_or_build_graph(session_id: str) -> Optional[nx.Graph]:
+    """Get the knowledge graph for a session, building from chunks if needed.
+
+    Returns None if the session has no ingested documents.
+    """  
+    session = SESSION_REGISTRY.get(session_id)
+    if session is None:
+        return None
+
+    # Return cached graph if available
+    if "graph" in session:
+        return session["graph"]
+
+    # Build graph from chunks
+    from .knowledge_graph import build_graph_from_chunks
+
+    collection = session["collection"]
+    try:
+        data = collection.get(include=["documents", "metadatas"])
+    except Exception:  # noqa: BLE001
+        return None
+
+    if not data.get("ids"):
+        return None
+
+    chunks = [
+        {
+            "id": cid,
+            "text": doc,
+            "filename": meta.get("filename", "unknown"),
+            "title": meta.get("title"),
+        }
+        for cid, doc, meta in zip(data["ids"], data["documents"], data["metadatas"])
+    ]
+
+    G = build_graph_from_chunks(chunks)
+    session["graph"] = G
+    return G
+
+
+def invalidate_graph(session_id: str) -> None:
+    """Clear cached graph when new documents are ingested."""
+    session = SESSION_REGISTRY.get(session_id)
+    if session:
+        session.pop("graph", None)

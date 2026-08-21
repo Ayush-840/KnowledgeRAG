@@ -159,3 +159,13 @@ export function getDocuments(sessionId) {
 export function getDocument(sessionId, filename) {
   return request(`/documents/${sessionId}/${encodeURIComponent(filename)}`)
 }
+
+/** Get the knowledge graph for a session. */
+export function getGraph(sessionId) {
+  return request(`/graph/${sessionId}`, { timeoutMs: 60000 })
+}
+
+/** Query the knowledge graph with entities from a query string. */
+export function queryGraph(sessionId, query) {
+  return request(`/graph/${sessionId}/query`, { method: 'POST', body: { query } })
+}

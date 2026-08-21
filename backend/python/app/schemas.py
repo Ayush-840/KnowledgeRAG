@@ -52,6 +52,33 @@ class ChatMetrics(BaseModel):
     tokens: dict = Field(..., description="Token usage: {prompt, completion, total}")
     model: str = Field(..., description="Generation model used")
 
+class GraphNode(BaseModel):
+    id: str = Field(..., description="Unique node identifier (entity_type:text)")
+    label: str = Field(..., description="Human-readable entity text")
+    entity_type: str = Field(..., description="Entity type (PROPER_NOUN, MONETARY, DATE, etc.)")
+    source_chunks: List[str] = Field(default_factory=list, description="Chunk IDs where this entity appears")
+    source_documents: List[str] = Field(default_factory=list, description="Source filenames")
+    count: int = Field(1, description="Total occurrences across chunks")
+
+class GraphEdge(BaseModel):
+    source: str = Field(..., description="Source node ID")
+    target: str = Field(..., description="Target node ID")
+    weight: float = Field(1.0, description="Edge weight (co-occurrence count)")
+    relationship: str = Field("co_occurs", description="Relationship type")
+    shared_chunks: List[str] = Field(default_factory=list, description="Chunk IDs where both entities co-occur")
+
+class GraphResponse(BaseModel):
+    session_id: str = Field(..., description="Session identifier")
+    nodes: List[GraphNode] = Field(..., description="Graph nodes")
+    edges: List[GraphEdge] = Field(..., description="Graph edges")
+    stats: dict = Field(..., description="Graph statistics")
+    query_entities: List[str] = Field(default_factory=list, description="Entities matched from query")
+
+class EntityResponse(BaseModel):
+    session_id: str = Field(..., description="Session identifier")
+    chunk_id: str = Field(..., description="Chunk identifier")
+    entities: List[dict] = Field(..., description="Extracted entities")
+
 class ChatResponse(BaseModel):
     session_id: str = Field(..., description="Session identifier")
     query: str = Field(..., description="Original query string")
@@ -60,3 +87,4 @@ class ChatResponse(BaseModel):
     metrics: ChatMetrics = Field(..., description="Latency and token-usage breakdown")
     candidates_retrieved: int = Field(..., description="Number of fused candidates retrieved before reranking")
     candidates_sent_to_llm: int = Field(..., description="Number of chunks sent to generation after reranking")
+    answer_confidence: Optional[float] = Field(None, description="Answer-level confidence: mean of cited chunk confidences")

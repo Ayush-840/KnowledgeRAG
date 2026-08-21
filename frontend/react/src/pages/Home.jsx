@@ -5,11 +5,12 @@ import ChatBox from '../components/ChatBox'
 import SourceDrawer from '../components/SourceDrawer'
 import DocumentViewer from '../components/DocumentViewer'
 import Logo from '../Logo'
-import { getSpace, querySpace, getDocument } from '../services/api'
+import { getSpace, querySpace, getDocument, getGraph } from '../services/api'
 
 // The 3D stack (three.js + R3F) is heavy — load it only when the explorer
 // opens, so it never taxes the main chat bundle.
 const SpacePanel = lazy(() => import('../components/SpacePanel'))
+const GraphPanel = lazy(() => import('../components/GraphPanel'))
 
 export default function Home() {
   const chat = useChatSessions()
@@ -23,6 +24,10 @@ export default function Home() {
   const [spaceData, setSpaceData] = useState(null) // { points, method, clustered, pointCount }
   const [spaceQuery, setSpaceQuery] = useState(null) // { point, promoted_ids, retrieved_ids }
   const [standaloneCitation, setStandaloneCitation] = useState(null) // chunk detail for non-cited points
+
+  // Knowledge graph state
+  const [graphOpen, setGraphOpen] = useState(false)
+  const [graphData, setGraphData] = useState(null) // { nodes, edges, stats, query_entities }
 
   const openSources = (marker) => {
     // find the last assistant message to source from
@@ -38,6 +43,7 @@ export default function Home() {
     chat.newSession()
     setDrawerOpen(false)
     setSpaceOpen(false)
+    setGraphOpen(false)
     setStandaloneCitation(null)
   }
 
@@ -55,6 +61,21 @@ export default function Home() {
   useEffect(() => {
     if (spaceOpen) loadSpace()
   }, [spaceOpen, loadSpace])
+
+  // Load the knowledge graph when the graph panel opens
+  const loadGraph = useCallback(async () => {
+    if (!chat.active) return
+    try {
+      const data = await getGraph(chat.active.id)
+      setGraphData(data)
+    } catch (e) {
+      setGraphData({ error: e.message })
+    }
+  }, [chat.active])
+
+  useEffect(() => {
+    if (graphOpen) loadGraph()
+  }, [graphOpen, loadGraph])
 
   // Follow the last completed chat query: drop it into the map live
   const lastAnswer = chat.active?.messages?.filter(
@@ -140,13 +161,22 @@ export default function Home() {
           </div>
           {chat.active && <span className="chat-header-title">{chat.active.title}</span>}
           {chat.active && (
-            <button
-              className={`space-toggle ${spaceOpen ? 'space-toggle-active' : ''}`}
-              onClick={() => setSpaceOpen((v) => !v)}
-              aria-pressed={spaceOpen}
-            >
-              Vector space
-            </button>
+            <div className="header-toggles">
+              <button
+                className={`space-toggle ${spaceOpen ? 'space-toggle-active' : ''}`}
+                onClick={() => setSpaceOpen((v) => !v)}
+                aria-pressed={spaceOpen}
+              >
+                Vector space
+              </button>
+              <button
+                className={`space-toggle ${graphOpen ? 'space-toggle-active' : ''}`}
+                onClick={() => setGraphOpen((v) => !v)}
+                aria-pressed={graphOpen}
+              >
+                Knowledge graph
+              </button>
+            </div>
           )}
         </header>
 
@@ -206,6 +236,19 @@ export default function Home() {
             error={spaceData?.error}
             onSelectPoint={selectSpacePoint}
             onClose={() => setSpaceOpen(false)}
+          />
+        </Suspense>
+      )}
+
+      {chat.active && graphOpen && (
+        <Suspense fallback={<div className="space-panel space-panel-loading">Loading knowledge graph…</div>}>
+          <GraphPanel
+            nodes={graphData?.nodes || []}
+            edges={graphData?.edges || []}
+            stats={graphData?.stats}
+            queryEntities={graphData?.query_entities || []}
+            error={graphData?.error}
+            onClose={() => setGraphOpen(false)}
           />
         </Suspense>
       )}

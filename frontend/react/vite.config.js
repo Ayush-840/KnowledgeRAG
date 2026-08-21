@@ -14,6 +14,8 @@ export default defineConfig({
       '/documents': 'http://localhost:8000',
       '/title': 'http://localhost:8000',
       '/space': 'http://localhost:8000',
+      '/graph': 'http://localhost:8000',
+      '/entities': 'http://localhost:8000',
       '/health': 'http://localhost:8000',
     },
   },
