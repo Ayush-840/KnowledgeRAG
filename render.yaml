@@ -31,7 +31,7 @@ services:
       # CORS locked to the deployed frontend origin; add other origins (e.g.
       # a localhost dev origin) as a comma-separated list if needed.
       - key: CORS_ORIGINS
-        value: https://knowledge-rag-iota.vercel.app,https://knowledge-owi3od76f-ayush-840s-projects.vercel.app,http://localhost:5173
+        value: https://knowledge-rag.vercel.app,https://knowledge-rag-tan.vercel.app,http://localhost:5173
       # LLM provider for /chat answers (nvidia = free NIM tier with key rotation)
       - key: LLM_PROVIDER
         value: nvidia

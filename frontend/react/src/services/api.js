@@ -26,6 +26,17 @@ async function request(path, { method = 'GET', body, timeoutMs = 120000, signal 
       }
       throw new Error(detail)
     }
+    // Detect SPA fallback: if the response is HTML instead of JSON, the request
+    // was caught by a client-side router rewrite instead of reaching the backend.
+    const ct = res.headers.get('content-type') || ''
+    if (ct.includes('text/html')) {
+      throw new Error(
+        'The API returned HTML instead of JSON. '
+        + 'This usually means the backend URL is not configured. '
+        + 'Set VITE_API_URL to your backend URL (e.g. https://your-backend.onrender.com) '
+        + 'in your hosting environment variables and redeploy.',
+      )
+    }
     return await res.json()
   } finally {
     clearTimeout(timer)
@@ -62,6 +73,8 @@ export async function ingestFileStream(sessionId, file, params = {}, onEvent) {
       method: 'POST',
       body: fd,
       signal: controller.signal,
+      // Do NOT set Content-Type for FormData — the browser must set the
+      // multipart boundary automatically. Setting it manually breaks uploads.
     })
     if (!res.ok) {
       let detail = `Request failed (${res.status})`
@@ -72,6 +85,19 @@ export async function ingestFileStream(sessionId, file, params = {}, onEvent) {
         /* keep default message */
       }
       throw new Error(detail)
+    }
+    // Detect SPA fallback: if the response is HTML instead of SSE, the request
+    // was caught by a client-side router rewrite (e.g. Vercel SPA catch-all)
+    // instead of reaching the backend. This happens when VITE_API_URL is not set
+    // and the frontend is deployed to a different origin than the backend.
+    const ct = res.headers.get('content-type') || ''
+    if (ct.includes('text/html')) {
+      throw new Error(
+        'The upload endpoint returned HTML instead of a stream. '
+        + 'This usually means the backend URL is not configured. '
+        + 'Set VITE_API_URL to your backend URL (e.g. https://your-backend.onrender.com) '
+        + 'in your Vercel/hosting environment variables and redeploy.',
+      )
     }
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
