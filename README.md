@@ -39,7 +39,7 @@ flowchart TD
         G --> H
         H --> I[Cross-Encoder Reranker<br/>BAAI/bge-reranker-base]
         I --> J[Top-k context<br/>default k = 5]
-        J --> K[Defensive Prompt<br/>enforces [n] citations]
+        J --> K[Defensive Prompt<br/>enforces inline citations]
         K --> L[LLM Synthesis<br/>GPT-4o via OpenRouter]
         L --> M[Answer + Verified Citations]
     end
