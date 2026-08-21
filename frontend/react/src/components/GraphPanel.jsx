@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 
 const ENTITY_COLORS = {
   PROPER_NOUN: '#6366f1',
@@ -141,12 +141,16 @@ export default function GraphPanel({ nodes = [], edges = [], stats, queryEntitie
     return () => ro.disconnect()
   }, [])
 
+  const nodeMap = useMemo(() => {
+    const map = {}
+    nodes.forEach(n => { map[n.id] = n })
+    return map
+  }, [nodes])
+
   const isQueryEntity = useCallback(
     (nodeId) => queryEntities.some(q => q.toLowerCase() === (nodeMap[nodeId]?.label || '').toLowerCase()),
-    [queryEntities, nodes],
+    [queryEntities, nodeMap],
   )
-  const nodeMap = {}
-  nodes.forEach(n => { nodeMap[n.id] = n })
 
   if (!nodes.length) {
     return (

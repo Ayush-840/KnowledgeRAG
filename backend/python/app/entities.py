@@ -6,8 +6,7 @@ NLP dependencies required — uses compiled regex patterns for portability.
 """
 
 import re
-from dataclasses import dataclass, field, asdict
-from typing import Optional
+from dataclasses import dataclass, asdict
 
 
 @dataclass
@@ -25,6 +24,22 @@ class Entity:
 # ---------------------------------------------------------------------------
 # Pre-compiled patterns — order matters (first match wins for overlaps)
 # ---------------------------------------------------------------------------
+
+# Common words to exclude from PROPER_NOUN matches
+_STOPWORDS = frozenset({
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to",
+    "for", "of", "with", "by", "from", "as", "is", "was", "are",
+    "were", "been", "be", "have", "has", "had", "do", "does", "did",
+    "will", "would", "could", "should", "may", "might", "shall",
+    "can", "not", "no", "nor", "so", "if", "then", "than",
+    "too", "very", "just", "about", "above", "after", "again",
+    "all", "also", "any", "because", "before", "between", "both",
+    "each", "few", "more", "most", "other", "some", "such",
+    "this", "that", "these", "those", "it", "its", "their",
+    "they", "them", "we", "our", "you", "your", "he", "him",
+    "his", "she", "her", "my", "me", "i",
+})
+
 
 _PATTERNS: list[tuple[str, re.Pattern]] = [
     # Monetary values: $49, $1,000, $1.5M, USD 50,000
@@ -61,18 +76,15 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
         r"https?://[^\s<>\"']+",
         re.IGNORECASE,
     )),
-    # Phone numbers: +1-555-123-4567, (555) 123-4567
-    ("PHONE", re.compile(
-        r"(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}\b",
-    )),
     # Technical IDs: EQ-1001, PRM-2026-5000, WO-2026-1000
     ("TECHNICAL_ID", re.compile(
         r"\b[A-Z]{2,5}-\d{2,6}(?:-\d{2,6})?\b",
     )),
-    # Version numbers: v2.1, version 3.0, API v1
+    # Version numbers: v2.1, version 3.0 (must follow "version" or "v" to
+    # avoid matching standalone decimals like 99.99 in "99.99 percent")
     ("VERSION", re.compile(
-        r"\bv?\d+\.\d+(?:\.\d+)?\b"
-        r"|version\s+\d+\.\d+(?:\.\d+)?",
+        r"\bv\d+\.\d+(?:\.\d+)?\b"
+        r"|\bversion\s+\d+\.\d+(?:\.\d+)?",
         re.IGNORECASE,
     )),
     # Durations: 30 days, 14-day, 2 weeks, 4 hours
@@ -89,14 +101,6 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
     ("ABBREVIATION", re.compile(
         r"\(([A-Z]{2,6})\)",
     )),
-    # Capitalized words (potential proper nouns) — 2+ words
-    ("PROPER_NOUN", re.compile(
-        r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b",
-    )),
-    # Single capitalized words (likely proper nouns when standalone)
-    ("PROPER_NOUN", re.compile(
-        r"\b(?:^|\.\s+)([A-Z][a-z]{2,15})\b",
-    )),
     # Section references: Section 36, Section 3.2
     ("SECTION_REF", re.compile(
         r"\bSection\s+\d+(?:\.\d+)*\b",
@@ -108,15 +112,25 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
         re.IGNORECASE,
     )),
     # Regulation references: OISD-116, DGMS Circular 2022-05
+    # (must start with known regulatory prefix to avoid matching AES-256 etc.)
     ("REGULATION", re.compile(
-        r"\b[A-Z]{2,10}\s+Circular\s+\d{4}-\d{1,3}\b"
-        r"|\b[A-Z]{2,10}-\d{2,4}\b",
+        r"\b[A-Z]{2,10}\s+Circular\s+\d{4}-\d{1,3}\b",
         re.IGNORECASE,
     )),
+    # Capitalized multi-word phrases: "Aurora Labs", "Microsoft Teams"
+    ("PROPER_NOUN", re.compile(
+        r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b",
+    )),
+    # Single capitalized words after sentence boundary: ". Atlas", "! Beacon"
+    # Uses lookbehind for sentence start (period/exclamation/question + space)
+    ("PROPER_NOUN", re.compile(
+        r"(?<=[.!?]\s)([A-Z][a-z]{2,15})\b",
+    )),
+    # Standalone capitalized word at start of text
+    ("PROPER_NOUN", re.compile(
+        r"^([A-Z][a-z]{2,15})\b",
+    )),
 ]
-
-# Labels that are "named entities" (not just data patterns)
-_NAMED_ENTITY_LABELS = {"PROPER_NOUN", "QUOTED", "REGULATION", "SECTION_REF", "ARTICLE_REF"}
 
 
 def extract_entities(text: str, *, dedupe: bool = True) -> list[Entity]:
@@ -131,22 +145,43 @@ def extract_entities(text: str, *, dedupe: bool = True) -> list[Entity]:
 
     for label, pattern in _PATTERNS:
         for m in pattern.finditer(text):
-            # Quoted strings capture group 1 or 2
+            # Quoted strings capture group 1 or 2; lookbehind patterns use
+            # group 1 for the actual entity text.  Use group(1) when it exists
+            # and is non-None, otherwise fall back to group(0).
             if label == "QUOTED":
                 matched = m.group(1) or m.group(2) or m.group(0)
+            elif m.lastindex and m.group(1):
+                matched = m.group(1)
             else:
                 matched = m.group(0)
 
-            key = (matched.strip(), label)
+            matched = matched.strip()
+            if not matched:
+                continue
+
+            # Skip stopwords for PROPER_NOUN to avoid "The", "A", etc.
+            if label == "PROPER_NOUN" and matched.lower() in _STOPWORDS:
+                continue
+
+            key = (matched, label)
             if dedupe and key in seen:
                 continue
             seen.add(key)
 
+            # Compute start position: for capture-group patterns, offset by
+            # the group start within the full match.
+            if m.lastindex and m.group(1) and label != "QUOTED":
+                start = m.start(1)
+                end = m.end(1)
+            else:
+                start = m.start()
+                end = m.end()
+
             entities.append(Entity(
-                text=matched.strip(),
+                text=matched,
                 label=label,
-                start=m.start(),
-                end=m.end(),
+                start=start,
+                end=end,
             ))
 
     # Sort by position in text
