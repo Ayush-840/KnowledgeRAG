@@ -112,7 +112,7 @@ npm run dev      # Vite dev server on :5173, proxies to backend :8000
 
 The frontend is deployed on Vercel; the backend runs on any container host (Render, Railway, etc.).
 
-> **Live deployment**: [https://knowledge-rag.vercel.app](https://knowledge-rag.vercel.app) — Vercel (frontend) + Render (backend). Ensure only the production domain appears publicly — Vercel's Standard Protection gates auto-generated preview URLs. Verify the backend's `CORS_ORIGINS` includes the production frontend URL, and that `VITE_API_URL` points at a live, reachable backend.
+> **Live demo**: [https://knowledge-rag-tan.vercel.app](https://knowledge-rag-tan.vercel.app) — Vercel (frontend) + Render (backend). Ensure only the production domain appears publicly — Vercel's Standard Protection gates auto-generated preview URLs. Verify the backend's `CORS_ORIGINS` includes the production frontend URL, and that `VITE_API_URL` points at a live, reachable backend.
 
 ### Environment variables
 
